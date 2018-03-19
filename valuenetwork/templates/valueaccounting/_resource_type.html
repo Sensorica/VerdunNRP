@@ -1,0 +1,34 @@
+{% load i18n %}
+{% load thumbnail %}
+{% load bootstrap_tags %}
+
+		{% if resource_type.photo %}
+			<img src="{% thumbnail resource_type.photo photo_size %}" />
+		{% elif resource_type.photo_url %}
+    	    <img src="{{ resource_type.photo_url }}" width="128" height="96" />
+		{% endif %}
+
+        {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
+		{% if resource_type.producing_process_type_relationships %}
+			<a href="{% url extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
+		{% endif %}
+
+		{% if user.is_authenticated %}
+		    {% if resource_type.is_process_output %}
+			    <a href="{% url edit_extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >
+			    
+                    {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
+				    {% if resource_type.producing_process_type_relationships %}
+					    {% trans "Change Recipe" %}
+				    {% else %}
+					    {% trans "Create Recipe" %}
+				    {% endif %}
+			    </a>
+		    {% endif %}
+		{% endif %}
+
+		<div class="facets" >{{ resource_type.facet_list }}</div>
+
+		<div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
+
+

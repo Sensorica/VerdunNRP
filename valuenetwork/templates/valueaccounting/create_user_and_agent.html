@@ -1,0 +1,148 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load url from future %}
+{% load bootstrap_tags %}
+{% load staticfiles %}
+
+{% block head_title %}{% trans "Create Agent and User" %}{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+#or {
+    margin-left: 4em;
+    font-weight: bold;
+}
+
+</style>
+
+{% endblock %}
+
+{% block body_class %}agent{% endblock %}
+
+{% block body_base %}
+<div class="container">
+    {% include "_messages.html" %}
+	<legend>{% trans "Create Agent and User" %}</legend>
+
+    <form id="userAgentForm" class="form-horizontal" method="POST" action="">
+	    {% csrf_token %}
+	        <div id="agent-selection">
+                {{ agent_selection_form|as_bootstrap }}
+                <p id="or" >...or create a new one</p>
+            </div>
+            
+            <div>
+				{{ agent_form|as_bootstrap }}
+				{{ user_form|as_bootstrap }}
+			</div>
+
+        <div class="form-actions">
+		    <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
+		</div>
+
+    </form>
+
+</div>
+{% endblock %}
+{% block extra_script %}
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.12.0/jquery.validate.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+
+
+	    $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+        
+        jQuery.validator.setDefaults({ 
+            success: function(label) {
+		        label
+			        .text('').addClass('valid')
+			        .closest('.control-group').addClass('success');
+	        }
+        });
+
+        $("select").chosen();
+        
+
+		$( "#userAgentForm" ).validate({
+			rules: {
+                'first_name': {
+                    required: true
+                },
+                username: {
+                    required: true
+                },
+                password1: {
+                    required: true
+                },
+                password2: {
+                    required: true,
+                    equalTo: "#id_password1"
+                },               
+			    'url': {
+                    url: true
+				},
+				email: {
+					required: true,
+					email: true
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');	
+			},
+		});
+
+		$("#id_selected_agent").change(getAgent);
+
+		function getAgent(event)
+		{
+			var agentId = event.target.value;
+			
+			if (agentId)
+			{
+			    var jsonUrl = encodeURI("/accounting/json-agent/" + agentId + "/");
+			    $.get(jsonUrl,
+				    function(data){
+					    var nick = data[0].fields["nick"];
+                        $("#id_nick").val(nick);
+                        var description = data[0].fields["description"];
+                        $("#id_description").val(description);
+                        var url = data[0].fields["url"];
+                        $("#id_url").val(url);
+                        var email = data[0].fields["email"];
+                        $("#id_email").val(email);
+                        var address = data[0].fields["address"];
+                        $("#id_address").val(address);
+                        var agent_type = data[0].fields["agent_type"];
+                        $("#id_agent_type").val(agent_type);
+                        $("#id_agent_type").trigger("liszt:updated");
+                        $("#agent-selection").hide()
+				    });
+		    }
+		    
+		}
+
+    }); // end document.ready
+
+    </script>
+    
+{% endblock %}

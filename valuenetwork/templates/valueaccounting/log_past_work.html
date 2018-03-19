@@ -1,0 +1,1807 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Labnotes for " %} {{ commitment.from_agent.name }} doing {{ commitment.resource_type.name }} on {{ process.name }}{% endblock %}
+
+{% block extra_head %}
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+#labnotesForm textarea {
+  width: 100%;
+  height: 600px;
+}
+
+.days, .hours, .minutes {
+	width: 24px;
+}
+
+.failureModal .modal-body {
+	max-height: 400px;
+}
+
+.failureModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+.detailModal .modal-body {
+    width: 95%;
+	max-height: 400px;
+}
+
+.detailModal {
+    width: 600px;
+}
+
+.detailModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+#addCiteModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+#addConsumableModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+#addUsableModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+#addOutputModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+#createResourceModal textarea {
+  width: 400px;
+  height: 200px;
+}
+
+#saving {
+	color: green;
+}
+
+.lablink {
+    font-size: 1.3em;
+    padding-left: 1em;
+}
+
+</style>
+{% endblock %}
+
+{% block body_class %}work{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+		<legend>
+			{% trans "Labnotes for " %} <i>{{ commitment.from_agent.name }}</i>
+			<span style="font-size: 60%;" > 
+			    {% trans "doing" %}: <i>{{ commitment.resource_type.name }}</i> {% trans "on Process" %}:  <i>{{ process.name }}</i> {% trans "due" %}:  <i>{{ process.end_date }}</i> 
+				{% trans "Estimated duration" %}: <i>{{ commitment.quantity }} {{ commitment.unit_of_quantity.abbrev }}</i>
+				{% trans "Project" %}: <i>{{ process.project }}</i>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+				<span id="saving"></span>
+			</span>
+		</legend>
+
+		<div class="row-fluid">
+			<div class="span7">
+
+			<form id="labnotesForm" method="POST" action="">
+				{% csrf_token %}
+				{{ wb_form.id }}
+
+                {% if others_working %}
+					<h4 style="margin-bottom: 2px;" >{% trans "Others working on this process" %}:</h4>
+					<ul>
+						{% for item in others_working %}
+							<li>
+								<b>{{ item.from_agent }}</b> {% trans "doing" %} {{ item.resource_type }}
+                                {% if item.has_labnotes %}
+									<a href="{% url labnote commitment_id=item.id %}" target="_blank" class="lablink">Labnotes</a>
+								{% endif %}
+							</li>
+
+						{% endfor %}
+					</ul>
+				{% endif %}
+				
+				<div class="control-group">
+					<label><h4>{% trans "Description of work done" %}:</h4></label>
+					{{ wb_form.description }}
+				</div>
+			</div>
+			<div class="span5">
+			    <div class="row-fluid">
+                    <div class="span10">
+				        <p>
+				            {% if process.work_requirements.count > 1 %}
+				                {% trans "My work is done" %} {{ wb_form.work_done }}
+				            {% endif %}
+				             {% trans "This process is done" %} {{ wb_form.process_done }}
+				        </p>
+                    </div>
+                  
+				        <div class="span2" style="margin-bottom: 1em;">
+				            <button class="btn btn-primary" type="submit" title="Close page" >{% trans "Close" %}</button>
+				        </div>
+                    
+                    </div>
+                    <div class="row-fluid">
+			        <div class="span12">
+			            <div class="control-group">
+					        <b>{% trans "Work date" %}:</b> 
+					        {{ wb_form.event_date }} <span id="date-required" style="color: red;" >Required</span>
+				        </div>
+
+				        <div class="control-group">
+					        <label><b>{% trans "Time spent" %}:</b></label>
+					        {{ wb_form.quantity }}&nbsp;&nbsp;&nbsp;&nbsp;
+					        {% if prev %}Previously: {{ prev }}{% endif %}
+					        <span class="help-block">{{ wb_form.quantity.help_text }}</span>
+				        </div>
+				    </div>
+			    </div>
+            </form>
+                <div class="row-fluid">
+			        <div class="span12">
+			            <a href="#addOutputModal" role="button" class="btn" data-toggle="modal">{% trans "+ output" %}</a>
+			            <a href="#addCiteModal" role="button" class="btn" data-toggle="modal">{% trans "+ cite" %}</a>
+			            <a href="#addConsumableModal" role="button" class="btn" data-toggle="modal">{% trans "+ consume" %}</a>
+
+			            <a href="#addUsableModal" role="button" class="btn" data-toggle="modal">{% trans "+ use" %}</a>
+			            
+			            <a href="#addWorkModal" role="button" class="btn" data-toggle="modal">{% trans "+ work" %}</a>
+			            
+			            <div class="modal hide fade" id="addOutputModal" tabindex="-1" role="dialog" aria-labelledby="output-label" aria-hidden="true">
+				            <div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+				                <h3 id="output-label">{% trans "Add an output" %}</h3>
+				                
+				            </div>
+				            <div class="modal-body">
+					            <form class="output-form" enctype="multipart/form-data" id="addOutputForm" action="{% url new_process_output commitment_id=commitment.id %}" method="POST" >
+						            {% csrf_token %}
+
+					                    <p class="modal-line">{% trans "Resource Type" %} </p>
+                                        <p>{{ add_output_form.resource_type }} 
+				                        <a href="#createResourceModal" role="button" class="add-another" data-toggle="modal">
+					                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
+				                        </a> </p>                   
+		                                <p class="modal-line">{% trans "Quantity" %} </p>
+                                        <p>{{ add_output_form.quantity }} </p>
+                                        <p class="modal-line">{% trans "Unit of Quantity" %} </p>
+                                        <p>{{ add_output_form.unit_of_quantity }}</p>
+                                        <p class="modal-line">{% trans "Description" %} </p>
+                                        <p class="desc">{{ add_output_form.description }} </p>
+
+                                	<input type='hidden' id='outputRunning' name='wasRunning' value='' />
+			                        <input type='hidden' id='outputRetrying' name='wasRetrying' value='' />
+			                        <input type="hidden" name="reload" value="labnotes" />
+					              <div class="modal-footer">
+						            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+						            <button class="btn btn-primary">{% trans "Add output" %}</button>
+					              </div>
+
+
+					            </form>
+                            </div>
+                        </div>
+
+                        <div class="modal hide fade rtmodal" id="createResourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label" aria-hidden="true">
+		                    <div class="modal-header">
+			                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			                    <h3 id="resource-consumable-create-label">{% trans "Create a new Resource Type" %}</h3>
+		                    </div>
+		                    <div class="modal-body">
+			                    <form class="resource-create-form" id="resource-create-form" enctype="multipart/form-data" action="." method="POST" >
+				                    {% csrf_token %}
+				                    {{ resource_type_form|as_bootstrap }}
+                                    {{ facet_formset.management_form }}
+                                    <table>
+                                        {% for form in facet_formset %}
+                                            <tr><td class="facet-name"> {{ form.facet_name }} </td><td> {{ form.value }} {{ form.facet_id }} </td></tr>
+                                        {% endfor %}
+                                    </table>
+
+			                      <div class="modal-footer">
+				                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+				                    <input type="submit" name="submit" id="save-resource-type" value="{% trans 'Save' %}" class="btn btn-primary save-resource-type" /> 
+                                    <input type="hidden" name="slot" value="out" />
+                                    <input type="hidden" name="pattern" value="{{ process.process_pattern.id }}" />
+			                      </div>
+
+			                    </form>
+
+	                        </div>
+                        </div>
+
+                        <div class="modal hide fade" id="addConsumableModal" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
+				            <div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+				                <h3 id="output-label">{% trans "Add a consumable input" %}</h3>
+				                
+				            </div>
+				            <div class="modal-body">
+					            <form class="consumable-form" enctype="multipart/form-data" id="addConsumableForm" 
+					                action="{% url new_process_input commitment_id=commitment.id slot='c' %}" method="POST" >
+						            {% csrf_token %}
+
+					                    {{ add_consumable_form|as_bootstrap }}
+
+                                	<input type='hidden' id='consumableRunning' name='wasRunning' value='' />
+			                        <input type='hidden' id='consumableRetrying' name='wasRetrying' value='' />
+			                        <input type="hidden" name="reload" value="labnotes" />
+					              <div class="modal-footer">
+						            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+						            <button class="btn btn-primary">{% trans "Add consumable" %}</button>
+					              </div>
+
+
+					            </form>
+                            </div>
+                        </div>
+
+                        <div class="modal hide fade" id="addUsableModal" tabindex="-1" role="dialog" aria-labelledby="use-label" aria-hidden="true">
+				            <div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+				                <h3 id="output-label">{% trans "Add a usable input" %}</h3>
+				                
+				            </div>
+				            <div class="modal-body">
+					            <form class="usable-form" enctype="multipart/form-data" id="addUsableForm" 
+					                action="{% url new_process_input commitment_id=commitment.id  slot='u' %}" method="POST" >
+						            {% csrf_token %}
+
+					                    {{ add_usable_form|as_bootstrap }}
+
+                                	<input type='hidden' id='usableRunning' name='wasRunning' value='' />
+			                        <input type='hidden' id='usableRetrying' name='wasRetrying' value='' />
+			                        <input type="hidden" name="reload" value="labnotes" />
+					              <div class="modal-footer">
+						            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+						            <button class="btn btn-primary">{% trans "Add usable" %}</button>
+					              </div>
+
+
+					            </form>
+                            </div>
+                        </div>
+
+                        <div class="modal hide fade" id="addCiteModal" tabindex="-1" role="dialog" aria-labelledby="cite-label" aria-hidden="true">
+				            <div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+				                <h3 id="cite-label">{% trans "Add a citation" %}</h3>
+				                
+				            </div>
+				            <div class="modal-body">
+					            <form class="cite-form" enctype="multipart/form-data" id="addCitationForm" action="{% url new_process_citation commitment_id=commitment.id %}" method="POST" >
+						            {% csrf_token %}
+
+					                    {{ add_citation_form|as_bootstrap }}
+
+                                	<input type='hidden' id='citeRunning' name='wasRunning' value='' />
+			                        <input type='hidden' id='citeRetrying' name='wasRetrying' value='' />
+			                        <input type="hidden" name="reload" value="pastwork" />
+			                        <input type="hidden" id="citationDate" name="citationDate" value="{{ event_date|date:'Y-m-d' }}" />
+					              <div class="modal-footer">
+						            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+						            <button class="btn btn-primary">{% trans "Add citation" %}</button>
+					              </div>
+
+
+					            </form>
+                            </div>
+                        </div>
+
+                        <div class="modal hide fade" id="addWorkModal" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
+				            <div class="modal-header">
+					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+				                <h3 id="work-label">{% trans "Invite a helper" %}</h3>
+				                
+				            </div>
+				            <div class="modal-body">
+					            <form class="work-form" id="addWorkForm" action="{% url new_process_worker commitment_id=commitment.id %}" method="POST" >
+						            {% csrf_token %}
+
+					                    {{ add_work_form|as_bootstrap }}
+
+                                	<input type='hidden' id='workRunning' name='wasRunning' value='' />
+			                        <input type='hidden' id='workRetrying' name='wasRetrying' value='' />
+			                        <input type="hidden" name="reload" value="pastwork" />
+			                        <input type="hidden" id="workDate" name="workDate" value="{{ event_date|date:'Y-m-d' }}" />
+					              <div class="modal-footer">
+						            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+						            <button class="btn btn-primary">{% trans "Invite helper" %}</button>
+					              </div>
+
+
+					            </form>
+                            </div>
+                        </div>
+
+				    </div>
+				</div>
+
+				<div>
+					<h4>{% trans "Output" %}:</h4>
+					<ul>
+						{% for item in process.outgoing_commitments %}
+						    {% with item.output_resource as resource %}
+							<li>
+								<b>{{ item.resource_type.name }}:</b> {% trans "Planned" %}: {{ item.quantity }} {{ item.unit_of_quantity }}
+								{% if item.is_deletable %}
+								    <form style="display: inline;" 
+								        class="delete-form" 
+								        id="deleteForm{{ item.id }}" 
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								        method="POST" >
+					                    {% csrf_token %}
+                                    	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
+		                                <input type='hidden' id='deleteRetrying{{ item.id }}' name='wasRetrying' value='' />
+		                                <input type="hidden" id="eventDate{{ item.id }}" name="eventDate" value="{{ event_date|date:'Y-m-d' }}" />
+		                                <input type="hidden" name="reload" value="pastwork" />
+					                    <button class="btn btn-warning btn-mini" title="Delete" >{% trans "X" %}</button>
+				                    </form>
+								{% endif %}
+								</br>
+								{% trans "Actual" %}: <input class="input-mini output-quantity" id="{{ item.id }}" name="{{ resource.id }}" type="text" size="6" value="{{ item.fulfilled_quantity }}" />
+								{% if item.creates_resources %}
+								    <div style="display: inline;" >
+								        <span id="label{{ item.id }}">{{ resource.label }}</span>
+									    &nbsp;&nbsp; 
+									    <a href="#detailModal{{ item.id }}" role="button" class="btn btn-info" data-toggle="modal">{% trans "Details" %}</a>
+								    </div>
+								{% endif %}
+								<div style="" >
+									<a href="#failureForm{{ item.id }}" role="button" class="btn btn-warning" data-toggle="modal">{% trans "Failed" %}</a>
+								</div>
+								
+								{% if item.failed_outputs %}
+									<div id="failDiv{{ item.id }}" style="margin-left: 1em;" >
+								{% else %}
+									<div id="failDiv{{ item.id }}" style="margin-left: 1em; display: none;" >
+								{% endif %}
+								{% trans "Failures" %}: <span id="failures{{ item.id }}">{{ item.failed_output_qty }}</span></div>
+								
+
+							</li>
+
+							
+							    <div class="modal hide fade detailModal" id="detailModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="detail-label" aria-hidden="true">
+						            <div class="modal-header">
+							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+
+						                <h3 id="detail-label">{% trans "Details for " %} {{ item.resource_type.name }}</h3>
+						                
+						            </div>
+						            <div class="modal-body">
+							            <form class="detail-form" enctype="multipart/form-data" id="detailForm{{ item.id }}" action="{% url resource_event_for_commitment commitment_id=item.id %}" method="POST" >
+								            {% csrf_token %}
+
+
+								            {% if resource %}
+							                    {{ resource.change_form|as_bootstrap }}
+						                    {% else %}
+							                    {{ item.resource_create_form|as_bootstrap }}
+						                    {% endif %}
+						                    
+                                        	<input type="hidden" name="itemId" value="{{ item.id }}" />					            
+								            <input type="hidden" name="next" value="{% url work_commitment commitment_id=commitment.id %}" />
+							              <div class="modal-footer">
+								            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+								            <button class="btn btn-primary">{% trans "Save changes" %}</button>
+							              </div>
+
+
+							            </form>
+                                    </div>
+                                </div>
+                            
+
+                            <div class="modal hide fade failureModal" id="failureForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="failure-label" aria-hidden="true">
+						        <div class="modal-header">
+							        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+							        <h3 id="failure-label">{% trans "Failed" %} {{ item.resource_type.name }}</h3>
+						        </div>
+						        <div class="modal-body">
+							        <form class="failure-form" id="failForm{{ item.id }}" action="{% url failed_outputs commitment_id=item.id %}" method="POST" >
+								        {% csrf_token %}
+								        {{ failure_form|as_bootstrap }}
+								        <input type="hidden" name="next" value="{% url work_commitment commitment_id=commitment.id %}" />
+							          <div class="modal-footer">
+								        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+								        <button class="btn btn-primary">{% trans "Save changes" %}</button>
+							          </div>
+
+
+							        </form>
+                                </div>
+                            </div>
+                            {% endwith %}
+                    
+						{% endfor %}
+					</ul>
+
+
+				{% if process.citation_requirements %}
+					<div>
+						<h4>{% trans "Citations" %}:</h4>
+						{% for item in process.citation_requirements %}
+						<ul>
+						    <li><b>{{ item.resource_type }}</b>
+								{% if item.is_deletable %}
+							        <form style="display: inline;" 
+								        class="delete-form" 
+								        id="deleteForm{{ item.id }}" 
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								        method="POST" >
+					                    {% csrf_token %}
+                                    	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
+		                                <input type='hidden' id='deleteRetrying{{ item.id }}' name='wasRetrying' value='' />
+		                                <input type="hidden" id="eventDate{{ item.id }}" name="eventDate" value="{{ event_date|date:'Y-m-d' }}" />
+		                                <input type="hidden" name="reload" value="pastwork" />
+					                    <button class="btn btn-warning btn-mini" title="Delete" >{% trans "X" %}</button>
+				                    </form>
+								{% endif %}
+					        </li>
+							<ul>
+							{% if item.onhand %}
+								{% for resource in item.onhand %}
+									<li>
+										<b>{% trans "Onhand" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b> 
+										{% trans "Cite" %}: <input class="input-mini cited" id="{{ resource.id }}" name="{{ item.id }}" type="checkbox" 
+										    {% if resource.id in cited_ids %} checked="checked" {% endif %} /></br>
+									</li>
+								{% endfor %}
+							{% elif item.resource_type.producing_commitments %}
+								{% for ct in item.resource_type.producing_commitments %}
+									<li>
+										<b>{% trans "Scheduled" %}: {{ item.resource_type.name }}</b>
+										<a href="{{ ct.process.get_absolute_url }}" target="_blank" > {{ ct.due_date }}</a>
+									</li>
+								{% endfor %}
+							{% endif %}
+							
+							</ul>
+						</ul>
+						{% endfor %}
+						
+					</div>
+				{% endif %}
+							  
+				{% if process.consumed_input_requirements %}
+					<div>
+						<h4>{% trans "Consumed inputs" %}:</h4>
+						{% for item in process.consumed_input_requirements %}
+						<ul>
+						    <li><b>{{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }} 
+								{% if item.is_deletable %}
+							        <form style="display: inline;" 
+								        class="delete-form" 
+								        id="deleteForm{{ item.id }}" 
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								        method="POST" >
+					                    {% csrf_token %}
+                                    	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
+		                                <input type='hidden' id='deleteRetrying{{ item.id }}' name='wasRetrying' value='' />
+		                                <input type="hidden" id="eventDate{{ item.id }}" name="eventDate" value="{{ event_date|date:'Y-m-d' }}" />
+		                                <input type="hidden" name="reload" value="pastwork" />
+					                    <button class="btn btn-warning btn-mini" title="Delete" >{% trans "X" %}</button>
+				                    </form>
+								{% endif %}
+					        </li>
+							<ul>
+							{% if item.onhand %}
+								{% for resource in item.onhand_with_fulfilled_quantity %}
+									<li>
+										<b>{% trans "Onhand" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b> 
+										<span id="onhand-{{resource.id}}">{{ resource.quantity }}</span> {{ resource.unit_of_quantity }}</br>
+										{% trans "Used" %}: <input class="input-mini used-quantity" id="{{ item.id }}" name="{{ resource.id }}" type="text" size="6" value="{{ resource.fulfilled_quantity }}" /></br>
+									</li>
+								{% endfor %}
+							{% elif item.resource_type.producing_commitments %}
+								{% for ct in item.resource_type.producing_commitments %}
+									<li>
+										<b>{% trans "Scheduled" %}: {{ item.resource_type.name }}</b>
+										<a href="{{ ct.process.get_absolute_url }}" target="_blank" >{{ ct.quantity }} {{ ct.unit_of_quantity }} {{ ct.due_date }}</a>
+									</li>
+								{% endfor %}
+							{% else %}
+								<li>
+									<b>{% trans "Not purchased yet" %}: {{ item.resource_type.name }}:</b> {{ item.quantity }} {{ item.unit_of_quantity }}
+								</li>
+		                        <ul>
+									{% for source in item.resource_type.producing_agent_relationships %}
+										<li>
+											{{ source.agent.name }} {% trans "Lead time" %}: {{ source.lead_time }} {% trans "days" %}
+										</li>
+									{% endfor %}
+								</ul>
+							{% endif %}
+							
+							</ul>
+						</ul>
+						{% endfor %}
+						
+					</div>
+				{% endif %}
+
+
+				{% if process.used_input_requirements %}
+					<div>
+						<h4>{% trans "Used inputs" %}:</h4>
+						{% for item in process.used_input_requirements %}
+		                    <ul>
+				                <li><b>{{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }} 
+				                    {% if item.is_deletable %}
+								        <form style="display: inline;" 
+								            class="delete-form" 
+								            id="deleteForm{{ item.id }}" 
+								            action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								            method="POST" >
+					                        {% csrf_token %}
+                                        	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
+		                                    <input type='hidden' id='deleteRetrying{{ item.id }}' name='wasRetrying' value='' />
+		                                    <input type="hidden" id="eventDate{{ item.id }}" name="eventDate" value="{{ event_date|date:'Y-m-d' }}" />
+		                                    <input type="hidden" name="reload" value="pastwork" />
+					                        <button class="btn btn-warning btn-mini" title="Delete" >{% trans "X" %}</button>
+				                        </form>
+								    {% endif %}
+			                    </li>
+								<ul>
+									{% if item.onhand %}
+										{% for resource in item.onhand_with_fulfilled_quantity %}
+											<li>
+												<b>{% trans "Available" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b></br>
+												{% trans "Used" %}: <input class="input-mini time-used" id="{{ item.id }}" name="{{ resource.id }}" type="text" size="6" value="{{ resource.fulfilled_quantity }}" /></br>
+											</li>
+										{% endfor %}
+
+									{% elif item.resource_type.producing_commitments %}
+										{% for ct in item.resource_type.producing_commitments %}
+											<li>
+												<b>{% trans "Scheduled" %}: {{ item.resource_type.name }}</b>
+												<a href="{{ ct.process.get_absolute_url }}" target="_blank" >{{ ct.quantity }} {{ ct.unit_of_quantity }} {{ ct.due_date }}</a>
+											</li>
+										{% endfor %}
+									{% else %}
+										<li>
+											<b>{% trans "Not purchased yet" %}: {{ item.resource_type.name }}:</b> {{ item.quantity }} {{ item.unit_of_quantity }}
+										</li>
+						                <ul>
+											{% for source in item.resource_type.producing_agent_relationships %}
+												<li>
+													{{ source.agent.name }} {% trans "Lead time" %}: {{ source.lead_time }} {% trans "days" %}
+												</li>
+											{% endfor %}
+										</ul>
+									{% endif %}
+
+								</ul>
+							</ul>
+						{% endfor %}
+					</div>
+				{% endif %}
+
+
+				{% if other_work_reqs %}
+					<h4 style="margin-left: 1em; margin-bottom: 2px;" >{% trans "Other work requirements" %}:</h4>
+					<ul>
+						{% for item in other_work_reqs %}
+							<li>
+								<b>{{ item.resource_type }}</b> {{ item.quantity }} {{ item.unit_of_quantity.abbrev }}
+								{% if item.is_deletable %}
+								    <form style="display: inline;" 
+								        class="delete-form" 
+								        id="deleteForm{{ item.id }}" 
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								        method="POST" >
+					                    {% csrf_token %}
+                                    	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
+		                                <input type='hidden' id='deleteRetrying{{ item.id }}' name='wasRetrying' value='' />
+		                                <input type="hidden" id="eventDate{{ item.id }}" name="eventDate" value="{{ event_date|date:'Y-m-d' }}" />
+		                                <input type="hidden" name="reload" value="pastwork" />
+					                    <button class="btn btn-warning btn-mini" title="Delete" >{% trans "X" %}</button>
+				                    </form>
+								{% endif %}
+							</li>
+
+						{% endfor %}
+					</ul>
+
+				{% endif %}
+			</div>
+		</div>
+
+
+	</div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="{% static 'js/RelatedObjectLookups.js' %}"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+    var commitment_id = {{ commitment.id }};
+    var returnUrl = "{% url work_commitment commitment_id=commitment.id %}";
+	var start = new Date();
+    var duration = {{ duration }};
+    var description = "";
+    var hoursValue = 0;
+    var minutesValue = 0;
+	var used = {};
+	var running = false;
+    var runTimer = null;
+	var retrying = false;
+    var retryTimer = null;
+    var contributionSaved = true;
+    var outputsSaved = true;
+    var inputsSaved = true;
+    var timeInputsSaved = true;
+    var failSaved = true;
+    var citationsSaved = true;
+    var resourceSaved = true;
+    var workDoneSaved = true;
+    var processDoneSaved = true;
+    var wasRunning = false;
+    var wasRetrying = false;
+    if ({{ was_running }})
+    {
+        wasRunning = {{ was_running }};
+    }
+    if ({{ was_retrying }})
+    {
+        wasRetrying = {{ was_retrying }};
+    }
+    {% if event_date %}
+        var eventDate = "{{ event_date|date:'Y-m-d' }}"
+    {% else %}
+        var eventDate = ""
+    {% endif %}
+
+
+	$(document).ready(function(){
+
+	    $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+        })
+
+        $("#id_work_done").click(function(event) 
+		{
+            var cb = event.target;
+            var cb = $('#' + cb.id);
+            setTimeout(function() {
+                var done = cb.prop('checked');
+                if (done) 
+                { 
+                    done = 1;
+                }
+                else
+                { 
+                    done = 0;
+                }
+                saveWorkDone(done);
+              }, 0);
+        });
+        
+        $("#id_process_done").click(function(event) 
+		{
+            var cb = event.target;
+            var cb = $('#' + cb.id);
+            setTimeout(function() {
+                var done = cb.prop('checked');
+                if (done) 
+                { 
+                    done = 1;
+                }
+                else
+                { 
+                    done = 0;
+                }
+                saveProcessDone(done);
+              }, 0);
+        });
+        
+	    $(".chzn-select").chosen();
+	    $("textarea").resizable();
+
+        $.validator.addClassRules("quantity", { required: true, number: true, });
+        $.validator.addClassRules("quality", { number: true, });
+		$.validator.addClassRules("url", { url: true });
+
+	    $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+	
+        {% if event_date %}
+            $("#id_event_date").attr('disabled', 'disabled');
+             $("#date-required").text("");
+        {% else %}
+	        $("input").attr('disabled', 'disabled');
+	        $("button").attr('disabled', 'disabled');
+	        $("textarea").attr('disabled', 'disabled');
+	        $("a").attr('disabled', 'disabled');
+
+            $("#id_event_date").removeAttr('disabled');
+            $('#id_event_date').focus();
+            
+	        $("#id_event_date").change(gotDate)
+
+	        function gotDate(event)
+	        {
+	            $("#date-required").text("");
+	            eventDate = event.target.value;
+                $("input").removeAttr('disabled');
+	            $("button").removeAttr('disabled');
+	            $("textarea").removeAttr('disabled');
+	            $("a").removeAttr('disabled');
+	            $("#id_event_date").attr('disabled', 'disabled');
+	            //todo: if the past work logging form becomes accessible other ways,
+                // existing events will need to be retrieved when the date is entered
+                // to initialize the duration fields.
+	            saveContribution();
+	            
+	        }
+	        
+        {% endif %}
+
+        $("a").click(function(event) {
+            if ($(this).attr('disabled')) return false;         
+        });
+
+
+        $('#labnotesForm').validate(
+		{
+			rules: {
+			    quantity_0: {
+                    required: true, 
+					number: true
+				},
+				quantity_1: {
+                    required: true, 
+					number: true
+				},
+				quantity_2: {
+                    required: true, 
+					number: true
+				},
+				event_date: {
+                    required: true, 
+					date: true
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			}
+		});
+		
+
+	    $(".resource-type-selector").change(getUnit);
+
+		function getUnit(event)
+		{
+		    $(".chzn-select").trigger("liszt:updated");
+		    var resourceId = event.target.value;
+		    if (resourceId)
+		    {
+                var targetId = event.target.id;
+			    if (targetId.search("usable") >= 0)
+			    {
+				    direction = "use";
+			    }
+			    else
+			    {
+				    direction = "other";
+			    }
+			    var prefix = targetId.split('-')[0];
+			    var unitName = "#" + prefix + "-unit_of_quantity";
+			    var jsonUrl = encodeURI("/accounting/json-directional-unit/" + resourceId + "/" + direction + "/");
+			    $.get(jsonUrl,
+				    function(data){
+					    var unit = data["unit"];
+                        $(unitName).val(unit);
+				    });
+		    }
+	    }
+
+        jQuery.validator.setDefaults({ 
+            success: function(label) {
+		        label
+			        .text('').addClass('valid')
+			        .closest('.control-group').addClass('success');
+	        }
+        });
+
+
+		description = $("#id_description").val();
+		hoursValue = parseInt($("#id_quantity_0").val());
+		minutesValue = parseInt($("#id_quantity_1").val());
+
+	    if (wasRunning)
+        {
+            startTimer();
+        }
+
+		$("#id_description").blur(function() 
+		{
+			var newDescription = this.value;
+            
+            if (description != newDescription)
+			{
+                description = newDescription;
+				saveContribution();
+			}
+		});
+
+
+		$("#id_quantity_0").blur(function() 
+		{
+            var newHours = parseInt(this.value);
+            if (hoursValue != newHours)
+			{
+				hoursValue = newHours;
+				recomputeDuration();
+				saveContribution();
+			}
+		});
+
+		$("#id_quantity_1").blur(function() 
+		{
+            var newMinutes = parseInt(this.value);
+            if (minutesValue != newMinutes)
+			{
+				minutesValue = newMinutes;
+				recomputeDuration();
+				saveContribution();
+			}
+		});
+
+		$(".cited").click(function(event) 
+		{
+            var resourceId = this.id;
+            var id = this.name;
+            var cb = event.target;
+            var cb = $('#' + cb.id);
+            setTimeout(function() {
+                var cited = cb.prop('checked');
+                if (cited) 
+                { 
+                    cited = 1;
+                }
+                else
+                { 
+                    cited = 0;
+                }
+                saveCitation(id, resourceId, cited);
+              }, 0);
+
+        });
+
+
+		$(".used-quantity").each( function(){
+			var id = this.id;
+			var resourceId = this.name;
+			var qty = this.value;
+            used[resourceId] = qty;
+		});
+		
+
+		$( "#addOutputForm" ).validate({
+			rules: {
+			    'output-resource_type': {
+                    required: true
+				},
+				'output-quantity': {
+                    required: true,
+					number: true,
+					min: .01
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			},
+		});
+
+		$( "#addConsumableForm" ).validate({
+			rules: {
+			    'input-resource_type': {
+                    required: true
+				},
+				'input-quantity': {
+                    required: true,
+					number: true,
+					min: .01
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			},
+		});
+
+		$( "#addUsableForm" ).validate({
+			rules: {
+			    'input-resource_type': {
+                    required: true
+				},
+				'input-quantity': {
+                    required: true,
+					number: true,
+					min: .01
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			},
+		});
+
+		$( "#addWorkForm" ).validate({
+			rules: {
+			    'input-resource_type': {
+                    required: true
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			},
+		});
+
+
+        {% for item in process.outgoing_commitments %}
+		    $("#detailForm{{ item.id }}").submit(function(event) {
+		
+		        event.preventDefault();
+                var itemId = {{ item.id }};
+			    var $form = $( this ),
+			        qtyInputId = $form.find( 'input[name="itemId"]' ).val(),
+			        identifier = $form.find( 'input[name*="identifier"]' ).val(),
+				    url = $form.attr( 'action' );
+
+			    var formData = $form.serialize();
+			    saveResource(url, itemId, qtyInputId, identifier, formData); 
+
+		    });
+
+		    $('#detailForm{{ item.id }}').validate(
+		    {
+			    highlight: function(label) {
+				    $(label).closest('.control-group').addClass('error');
+			    }
+		    });
+		    
+		    $("#failForm{{ item.id }}").submit(function(event) {
+		
+		        event.preventDefault();
+                var itemId = {{ item.id }};
+			    var $form = $( this ),
+				    qty = $form.find( 'input[name="quantity"]' ).val(),
+				    url = $form.attr( 'action' );
+
+			    var formData = $form.serialize();
+			    saveFail(qty, itemId, url, formData);
+		    });
+
+		    $('#failForm{{ item.id }}').validate(
+		    {
+			    rules: {
+				    quantity: {
+                        required: true, 
+					    number: true
+				    },
+				    description: {
+                        required: true
+				    }
+			    },
+			    highlight: function(label) {
+				    $(label).closest('.control-group').addClass('error');
+			    }
+		    });
+		    
+        {% endfor %}
+
+		$("#start").click(function(event) {
+		    event.preventDefault();
+            startTimer();  
+		});
+
+		$("#stop").click(function(event) {
+            event.preventDefault();
+            setHoursMins();
+            running = false;
+			clearInterval(runTimer);
+			$("#stop").attr("disabled", "disabled");
+			$("#startButton").removeAttr("disabled"); 
+			saveContribution();
+		});
+
+        $("#addOutputForm").submit(function(event) {
+            $('#outputDate').prop('value', eventDate);
+            if(running)
+            {
+                $('#outputRunning').prop('value', 1);
+            }
+            else
+            {
+                $('#outputRunning').prop('value', 0);
+            }
+            if (retrying)
+            {
+                $('#outputRetrying').prop('value', 1);
+            }
+            {
+                $('#outputRetrying').prop('value', 0);
+            }
+            return true;
+		});
+
+		$("#addCitationForm").submit(function(event) {
+		    $('#citationDate').prop('value', eventDate);
+            if(running)
+            {
+                $('#citeRunning').prop('value', 1);
+            }
+            else
+            {
+                $('#citeRunning').prop('value', 0);
+            }
+            if (retrying)
+            {
+                $('#citeRetrying').prop('value', 1);
+            }
+            {
+                $('#citeRetrying').prop('value', 0);
+            }
+            return true;
+		});
+
+		$("#addConsumableForm").submit(function(event) {
+            if(running)
+            {
+                $('#consumableRunning').prop('value', 1);
+            }
+            else
+            {
+                $('#consumableRunning').prop('value', 0);
+            }
+            if (retrying)
+            {
+                $('#consumableRetrying').prop('value', 1);
+            }
+            {
+                $('#consumableRetrying').prop('value', 0);
+            }
+            return true;
+		});
+
+		$("#addUsableForm").submit(function(event) {
+            if(running)
+            {
+                $('#usableRunning').prop('value', 1);
+            }
+            else
+            {
+                $('#usableRunning').prop('value', 0);
+            }
+            if (retrying)
+            {
+                $('#usableRetrying').prop('value', 1);
+            }
+            {
+                $('#usableRetrying').prop('value', 0);
+            }
+            return true;
+		});
+
+		$("#addWorkForm").submit(function(event) {
+		    $('#workDate').prop('value', eventDate);
+            if(running)
+            {
+                $('#workRunning').prop('value', 1);
+            }
+            else
+            {
+                $('#workRunning').prop('value', 0);
+            }
+            if (retrying)
+            {
+                $('#workRetrying').prop('value', 1);
+            }
+            {
+                $('#workRetrying').prop('value', 0);
+            }
+            return true;
+		});
+
+		{% for item in process.non_work_requirements %}
+		    $("#deleteForm{{ item.id }}").submit(function(event) {
+		        $('#eventDate{{ item.id }}').prop('value', eventDate);
+                if(running)
+                {
+                    $('#deleteRunning{{ item.id }}').prop('value', 1);
+                }
+                else
+                {
+                    $('#deleteRunning{{ item.id }}').prop('value', 0);
+                }
+                if (retrying)
+                {
+                    $('#deleteRetrying{{ item.id }}').prop('value', 1);
+                }
+                {
+                    $('#deleteRetrying{{ item.id }}').prop('value', 0);
+                }
+                return true;
+		    });
+		{% endfor %}
+
+        $("#addConsumable").click(function(event) {
+            event.preventDefault();
+		});
+
+		$(".output-quantity").blur(function() 
+		{
+			var quantity = this.value;
+			var id = this.id;
+			var resourceId = this.name;
+			var wholeNbrs = quantity;
+			var decimals = "";
+			if (quantity.indexOf(".") > -1)
+			{
+				var qtySplit = quantity.split(".");
+				wholeNbrs = qtySplit[0];
+				decimals = qtySplit[1];
+			}
+			
+			if ($.isNumeric(quantity))
+			{
+				var combined = wholeNbrs.length + decimals.length;
+				if (combined<=8 && decimals.length<=2)
+				{
+					var id = this.id;
+					saveOutput(id, resourceId, quantity);
+				}
+				else
+				{
+					alert(quantity + " can only have 8 overall digits with 2 decimal places.");
+					this.value = quantity;
+				}
+			}
+			else
+			{
+				alert(quantity + " is not a number");
+				this.value = quantity;
+			}
+		});
+
+		$(".used-quantity").blur(function() 
+		{
+			var quantity = this.value;
+            var id = this.id;
+            var resourceId = this.name;
+            var prev = parseFloat(used[resourceId]);
+            var onhandId = "#onhand-" + resourceId;
+            var onhand = parseFloat($(onhandId).text());
+            var avail = prev + onhand;
+			var wholeNbrs = quantity;
+			var decimals = "";
+			if (quantity.indexOf(".") > -1)
+			{
+				var qtySplit = quantity.split(".");
+				wholeNbrs = qtySplit[0];
+				decimals = qtySplit[1];
+			}
+			
+			if ($.isNumeric(quantity))
+			{
+				var combined = wholeNbrs.length + decimals.length;
+				if (combined<=8 && decimals.length<=2)
+				{
+					if (quantity > avail)
+					{
+						alert(quantity + " is more than available quantity: " + avail);
+						this.value = quantity;
+					}
+					else
+					{
+						var id = this.id;
+						saveInput(id, resourceId, quantity);
+					}
+				}
+				else
+				{
+					alert(quantity + " can only have 8 overall digits with 2 decimal places.");
+					this.value = quantity;
+				}
+			}
+			else
+			{
+				alert(quantity + " is not a number");
+				this.value = quantity;
+			}
+		});
+
+
+		$(".time-used").blur(function() 
+		{
+			var quantity = this.value;
+			var wholeNbrs = quantity;
+			var decimals = "";
+			if (quantity.indexOf(".") > -1)
+			{
+				var qtySplit = quantity.split(".");
+				wholeNbrs = qtySplit[0];
+				decimals = qtySplit[1];
+			}
+			
+			if ($.isNumeric(quantity))
+			{
+				var combined = wholeNbrs.length + decimals.length;
+				if (combined<=8 && decimals.length<=2)
+				{
+					var id = this.id;
+					var resourceId = this.name;
+					saveTimeInput(id, resourceId, quantity);
+				}
+				else
+				{
+					alert(quantity + " can only have 8 overall digits with 2 decimal places.");
+					this.value = quantity;
+				}
+			}
+			else
+			{
+				alert(quantity + " is not a number");
+				this.value = quantity;
+			}
+		});
+
+	    function startTimer()
+        {
+            start = new Date();
+		    running = true;
+		    // updateTime every minute
+            runTimer = setInterval(updateTime, 60 * 1000);
+		    $("#start").attr("disabled", "disabled");
+		    $("#stop").removeAttr("disabled");
+        }
+
+        function html_unescape(text) {
+            // Unescape a string that was escaped using django.utils.html.escape.
+            text = text.replace(/&lt;/g, '<');
+            text = text.replace(/&gt;/g, '>');
+            text = text.replace(/&quot;/g, '"');
+            text = text.replace(/&#39;/g, "'");
+            text = text.replace(/&amp;/g, '&');
+            return text;
+        }
+
+        var nameArray = html_unescape("{{ resource_names }}").split("~");
+
+        jQuery.validator.addMethod("unique", function(value, element, param) {
+            return this.optional(element) || $.inArray(value, param) < 0; // <-- Check if the value is not in the array.
+        }, "Name is not unique.");
+
+        $.validator.addClassRules("url", { url: true });
+        $.validator.addClassRules("unique-name", { required: true, unique: nameArray });
+
+        $( "#resource-create-form" ).validate({
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			},
+		});
+
+        $("#save-resource-type").click(function(event) {
+            event.preventDefault();
+            var btn = event.target;
+		    var $form = $("#resource-create-form");
+		    if ($form.valid())
+		    {
+		        var formData = $form.serialize();
+		        var selId = "#id_output-resource_type";
+		        var modalId = "#createResourceModal";
+		        var modal = $(modalId);
+                var url = "{%url create_resource_type_simple_patterned_ajax %}";
+		        var jqxhr = $.post( url, formData,
+			        function( data ) {
+                        for(var i=0 ; i<data.length ; i++) //will be only one
+                        {
+                            var id = data[i]['pk'];
+                            var name = data[i].fields['name']; 
+                            var selx = $(selId);
+                            selx.append('<option value="' + id + '" selected="selected">' + name + '</option>');
+                            selx.trigger("liszt:updated");
+                            selx.trigger("change");
+                        }
+                        $(modalId).modal('hide');
+                        $form.trigger( "reset" );
+			        })
+			        .fail(function() 
+			        { 
+				        alert("Check your name field.");
+			        }
+		        );
+	        }
+		});
+
+	}); // end document.ready
+
+
+
+	function setHoursMins()
+    {
+        var stop = new Date();
+		duration += Math.round((stop - start) / 60000);
+        start = stop;
+        duration += Math.round((stop - start) / 60000);
+    	var hours = Math.floor(duration / 60);
+        var mins = Math.round(duration - (hours * 60));
+		$("#id_quantity_0").val(hours);
+		$("#id_quantity_1").val(mins);
+	}
+
+
+	function recomputeDuration()
+	{
+		duration = (hoursValue * 60) + minutesValue;
+	}
+
+	function saveContribution()
+	{
+
+		var $form = $("#labnotesForm");
+
+		var formData = $form.serialize();
+		var ed = "&eventDate=" + eventDate;
+		formData += ed;
+
+		var url = "{%url save_past_work commitment_id=commitment.id %}";
+
+		notifySaving();
+
+		var jqxhr = $.post( url, formData,
+			function( data ) {
+				notifySaved();
+				contributionSaved = true;
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				contributionSaved = false;
+				startRetrying();
+			}
+		);
+
+	}
+
+	function updateTime()
+	{
+        setHoursMins();
+		saveContribution();	
+		retrySaving();		
+	}
+
+	function startRetrying()
+	{
+        if (!running)
+		{
+			if (!retrying)
+			{
+				//retryTimer = setInterval(retrySaving, 30 * 1000);
+                retrying = true;
+			}
+		}
+	}
+
+	function retrySaving()
+	{
+		if (!contributionSaved)
+		{
+			saveContribution();
+		}
+
+		if (!outputsSaved)
+		{
+			$(".output-quantity").each( function(){
+				var id = this.id;
+				var resourceId = this.name;
+				var quantity = this.value;
+				saveOutput(id, resourceId, quantity);
+			});
+		}
+
+		if (!inputsSaved)
+		{
+			$(".used-quantity").each( function(){
+				var id = this.id;
+				var resourceId = this.name;
+				var quantity = this.value;
+			    saveInput(id, resourceId, quantity);
+			});
+		}
+
+		if (!citationsSaved)
+		{
+			$(".cited").each( function(){
+				var resourceId = this.id;
+                var id = this.name;
+				var cb = event.target
+                var cb = $('#' + cb.id)
+                var cited = cb.prop('checked');
+                if (cited) 
+                { 
+                    cited = 1;
+                }
+                else
+                { 
+                    cited = 0;
+                }
+			    saveCitation(id, resourceId, cited);
+			});
+		}
+
+		if (!workDoneSaved)
+		{
+            var done = $("#id_work_done").prop('checked');
+            if (done) 
+            { 
+                done = 1;
+            }
+            else
+            { 
+                done = 0;
+            }
+	        saveWorkDone(done);
+		}
+
+		if (!processDoneSaved)
+		{
+            var done = $("#id_process_done").prop('checked');
+            if (done) 
+            { 
+                done = 1;
+            }
+            else
+            { 
+                done = 0;
+            }
+	        saveProcessDone(done);
+		}
+
+		if (!timeInputsSaved)
+		{
+			$(".time-used").each( function(){
+				var id = this.id;
+				var resourceId = this.name;
+				var quantity = this.value;
+			    saveTimeInput(id, resourceId, quantity);
+			});
+		}
+
+		if (!failSaved)
+		{
+		    {% for item in process.outgoing_commitments %}
+		        var itemId = {{ item.id }};	
+			    var $form = $("#failForm{{ item.id }}");
+			    var qty = $form.find( 'input[name="quantity"]' ).val();
+			    var url = $form.attr( 'action' );
+			    var formData = $form.serialize();
+			    saveFail(qty, itemId, url, formData);
+			{% endfor %}
+
+		}
+
+		if (!resourceSaved)
+		{
+		    {% for item in process.outgoing_commitments %}	
+	            var $form = $("#detailForm{{ item.id }}");
+                var itemId = {{ item.id }};
+		        var qtyInputId = $form.find( 'input[name="itemId"]' ).val();
+		        var identifier = $form.find( 'input[name*="identifier"]' ).val();
+			    var url = $form.attr( 'action' );
+
+		        var formData = $form.serialize();
+		        saveResource(url, itemId, qtyInputId, identifier, formData); 
+            {% endfor %}
+		}
+
+		if (contributionSaved 
+		        && outputsSaved 
+	            && inputsSaved 
+	            && failSaved 
+	            && resourceSaved
+	        )
+		{
+			if (retrying)
+			{
+				clearInterval(retryTimer);
+		    	retrying = false;
+			}
+		}
+	}
+
+	function notifySaving()
+	{
+		$("#saving").css("color","green"); 
+		$("#saving").text("Saving...");
+	}
+
+	function notifySaved()
+	{
+		$("#saving").css("color","green"); 
+		$("#saving").text("Saved");
+	}
+
+	function notifyProblem()
+	{
+		$("#saving").css("color","red"); 
+		$("#saving").text("Problem saving");
+	}
+
+	function saveFail(qty, itemId, url, formData)
+	{
+		notifySaving();
+		var modalID = "#failureForm" + itemId;
+		var formID = "#failForm" + itemId;
+		var divID = "#failDiv" + itemId;
+		var failuresId = "#failures" + itemId;
+		var jqxhr = $.post( url, formData,
+			function( data ) {
+				$(divID).show();
+				$(failuresId).empty().append( data );
+				$(modalID).modal('hide');
+				notifySaved();
+                $(formID).trigger( "reset" );
+				failSaved = true;
+			})
+			.fail(function() 
+			{ 
+				$(modalID).modal('hide');
+				notifyProblem(); 
+				failSaved = false;
+				startRetrying();
+			}
+		);
+
+	}
+
+	function saveResource(url, itemId, qtyInputId, identifier, formData)
+	{
+		notifySaving();
+		var ed = "&eventDate=" + eventDate;
+		formData += ed;
+		var qtyInputId = "#" + qtyInputId;
+		var modalID = "#detailModal" + itemId;
+		var labelID = "#label" + itemId;
+		var jqxhr = $.post( url, formData,
+			function( data ) {
+				$(modalID).modal('hide');
+				notifySaved();
+				resourceSaved = true;
+				$(qtyInputId)[0].value = data;
+				$(labelID).text(identifier);
+			})
+			.fail(function() 
+			{ 
+				$(modalID).modal('hide');
+				notifyProblem(); 
+				resourceSaved = false;
+				startRetrying();
+			}
+		);
+
+	}
+
+	function saveOutput(id, resourceId, quantity)
+	{
+		notifySaving();
+		var formId = "#detailForm" + id;
+		var $form = $(formId);
+		var detailQtyId = $form.find( 'input[name*="quantity"]' ).attr('id');
+		detailQtyId = "#" + detailQtyId;
+		var jqxhr = $.post("{% url production_event_for_commitment %}",  
+		    { id: id, 
+		    quantity: quantity, 
+		    eventDate: eventDate
+		    },
+			function( data ) 
+			{
+				notifySaved();
+				outputsSaved = true;
+				$(detailQtyId)[0].value = quantity;
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				outputsSaved = false;
+				startRetrying();
+			}
+		);
+	}
+
+	function saveInput(id, resourceId, quantity)
+	{
+		notifySaving();
+		var jqxhr = $.post("{% url consumption_event_for_commitment  %}",  
+		    { id: id, 
+		    resourceId: resourceId, 
+		    quantity: quantity,
+		    eventDate: eventDate 
+		    },
+			function( data ) 
+			{
+				notifySaved();
+				inputsSaved = true;
+		        var prev = parseFloat(used[resourceId]);
+				var onhandId = "#onhand-" + resourceId;
+		        var onhand = parseFloat($(onhandId).text());
+		        var avail = prev + onhand;
+				var newOnhand = avail - quantity;
+				used[resourceId] = quantity;
+				$(onhandId).text(newOnhand);
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				inputsSaved = false;
+				startRetrying();
+			}
+		);
+	}
+
+	function saveCitation(id, resourceId, cited)
+	{
+		notifySaving();
+		var jqxhr = $.post("{% url citation_event_for_commitment  %}",  { id: id, resourceId: resourceId, cited: cited },
+			function( data ) 
+			{
+				notifySaved();
+				citationsSaved = true;
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				citationsSaved = false;
+				startRetrying();
+			}
+		);
+	}
+
+	function saveWorkDone(done)
+	{
+	    var commitmentId = {{ commitment.id }};
+		notifySaving();
+		var jqxhr = $.post("{% url work_done  %}",  { commitmentId: commitmentId, done: done },
+			function( data ) 
+			{
+				notifySaved();
+				workDoneSaved = true;
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				workDoneSaved = false;
+				startRetrying();
+			}
+		);
+	}
+
+	function saveProcessDone(done)
+	{
+	    var processId = {{ process.id }};
+	    var commitmentId = {{ commitment.id }};
+		notifySaving();
+		var jqxhr = $.post("{% url process_done  %}",  { processId: processId, commitmentId: commitmentId, done: done },
+			function( data ) 
+			{
+				notifySaved();
+				processDoneSaved = true;
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				processDoneSaved = false;
+				startRetrying();
+			}
+		);
+	}
+
+	function saveTimeInput(id, resourceId, quantity)
+	{
+		notifySaving();
+		var jqxhr = $.post("{% url time_use_event_for_commitment  %}",  
+		    { id: id, 
+		    resourceId: resourceId, 
+		    quantity: quantity, 
+		    eventDate: eventDate 
+		    },
+			function( data ) 
+			{
+				notifySaved();
+				timeInputsSaved = true;
+			})
+			.fail(function() 
+			{ 
+				notifyProblem(); 
+				timeInputsSaved = false;
+				startRetrying();
+			}
+		);
+	}
+
+	$(document).ajaxSend(function(event, xhr, settings) 
+	{
+		function getCookie(name) 
+		{
+		    var cookieValue = null;
+		    if (document.cookie && document.cookie != '') 
+			{
+		        var cookies = document.cookie.split(';');
+		        for (var i = 0; i < cookies.length; i++) 
+				{
+		            var cookie = jQuery.trim(cookies[i]);
+		            // Does this cookie string begin with the name we want?
+		            if (cookie.substring(0, name.length + 1) == (name + '=')) 
+					{
+		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+		                break;
+		            }
+		        }
+		    }
+		    return cookieValue;
+    	}
+
+		function sameOrigin(url) 
+		{
+		    // url could be relative or scheme relative or absolute
+		    var host = document.location.host; // host + port
+		    var protocol = document.location.protocol;
+		    var sr_origin = '//' + host;
+		    var origin = protocol + sr_origin;
+		    // Allow absolute or scheme relative URLs to same origin
+		    return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+		        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+		        // or any other URL that isn't scheme relative or absolute i.e relative.
+		        !(/^(\/\/|http:|https:).*/.test(url));
+		}
+
+		function safeMethod(method) 
+		{
+		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+		}
+
+		if (!safeMethod(settings.type) && sameOrigin(settings.url)) 
+		{
+		    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+		}
+	});
+    </script>
+
+{% endblock %}

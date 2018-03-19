@@ -1,0 +1,144 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Distributions" %}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+
+<style>
+.totals {
+    border: solid 2px firebrick;
+    background-color: oldlace;
+    margin-bottom: 12px;
+    padding-left: 1em;
+}
+.total {
+    font-weight: bold;
+    padding-right: 2em;
+}
+#btn-export {
+    margin-bottom: 8px;
+}
+.title {
+    font-size: 1.1em;
+    font-weight: bold;
+}
+.indent {
+    margin-left: 1em;
+}
+</style>
+
+{% endblock %}
+
+{% block body_class %}exchange{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+		<legend>{% trans "Distributions" %}
+            {% if agent %} 
+                for {{ agent.agent_type }} {{ agent.name }}
+                {% if user_agent %}
+                    <a class="btn btn-primary indent" href="{% url distribution_logging %}">{% trans "Create Distribution Manually" %}</a>
+                {% endif %}
+            {% endif %}
+        </legend>
+
+        <div class="span8">
+          <div class="totals">
+            <span class="total">Distributions total: {{ total_distributions }} </span> 
+            <br />
+            * Note these totals are valid only if the events selected all use the same currency.
+          </div>  
+		  {% if distributions %}
+		    <ul>
+		      {% for dist in distributions %}
+                <li>
+                    <a href="{% url distribution_logging distribution_id=dist.id %}">{{ dist }}
+                    </a>  {% trans "created by" %} {{ dist.created_by }}
+                    {% if user = dist.created_by or user.is_superuser%}
+                        <a class="btn btn-info btn-mini" href="{% url distribution_logging distribution_id=dist.id %}">{% trans "Change" %}</a> 
+                        	{% if dist.is_deletable %}
+                                <form
+                                    style="display: inline;" 
+                                    class="delete-form" 
+                                    id="deleteForm{{ dist.id }}" 
+                                    action="{% url delete_distribution distribution_id=dist.id %}" 
+                                    method="POST" >
+                                    {% csrf_token %}
+                                    <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete item" >Delete</button>
+                                </form>
+                            {% endif %}
+                    {% endif %}
+		        </li>
+                {% if dist.event_list %}
+                    <ul>
+                        {% for event in dist.event_list %}
+                            <li>{{ event }} {% if event.value %} {{ event.value }} {{ event.unit_of_value }} {% endif %}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+		  {% endfor %}
+		 </ul>
+	    {% endif %}
+        </div>
+        <div class="span3 filter">
+          {% if distributions %}
+            <div>
+                <a href=" {% url exchange_events_csv %}?event-ids={{ event_ids }}" id="btn-export" class="btn btn-primary" title="Export filtered list to csv (comma separated value) format" >{% trans "Export CSV File" %}</a>
+            </div>
+          {% endif %}
+            <h3>{% trans "Filter the List" %}</h3>
+            <form id="filter-form" action="." method="POST">
+	            {% csrf_token %}
+                <div id="div_id_start_date" class="control-group" style="display: inline;" > 
+                    <label for="id_start_date" class="control-label required-field" style="display: inline; vertical-align: text-bottom;" >
+                        {% trans "Start date " %}
+                    </label>    
+                    <div class="controls" style="display: inline;" >
+                        {{ dt_selection_form.start_date }}
+                    </div>
+                </div>
+                <div id="div_id_end_date" class="control-group" > 
+                    <label for="id_end_date" class="control-label required-field" style="display: inline;  vertical-align: text-bottom; " >
+                        {% trans "End date  " %}
+                    </label>    
+                    <div class="controls" style="display: inline;" >
+                        {{ dt_selection_form.end_date }}
+                    </div>
+                </div>
+                <input type="submit" id="btn-filter" name="submit" class="btn btn-info" value="{% trans 'Filter' %}" />
+            </form>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+
+        $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+	$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+
+
+	}); // end document.ready
+    </script>
+
+{% endblock %}

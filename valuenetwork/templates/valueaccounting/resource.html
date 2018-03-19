@@ -1,0 +1,422 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+{% load thumbnail %}
+
+{% block head_title %}{% trans "Resource" %}: {{ resource }}{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+
+<style>
+
+.labnote {
+    background-color: beige;
+    padding: 2px 6px 3px 6px;
+    border: 1px solid gainsboro;
+}
+.btn-info {
+    margin-left: 10px;
+}
+.hdg {
+    color: firebrick;
+}
+.btn {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+#id_notes, #id_access_rules {
+  width: 500px;
+  height: 100px;    
+}
+.modal {
+    width: 600px;
+}
+.text-center {
+    text-align: center;
+}
+</style>
+
+{% endblock %}
+
+{% block body_class %}work{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+
+		<legend>
+			{% trans "Resource" %}: {{ resource }} &nbsp;
+			{% if agent %}
+		        <a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>&nbsp;&nbsp;
+		        <a href="#resourceOrderForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Plan Work Order" %}</a>&nbsp;&nbsp;
+	        {% endif %}
+	        <a href="{% url event_history resource_id=resource.id %}">{% trans "Event history" %}</a>&nbsp;&nbsp;
+            <a href="{% url incoming_value_flows resource_id=resource.id %}">{% trans "Incoming Value Flow" %}</a>
+		</legend>
+		
+        {% if agent %}
+		    <div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
+			    <div class="modal-header">
+				    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				    <h3 id="resource-change-label">{% trans "Change" %} {{ resource }}</h3>
+			    </div>
+			    <div class="modal-body">
+				    <form id="resource-change-form" action="{% url change_resource resource_id=resource.id %}" method="POST" >
+					    {% csrf_token %}
+					    {{ resource.change_form|as_bootstrap }}
+                        {{ role_formset.management_form }}
+                        <table>
+                            <tr>
+                                <td>Resource access role</td>
+                                <td>Assignment</td>
+                                <td>Is contact &nbsp;</td>
+                                <td>Delete</td>
+                            </tr>
+	                        {% for form in role_formset %}
+                                {{ form.id }}  
+	                            <tr class="role-row">
+	                                <td class="td-role">{{ form.role }}</td>
+	                                <td class="td-agent">{{ form.agent }}</td>
+	                                <td class="text-center">{{ form.is_contact }}</td>
+                                    <td class="text-center">{{ form.DELETE }}</td>
+	                            </tr>
+                           	{% endfor %}
+                        </table>
+				        <div class="modal-footer">
+					      <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+					      <button class="btn btn-primary">{% trans "Save changes" %}</button>
+				        </div>
+				    </form>
+                </div>
+            </div>
+		      
+		      <div class="modal hide fade" id="resourceOrderForm" tabindex="-1" role="dialog" aria-labelledby="resource-order-label" aria-hidden="true">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h3 id="resource-order-label">{% trans "Create Work Order for" %} {{ resource }}</h3>
+                </div>
+                <div class="modal-body">
+                    <form enctype="multipart/form-data" action="{% url plan_work_order_for_resource resource_id=resource.id %}" method="POST" >
+                        {% csrf_token %}
+                        {{ order_form|as_bootstrap }}
+                        <div class="modal-footer">
+                          <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                          <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                        </div>
+                    </form>
+              </div>
+            </div>
+
+	    {% endif %}
+
+		<div class="row-fluid">
+		
+		    <div class="span6 resource">
+		
+	            <table class="table table-bordered" >
+	                <tr>
+                        <th style="text-align: right;">{% trans "Quantity" %}</th>
+                        <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
+                    </tr>
+{% comment %}
+                    <tr>
+                        <th style="text-align: right;">{% trans "Quality" %}</th>
+                        <td>{{ resource.quality }}</td>
+                    </tr>
+{% endcomment %}
+                    {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
+                        <tr>
+	                        <th style="text-align: right; vertical-align: top; ">{% trans "Value per" %} {{ resource.resource_type.unit_of_use.abbrev }} {% trans "of use" %}</th>
+	                        <td>{{ resource.value_per_unit_of_use }}</td>
+                        </tr>
+                    {% endif %}
+
+	                {% if resource.url %}
+	                    <tr>
+	                        <th style="text-align: right;">{% trans "URL" %}</th>
+	                        <td>{{ resource.url|urlize }}</td>
+                        </tr>
+                    {% endif %}
+	                {% if resource.current_location %}
+	                    <tr>
+	                        <th style="text-align: right;">{% trans "Current Location" %}</th>
+	                        <td>{{ resource.current_location }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if resource.notes %}
+                        <tr>
+	                        <th style="text-align: right; vertical-align: top; ">{% trans "Notes" %}</th>
+	                        <td>{{ resource.notes|urlize|linebreaks }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if resource.access_rules %}
+                        <tr>
+	                        <th style="text-align: right; vertical-align: top; ">{% trans "Access Rules" %}</th>
+	                        <td>{{ resource.access_rules|urlize|linebreaks }}</td>
+                        </tr>
+                    {% endif %}
+                    {% if resource.photo %}
+	                	<tr>
+	                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
+	                        <td><img src="{% thumbnail resource.photo photo_size %}" /></td>
+                        </tr>
+                	{% elif resource.photo_url %}
+                        <tr>
+	                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
+	                        <td><img src="{{ resource.photo_url }}" width="128" height="96" /></td>
+                        </tr>
+	                {% endif %}
+                    {% if resource.agent_resource_roles.all %}
+                        <tr>
+	                        <th style="text-align: right; vertical-align: top; ">{% trans "Assignments" %}</th>
+	                        <td>
+                                {% for item in resource.agent_resource_roles.all %}
+                                    {{ item.role.name }} : {{ item.agent.nick }} 
+                                    {% if item.is_contact %} (Contact) {% endif %} <br />
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                    <tr>
+                        <th style="text-align: right;">{% trans "Record created date" %}</th>
+                        <td>{{ resource.created_date }}</td>
+                    </tr>
+                    <tr>
+                        <th style="text-align: right;">{% trans "Record created by" %}</th>
+                        <td>{{ resource.created_by }}</td>
+                    </tr>
+
+	            </table>
+	        
+	        </div>
+
+	        <div class="span6 info">
+
+	            {% if resource.demands %}
+	                <h4 class="hdg">{% trans "Demands" %}:</h4>
+	                <ul>
+	                {% for ct in resource.demands %}
+	                    <li><a href="{{ ct.process.get_absolute_url }}">{{ ct }}</a></li>
+	                {% endfor %}
+	                </ul>
+	            {% endif %}
+
+	        </div>
+
+		</div>
+
+        <div class="row-fluid" tyle="margin-top: 1em;">
+            <div class="span6">           
+                <h3 class="hdg">{% trans "Where from" %}:</h3>  
+                {% if resource.where_from_events %}
+                    <ul>
+                        {% for event in resource.where_from_events %}
+                            <li><b>{% trans "Event" %}:</b> {{ event.event_type }} {{ event.event_date }} {{ event.quantity }} {% trans "from" %}: {{ event.from_agent }}</li>
+
+                            {% if event.process %}
+                                <ul>
+                                    <li><b>{% trans "Process" %}:</b> <a href="{% url process_details process_id=event.process.id %}">{{ event.process.name }}</a>
+
+                                    </li>
+
+                                </ul>
+                            {% endif %}
+                            {% if event.transfer %}
+                                {% if event.transfer.exchange %}
+                                    {% with event.transfer.exchange as exchange %}
+                                    <ul>
+                                        <li><b>{% trans "Exchange" %}:</b> <a href="{% url exchange_logging exchange_type_id=0 exchange_id=exchange.id %}">{{ exchange }}</a>
+                                        </li>
+                                            {% if exchange.payment_sources_with_contributions %}
+                                                <li><b>{% trans "Contributions to payment for " %} {{ resource.identifier }}:</b></li>
+                                                <ul>
+                                                    {% for source in exchange.payment_sources_with_contributions %}
+                                                        {% for contribution in source.cash_contribution_events %}
+                                                            <li>
+                                                                <b>{{ contribution.event_type }}:</b> 
+                                                                {{ contribution.event_date }} 
+                                                                {{ contribution.distribution_quantity_formatted }}
+                                                                {% trans "from" %}: {{ contribution.from_agent }}
+                                                            </li>
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                    </ul>
+                                    {% endwith %}
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+	                            
+              
+	                </ul> 
+
+                {% else %}
+                    {% if agent %}
+                        <p>We don't know!  Create it here!</p>
+                        <div >
+		                    <a href="#processAddForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Add process that created resource" %}</a>
+	                    </div>
+	                    <div class="modal hide fade" id="processAddForm" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
+	                      <div class="modal-header">
+		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		                    <h3 id="process-add-label">{% trans "Add Process" %}</h3>
+	                      </div>
+	                      <div class="modal-body">
+			                    <form class="process-add-form" action="" method="POST" >
+				                    {% csrf_token %}
+				                    {{ process_add_form }}
+				
+			                      <div class="modal-footer">
+				                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+				                    <button class="btn btn-primary" name="process-save" value="process">{% trans "Save" %}</button>
+			                      </div>
+			                    </form>
+	                      </div>
+                        </div>
+                    {% else %}
+                        <p>We don't know.</p>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="span6">
+              <h3 class="hdg">{% trans "Where to" %}:</h3>
+
+              {% if resource.where_to_events %}
+                <ul>
+                    {% for event in resource.where_to_events %}
+                        <li><b>{% trans "Event" %}:</b> {{ event.resource.label }} {{ event.event_type }}
+                             {% if event.event_type.relationship != "cite" %}
+                                {{ event.quantity }} {{ event.unit_of_quantity.abbrev }}
+                             {% endif %}
+                             {{ event.event_date }} {% trans "to" %}: {{ event.to_agent }}</li>
+                        {% if event.process %}
+                            <ul>
+                                <li>
+                                    <b>{% trans "Process" %}:</b> <a href="{% url process_details process_id=event.process.id %}">{{ event.process.name }}</a>
+                               </li>
+                                <ul>
+                                    {% for req in event.process.work_requirements %}
+                                        <li><b>{% trans "Workers" %}:</b> {{ req.resource_type }} {% trans "from" %}: {{ req.from_agent }} </li>
+                                        {% if req.description %}
+                                            <div class="labnote" ><span class="label">{% trans "Labnotes" %}:</span> {{ req.description|urlize|linebreaks }}</div>
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </ul>
+                                {% for op in event.process.outputs %}
+                                    {% if op.resource %}
+                                        <li>{% trans "Event" %}: <b>{{ op.event_type }}</b>  {{ op.resource_type.name }} {{ event.quantity }} {{ event.unit_of_quantity.abbrev }} {{ event.event_date }}</li>
+                                        <ul>
+                                            <li><b>{% trans "Resource" %}:</b> <a href="{% url resource resource_id=op.resource.id %}">{{ op.resource.label }}</a></li>
+                                        </ul>
+                                    {% endif %}
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        {% if event.transfer %}
+                                {% if event.transfer.exchange %}
+                                    {% with event.transfer.exchange as exchange %}
+                                    <ul>
+                                        <li><b>{% trans "Exchange" %}:</b> <a href="{% url exchange_logging exchange_type_id=0 exchange_id=exchange.id %}">{{ exchange }}</a>
+                                        </li>
+                                    </ul>
+                                    {% endwith %}
+                                {% endif %}
+                            {% endif %}
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>Not yet!</p>
+
+            {% endif %}
+
+	    </div>
+    </div>
+{% endblock %}
+
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+{% endblock %}
+
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+
+		$('#inventory').addClass('active');
+		
+		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+
+		$( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+        //$('td.td-role > select').addClass('select-role');   
+        //$('td.td-agent > select').addClass('select-agent');  
+
+        $.validator.addMethod("agentRequired", function (value, element) {
+            var parent = element.parentElement;
+            var parentSib = parent.nextElementSibling;
+            var sib = parentSib.children[0];
+            var sibValue = sib.value;
+            if (sibValue){
+                var sibId = sib.id;
+                sibId = "#" + sibId;
+                $(sibId).removeClass('error').next('label.error').remove();
+            }
+            return this.optional(element) || sibValue;
+        }, "Both role and agent must be selected.");
+        
+        $.validator.addMethod("roleRequired", function (value, element) {
+            var parent = element.parentElement;
+            var parentSib = parent.previousElementSibling;
+            var sib = parentSib.children[0];
+            var sibValue = sib.value;
+            if (sibValue){
+                var sibId = sib.id;
+                sibId = "#" + sibId;
+                $(sibId).removeClass('error').next('label.error').remove();
+            }
+            return this.optional(element) || sibValue;
+        }, "Both role and agent must be selected.");
+        
+        $.validator.addClassRules("select-role", { agentRequired: true });
+        $.validator.addClassRules("select-agent", { roleRequired: true });
+        
+        jQuery.validator.addMethod("quantity",
+            function(value, element) {
+                var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
+                return this.optional(element) || isValidQuantity;
+            },
+            "Please enter a number less than 1000000 with no more than 2 decimal places"
+        );
+
+        $.validator.addClassRules("quantity", { quantity: true });
+
+            
+        $('#resource-change-form').validate(
+        {
+            highlight: function(label) {
+                $(label).closest('.control-group').addClass('error');
+            }
+
+        });
+    
+    }); // end document.ready
+
+    </script>
+    
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Production" %}{% endblock %}
+
+{% block extra_head %}
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" />
+
+<style>
+
+#resources {
+    margin-left: 6em;
+    margin-bottom: 2em;
+}
+
+</style>
+{% endblock %}
+
+{% block body_class %}x{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+      {% include "_messages.html" %}
+	  <div>
+		<legend>{% trans "Create a Plan from Recipe for " %} {{ resource_type.name }} </legend>
+		<form class="form-horizontal" id="processForm" method="POST" action=".">
+	        {% csrf_token %}
+            {{ date_name_form|as_bootstrap }}
+            
+            {% if resource_required %}
+                <div id="resources" class = "resources" >
+                    <p>This recipe needs a starting resource</p>
+                    {% for resource in resource_type.onhand %}
+                        <p>
+                            <input type="radio" id="resource-{{ resource.id }}" name="resource" value="{{ resource.id }}" />
+                            {{ resource.identifier }}
+                        </p>
+                    {% empty %}
+                        <p>Sorry, no starting resources exist.</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if resource_required %}
+                <input type="submit" id="submit" name="create-process" disabled="true" value="{% trans 'Create plan' %}" class="btn btn-primary" />
+            {% else %}
+                <input type="submit" id="submit" name="create-process" value="{% trans 'Create plan' %}" class="btn btn-primary" />
+            {% endif %}
+		</form>
+      </div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+	
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+ 	$(document).ready(function(){
+
+	    $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+        //$(".chzn-select").chosen();
+
+        $( "#id_due_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+
+        $("[type=radio]").click(function() {
+            $("#submit").removeAttr("disabled");
+        });
+		
+
+	}); // end document.ready
+
+    </script>
+
+{% endblock %}

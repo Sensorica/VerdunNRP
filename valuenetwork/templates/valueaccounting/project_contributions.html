@@ -1,0 +1,163 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Project Contributions for " %} {{ project }}{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+	tr.even td 
+	{
+		color:#000000;
+		background-color:#EAF2D3;
+	}
+
+	th
+	{
+		background-color:#C8D6E8;
+	}
+
+</style>
+
+{% endblock %}
+
+{% block body_class %}projects{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+		<legend>{% trans "Contributions for" %} {{ project.agent_type }} {{ project }}</legend>
+		
+		<div>
+            <form id="filterForm" action="." method="POST" style="display: inline;" >
+                {% csrf_token %}
+                <div id="div_id_start_date" class="control-group" style="display: inline;" >     
+                    <label for="id_start_date" class="control-label required-field" style="display: inline;" >
+                        {% trans "Show contributions from " %}
+                    </label>
+                    <div class="controls" style="display: inline;" >
+                        {{ filter_form.start_date }}
+                    </div>
+                </div>
+                <div id="div_id_end_date" class="control-group" style="display: inline;" >     
+                    <label for="id_end_date" class="control-label required-field" style="display: inline;" >
+                        {% trans " through " %}
+                    </label>
+                    <div class="controls" style="display: inline;" >
+                        {{ filter_form.end_date }}
+                    </div>
+                </div>
+                <div id="div_id_from_agent" class="control-group" style="display: inline;" >
+                    <label for="id_from_agent" class="control-label" style="display: inline;" >
+                        {% trans "from" %}
+                    </label>
+                    <div class="controls" style="display: inline; vertical-align: bottom;" >
+                        {{ filter_form.from_agents }}
+                    </div>                    
+                </div>&nbsp;
+                <input type="submit" name="submit" class="btn btn-info" style="display: inline;" value="{% trans 'Filter' %}" />
+            </form>
+                {% if event_ids and agent %}
+                    <a 
+                        href=" {% url contribution_events_csv %}?event-ids={{ event_ids }}" 
+                        id="btn-export" 
+                        class="btn btn-primary" 
+                        title="Export filtered list to csv (comma separated value) format" 
+                        style="display: inline; vertical-align: middle;"
+                        >{% trans "Export CSV File" %}
+                    </a>
+                {% endif %}
+		</div>
+		
+		<table style="width: 100%;" class="table table-bordered table-hover table-condensed" >
+			<thead>
+				<th>{% trans "Date" %}</th>
+				<th>{% trans "Type" %}</th>
+				<th>{% trans "From" %}</th>
+				<th>{% trans "Resource Type" %}</th>
+				<th>{% trans "Qty" %}</th>
+				<th>{% trans "URL" %}</th>
+				<th>{% trans "Description" %}</th>
+				<th>{% trans "Process" %}</th>
+				<th>{% trans "Deliverables" %}</th>
+				
+			</thead>
+			<tbody>	
+				{% for event in events %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ event.event_date }}</td>
+						<td>{{ event.event_type }}</td>
+						<td>{{ event.from_agent }}</td>
+						<td>{{ event.resource_type }}</td>
+						<td style="text-align: right;" >{{ event.quantity_formatted }}</td>
+						<td>
+							{% if event.url %}
+								<a href="{{ event.url }}" target="_blank">Open</a>
+							{% endif %}
+						</td>
+						<td>{% if event.description %}{{ event.description|urlize }}
+                            {% else %} {{ event.commitment.description|urlize }} {% endif %}
+                       </td>
+						<td>
+							{% if event.process %}
+								<a href="{{ event.process.get_absolute_url }}" target="_blank">{{ event.process.name }}</a>
+							{% endif %}
+						</td>
+						<td>
+						    {% for d in event.process.deliverables %}
+						        <a href="{% url resource resource_id=d.id %}">{{ d }}</a></br >
+					        {% endfor %}
+					    </td>
+					</tr>
+				{% endfor %}
+			<tbody>	
+		</table>
+<div class="pagination">
+    <span class="step-links">
+        {% if events.has_previous %}
+            <a href="?page={{ events.previous_page_number }}">{% trans "previous" %}</a>
+        {% endif %}
+
+        <span class="current">
+            {% trans "Page" %} {{ events.number }} {% trans "of" %} {{ events.paginator.num_pages }}.
+        </span>
+
+        {% if events.has_next %}
+            <a href="?page={{ events.next_page_number }}">{% trans "next" %}</a>
+        {% endif %}
+    </span>
+</div>
+
+	</div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+    <script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+
+		$('#projects').addClass('active');
+		
+		$(".chzn-select").chosen();
+		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+
+	}); // end document.ready
+
+    </script>
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Production" %}{% endblock %}
+
+{% block extra_head %}
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" />
+
+<style>
+
+#id_notes
+{
+  width: 28em;
+}
+
+#id_url
+{
+  width: 28em;
+}
+
+.item-description
+{
+	width: 32em;
+    height: 40px;
+}
+.selected {
+    font-size: 1.2em;
+}
+.section {
+    color: firebrick;
+}
+.select-buttons p {
+    margin-top: 20px;
+}
+#div_id_start_date {
+    margin-top: 20px
+}
+
+</style>
+{% endblock %}
+
+{% block body_class %}x{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+      {% include "_messages.html" %}
+	  <div>
+        {% if rand %}
+		  <legend>{% trans "Production Planning" %}</legend>
+        {% else %}
+		  <legend>{% trans "Log Unplanned Production Work" %}</legend>
+        {% endif %}
+		<form class="form-horizontal" id="processForm" method="POST" action=".">
+	      {% csrf_token %}
+		  <div class="row-fluid">
+			<div class="span12">
+                {% if selected_pattern %}
+                    <p class="selected">
+                    <i>Chosen:</i>&nbsp;&nbsp;
+                    {% trans "Pattern " %} 
+	                <input type="text" name="selected-pattern~{{ selected_pattern.id }}" value="{{ selected_pattern }}"
+                        readonly="readonly" />&nbsp;&nbsp; 
+                    {% trans "Project " %} 
+	                <input type="text" name="selected-context-agent~{{ selected_context_agent.id }}" value="{{ selected_context_agent }}"
+                        readonly="readonly" /> 
+                    </p>
+                {% else %}
+                    {% trans "Choose a pattern " %} {{ pattern_form.pattern }} &nbsp; 
+                    {% trans "Choose a project " %} {{ ca_form.context_agent }} &nbsp;&nbsp; 
+	                <input type="submit" name="get-related" value="{% trans 'Get resource types' %}" class="btn btn-primary" />
+                {% endif %}
+            </div>
+          </div>
+
+		  {% if selected_pattern %}
+
+		    <div class="row-fluid">
+			  <div class="span6">
+
+	              {% for slot in slots %}
+
+                    <legend class="section"> {{ slot }} </legend>
+                    <div>
+                        {% for item in slot.resource_types %}
+                            <div>
+		                        <p>
+		                            <input type="checkbox" class="{{ slot.name }}" id="{{ slot.name }}-{{ item.id }}" name="{{ slot.name }}~{{ item.name }}" value="{{ item.id }}" />
+		                            {{ item }} ( {{ item.facet_values_list }} )
+	                            </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                  {% endfor %}
+              </div>
+              <div class="span6">
+
+                    <hr />
+                    {{ process_form|as_bootstrap }}
+
+
+                    {% if rand %}
+                        {{ demand_form|as_bootstrap }}  
+                        (If a work order is not selected, a new work order will be created automatically.) 
+                    {% endif %}
+                    <hr />                
+                    
+                    <div class="select-buttons">
+                        {% if rand %}
+                            <p>
+                                <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
+                                </br>Create planned work using the selected resource types.
+                            </p>
+                            <p>
+                                <input type="submit" name="add-another" value="{% trans 'Save process & add another' %}" class="btn btn-primary" />
+                                </br>Save this process and plan more work.
+                            </p>
+                            <p>
+                                <input type="submit" name="edit-process" value="{% trans 'Change process' %}" class="btn btn-primary" />
+                                </br>Create planned work and edit the process details.
+                            </p>
+                        {% else %}
+                            <p>
+                                <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
+                                </br>Create a process using the selected resource types, where you can log your work.
+                            </p>
+                            <p>
+                                <input id="startNow" type="submit" name="labnotes" value="{% trans 'Work now' %}" class="btn btn-primary" disabled />
+                                </br>Log your work starting now now. (You must select one type of work.)
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+               </div>
+            </div>
+   
+	      {% endif %}
+
+		</form>
+      </div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+	
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+ 	$(document).ready(function(){
+
+	    $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+        //$(".chzn-select").chosen();
+
+        $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_end_date" ).datepicker({ 
+			dateFormat: "yy-mm-dd",
+    		onClose: function() {
+      			$( this ).valid();
+			}
+		 });
+
+		jQuery.validator.addMethod("equalToOrGreaterThan", 
+		function(value, element, params) {
+
+			if (!/Invalid|NaN/.test(new Date(value))) {
+				return new Date(value) >= new Date($(params).val());
+			}
+
+			return isNaN(value) && isNaN($(params).val()) 
+				|| (Number(value) >= Number($(params).val())); 
+		},'Must be equal to or greater than start date.');
+
+		$( "#processForm" ).validate({
+			rules: {
+				start_date: {
+					required: true,
+					date: true
+				},
+				end_date: {
+					date: true,
+					equalToOrGreaterThan: '#id_start_date'
+				}
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			},
+		});
+
+        $(".work").click(function() { 
+            var numberChecked = 0;
+            var works = $('.work');
+            var gotWork = false;
+            for (i in works) {
+                if (works[i].checked == true) {
+                    numberChecked += 1;
+                }
+            }
+            if (numberChecked == 1) {
+               var gotWork = true;
+            }
+            resetButtons(gotWork);
+        });
+
+        //{% for recipe in related_recipes %}
+        //    $("#recipe-{{ recipe.id }}").click(function() {
+        //        gotRecipe = true;
+        //        resetButtons();
+        //    });
+        //{% endfor %}
+
+	}); // end document.ready
+
+
+    function resetButtons(gotWork)
+	{
+        if (gotWork)
+        {
+            $('#startNow').removeAttr("disabled");
+            $('#pastWork').removeAttr("disabled");
+        }
+        else
+        {
+            $('#startNow').attr("disabled", "disabled");
+            $('#pastWork').attr("disabled", "disabled"); 
+        }
+    }
+	
+    </script>
+
+{% endblock %}

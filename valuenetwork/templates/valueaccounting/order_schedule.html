@@ -1,0 +1,501 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Schedule for " %}{{ order }}{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+.error {
+    color: red;
+}
+.reskedForm {
+    display: inline;
+}
+li {
+    list-style-type: none;
+}
+textarea {
+    width: 480px;
+}
+.project-line {
+    font-size: 1.2em;
+    color: brown;
+    font-weight: bold;
+    margin-top: 1.5em;
+}
+.process {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-top: .8em;
+    background-color: lightyellow;
+    border: 1px solid gainsboro;
+    padding: 1em;
+}
+.resource-type {
+    font-weight: bold;
+    font-size: 1.1em;
+    vertical-align: text-bottom;
+}
+.oi {
+    color: firebrick;
+    font-size: 1.2em;
+    vertical-align: text-bottom;
+}
+.production-process-btn {
+    vertical-align: text-bottom;
+}
+.space-down {
+    margin-top: 12px;
+}
+.for, .req-description p, .description p {
+    font-size: 1em;
+    font-style: italic;
+    font-weight: normal;
+}
+.section {
+    color:     #008A2E;
+    font-size: 1em;
+}
+.indent {
+    margin-left: 1em;
+}
+.process-btn {
+    margin-top: 10px;
+}
+.btn-warning {
+    margin-top: 5px;
+}
+.wf-project-form {
+    height: 400px;
+}
+.btn-primary {
+    margin-bottom: 1px;
+}
+.process-dates {
+    font-size: 1em;
+    color:     #008A2E;
+    font-weight: normal;
+}
+</style>
+
+{% endblock %}
+
+{% block body_class %}projects{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+		<legend>{% trans "Schedule for " %}{{ order }}
+            {% if order.exchange %}
+                <a href="{% url exchange_logging exchange_type_id=0 exchange_id=order.exchange.id %}" style="display: inline;"  class="btn btn-info indent" title="Exchange for this order" >Go to Exchange</a>
+            {% endif %}
+        </legend>
+		
+            {% if order.description %}
+                <div class="req-description">{{ order.description|urlize|linebreaks }}</div>
+            {% endif %}
+
+
+            {% if agent %}
+                <h3>
+                    {% if order.order_type == "customer" %}
+                        {% trans "Order Items" %}:
+                        <a href="#addOrderItem" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Add an Order Item" %}</a>
+                    {% else %}
+                        {% trans "Deliverables" %}:
+                        {% if agent %}
+                        <a href="#addOrderItem" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Add a Deliverable" %}</a>
+                        {% endif %}
+                    {% endif %}
+                </h3>
+            {% endif %}
+        
+			<ul>
+			    {% for item in order_items %}
+					<li>
+					    <a class="resource-type" href="#item-{{ item.id }}">
+                            {{ item.resource_type }}
+                            {% if item.stage %}
+                                @{{ item.stage.name }}
+                            {% endif %}
+                        </a> {{ item.quantity }} {{ item.unit_of_quantity }}
+                        {% if agent %}
+                          {% if item.stage %}
+                            <div style="display: inline;" >
+                                <a href="#resourceQuantity-{{ item.id }}" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Change Quantity" %}</a>
+                                {% trans "Project" %}: {{ item.context_agent }} 
+                                <a href="#changeProject-{{ item.id }}" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Change Project" %}</a>
+                            </div>
+                            <div class="modal hide fade" id="resourceQuantity-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-qty-label" aria-hidden="true">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="resource-qty-label">{% trans "Change resource quantity for workflow plan" %} </h3>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form class="resource-qty-form validateMe" enctype="multipart/form-data" action="{% url change_commitment_quantities order_item_id=item.id %}" method="POST" >
+                                        {% csrf_token %}
+                                        {{ item.resource_qty_form }} {{ unit }}
+                                        <p>This will change the planned quantity for the workflow resource on all processes for this order item.</p>
+                                        <p>If work inputs also are using the same quantity and unit, they will also be changed.</p>
+                                        <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
+                                        <div class="modal-footer">
+                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                            <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="modal hide fade" id="changeProject-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="chg-proj-label" aria-hidden="true">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="chg-proj-label">{% trans "Change project for workflow plan" %} </h3>
+                                </div>
+
+                                <div class="modal-body">
+                                    <form class="wf-project-form validateMe" enctype="multipart/form-data" action="{% url change_workflow_project order_item_id=item.id %}" method="POST" >
+                                        {% csrf_token %}
+                                        {{ item.project_form }}
+                                        <p>This will change the project on all processes for this order item.</p>
+                                        <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
+                                        <div class="modal-footer">
+                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                            <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                          {% endif %}
+                        {% endif %}
+				    </li>
+                {% empty %}
+                    None
+				{% endfor %}
+			</ul>
+
+			{% if agent %}
+                <div class="modal hide fade" id="addOrderItem" tabindex="-1" role="dialog" aria-labelledby="order-item-label" aria-hidden="true">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                        <h3 id="order-item-label">{% trans "Add another Order Item" %} </h3>
+                    </div>
+                    <div class="modal-body">
+                        <form class="order-item-form validateMe" enctype="multipart/form-data" action="{% url add_order_item order_id=order.id %}" method="POST" >
+                            {% csrf_token %}
+                            {{ add_order_item_form|as_bootstrap }}
+                            <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
+                            <div class="modal-footer">
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                            </div>
+                        </form>
+                    </div>
+              </div>
+			{% endif %}
+			
+			<div class="row-fluid">
+
+				<div class="span12">
+					<h3 style="margin-bottom: 4px;" >
+					    {% trans "Production Schedule" %}:
+					    {% if order.all_processes %}
+                            <a class="indent" href="{% url processes_graph object_type='O' object_id=order.id %}">Process graph diagram</a>
+                            
+                            <a class="indent" href="{% url order_timeline order_id=order.id %}">Timeline</a>
+					    {% endif %}
+				    </h3> 
+					
+                    {% for item in order_items %}
+                      <div id="item-{{ item.id }}" class="resource-type space-down">
+                            <span class="oi">{% trans 'Order Item' %}:</span>
+                            {{ item.resource_type }}
+                            {% if item.stage %}
+                                @{{ item.stage.name }}
+                            {% endif %}
+                            {% if item.needs_production_process %}
+                              {% if agent %}
+                                <a href="#productionProcessModal{{ item.id }}" role="button" class="btn btn-info btn-mini production-process-btn" data-toggle="modal">
+                                    {% blocktrans %}Add Process to produce {% endblocktrans %} {{ item.resource_type }}
+                                </a>
+                              {% endif %}
+                            {% endif %}
+                      </div>
+                      
+                      {% if agent %}
+                        <div class="modal hide fade productionProcessModal" id="productionProcessModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="productionProcess-label" aria-hidden="true">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                <h3 id="productionProcess-label">{% trans "Add Production Process" %}</h3>
+                            </div>
+                            <div class="modal-body">
+                                <form class="productionProcess{{ item.id }} validateMe" action="{% url create_production_process commitment_id=item.id %}" method="POST" >
+                                    {% csrf_token %}
+                                    {{ item.process_form|as_bootstrap }}
+                                    <input type="hidden" id="next" name="next" value="process" />
+                                    <div class="modal-footer">
+                                        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                        <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                      {% endif %}
+                      
+                      {% for oh in item.onhand %}
+                            <div class "onhand">
+                                {% trans 'Onhand' %}: <a href="{{ oh.get_absolute_url }}"> {{ oh }} {{ oh.formatted_quantity }}</a>
+                            </div>
+                      {% endfor %}
+                      {% for process in item.processes %}
+					
+					    {% if agent %}
+                          {% if process.to_be_changed_requirements %}
+                            <div class="row-fluid indent">
+                                <div class="span12">
+                                    <a href="#insertProcessForm{{ process.id }}" role="button" class="btn btn-info btn-mini process-btn" data-toggle="modal">
+                                    {% blocktrans %}Insert a process here {% endblocktrans %}
+                                    </a>
+                                </div>
+                                
+                                <div class="modal hide fade processForm" id="insertProcessForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="process-insert-label">{% blocktrans %}Insert process for {% endblocktrans %} {{ order }} </h3>
+                                    </div>
+                                    <div class="modal-body">
+                                    <form class="process-form validateMe" action="{% url insert_process_for_streaming order_item_id=item.id process_id=process.id %}" method="POST">
+                                            {% csrf_token %}
+                                            
+                                            {% with process.insert_process_form as processForm %}
+                                                <table>
+                                                    <tr><td>{{ processForm.name.label }}</td></tr>
+                                                    <tr><td>{{ processForm.name }}</td></tr>
+                                                    <tr><td>{{ processForm.context_agent.label }}</td></tr>
+                                                    <tr><td>{{ processForm.context_agent }}</td></tr>
+                                                    <tr><td>{{ processForm.process_pattern.label }}</td></tr>
+                                                    <tr><td>{{ processForm.process_pattern }}</td></tr>
+                                                    <tr><td>{{ processForm.process_type.label }}</td></tr>
+                                                    <tr><td>{{ processForm.process_type }}</td></tr>
+                                                    <tr><td>{{ processForm.new_process_type_name.label }}</td></tr>
+                                                    <tr><td>{{ processForm.new_process_type_name }}</td></tr>
+                                                    <tr><td>{{ processForm.start_date.label }}</td></tr>
+                                                    <tr><td>{{ processForm.start_date }}</td></tr>
+                                                    <tr><td>{{ processForm.end_date.label }}</td>
+                                                    <tr><td>{{ processForm.end_date }}</td></tr></tr>
+                                                    <tr><td>{{ processForm.notes.label }}</td></tr>
+                                                    <tr><td>{{ processForm.notes }}</td></tr>
+                                                </table>
+                                            {% endwith %}
+                                            
+                                            <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>            
+                            </div>
+                          {% endif %}
+					    {% endif %}
+					
+                        <div class="row-fluid indent">
+                            <div class="span9">
+                                <div class="process" >{% include  "valueaccounting/_process_for_order.html" %}</div>
+                            </div>
+                            
+                            <div class="span3">
+                              {% if agent %}
+                              <a href="#processChangeForm{{ process.id }}" role="button" class="btn btn-primary btn-mini process-btn" data-toggle="modal">{% trans "Change process plan" %}</a>
+                                
+                                <div class="modal hide fade processForm" id="processChangeForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="process-change-label">{% trans "Change" %} {{ process.name }}</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="process-change-form validateMe" action="{% url change_process_plan process_id=process.id %}" method="POST" >
+                                            {% csrf_token %}
+                                            {{ process.plan_change_form }}
+                                            <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>  
+                                
+                                {% if item.is_workflow_order_item %}
+                                 {% if process.is_deletable %}
+                                  <form
+                                    id="deleteProcessForm{{ process.id }}" 
+                                    action="{% url delete_workflow_process order_item_id=item.id process_id=process.id %}" 
+                                    method="POST" >
+                                    {% csrf_token %}
+                                    <input type="hidden" id="next" name="next" value="{% url order_schedule order_id=order.id %}" />
+                                    <button class="btn btn-warning btn-mini" title="Delete this process" >Delete process</button>
+                                  </form>    
+                                {% endif %}
+                               {% endif %}
+                              {% endif %}
+                            </div>
+						 </div>
+
+					{% endfor %}
+					
+					{% if agent %}
+                        {% if item.is_workflow_order_item %}
+                            <div class="row-fluid indent">
+                                <div class="span12">
+                                    <a href="#addProcessForm{{ item.id }}" role="button" class="btn btn-info process-btn btn-mini" data-toggle="modal">
+                                    {% blocktrans %}Add a process here {% endblocktrans %}
+                                    </a>
+                                </div>
+                                
+                                <div class="modal hide fade processForm" id="addProcessForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="process-add-label">{% blocktrans %}Add process for {% endblocktrans %} {{ order }} </h3>
+                                    </div>
+                                    <div class="modal-body">
+                                    <form class="process-form validateMe" action="{% url create_process_for_streaming order_item_id=item.id %}" method="POST">
+                                            {% csrf_token %}
+
+                                            <table>
+                                                <tr><td>{{ item.add_process_form.name.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.name }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.context_agent.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.context_agent }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.process_pattern.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.process_pattern }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.process_type.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.process_type }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.new_process_type_name.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.new_process_type_name }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.start_date.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.start_date }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.end_date.label }}</td>
+                                                <tr><td>{{ item.add_process_form.end_date }}</td></tr></tr>
+                                                <tr><td>{{ item.add_process_form.notes.label }}</td></tr>
+                                                <tr><td>{{ item.add_process_form.notes }}</td></tr>
+                                            </table>
+                                            
+                                            <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <button class="btn btn-primary">{% trans "Save changes" %}</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>            
+                            </div>
+                        {% endif %}
+					{% endif %}
+                  {% endfor %}
+				</div>
+
+			</div>
+
+        </div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+<script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+{{ block.super }}
+
+<script type="text/javascript">
+
+$(document).ready(function(){
+    
+    //$('#demand').addClass('active');
+    
+    $( "#help" ).toggle( function(){
+        $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+        $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $( "#help" ).text("Show Help");
+    })
+      
+    //couldn't get this to work for project dropdown in change project for workflow order item
+    //$(".chzn-select").chosen();
+    //$(".chzn-select").trigger("liszt:updated");
+    
+    $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+
+    $('.validateMe').each( function(){
+        var form = $(this);
+        form.validate({
+            highlight: function(label) {
+                $(label).closest('.control-group').addClass('error');
+                }
+        });
+    });
+
+    jQuery.validator.setDefaults({ 
+        success: function(label) {
+            label
+            .text('').addClass('valid')
+            .closest('.control-group').addClass('success');
+        }
+    });
+    
+    jQuery.validator.addMethod("quantity",
+            function(value, element) {
+                var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
+                return this.optional(element) || isValidQuantity;
+            },
+            "Please enter a number less than 1000000 with no more than 2 decimal places"
+        );
+        
+
+   jQuery.validator.addMethod("require_from_group", function(value, element, options) {
+        var selector = options[1];
+        var validOrNot = $(selector, element.form).filter(function() {
+            return $(this).val();
+        }).length >= options[0];
+
+        if(!$(element).data('being_validated')) {
+            var fields = $(selector, element.form);
+            fields.data('being_validated', true);
+            fields.valid();
+            fields.data('being_validated', false);
+        }
+        return validOrNot;
+    }, jQuery.format("Please fill at least {0} of these fields."));     
+
+        
+    $.validator.addClassRules("quantity", { 
+            required: true, 
+            quantity: true,
+        });
+    
+    $.validator.addClassRules("date-entry", { required: true, date: true, });
+    $.validator.addClassRules("resourceType", { required: true});
+    $.validator.addClassRules("name", { required: true, });
+    
+    $.validator.addClassRules("process-type", {require_from_group: [1,".process-info"]});
+    $.validator.addClassRules("new-pt-name", {require_from_group: [1,".process-info"]});
+        
+
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head_title %}{% trans "Project-level Value Network" %}{% endblock %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block body_class %}projects{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+		<h1>{% trans "Project-level Value Network" %}
+{% comment %}
+			{% if resource_type.photo %}
+			    <img src="{% thumbnail resource_type.photo photo_size %}" />
+		    {% elif resource_type.photo_url %}
+        	    <img src="{{ resource_type.photo_url }}" width="128" height="96" />
+			{% endif %}
+{% endcomment %}
+		</h1>
+		<div>
+			<div style="float: left;">
+				<button id="redraw" onclick="redraw();">{% trans "redraw" %}</button> {% trans "or just drag stuff around..." %}
+			</div>
+			<div style="float: right;">
+				<span style="color:blue;">{% trans "Blue oval = Project" %}</span></br>
+				<span style="color:red;">{% trans "Red rectangle = Resource Type" %}</span>
+{% comment %}
+				</br>
+				<span style="color:green;">{% trans "Green rectangle = Agent" %}</span>
+{% endcomment %}
+			</div>
+			<div style="clear:both;"></div>
+		</div>
+
+		<div id="canvas" style="width:100%; height:600px;" ></div>
+
+	</div>
+
+
+	{% include "valueaccounting/_network_diagram.html" %}
+
+    </div>
+{% endblock %}
+{% block extra_body %}
+	{{ block.super }}
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+
+		$('#projects').addClass('active');
+
+	}); // end document.ready
+
+    </script>
+{% endblock %}

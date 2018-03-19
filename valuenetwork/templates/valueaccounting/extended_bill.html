@@ -1,0 +1,319 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head_title %}{% trans "Recipe for " %} {{ resource_type }}{% endblock %}
+
+{% block extra_head %}
+ <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<style>
+h4 {
+	margin-top: 1em; 
+	margin-bottom: 4px;
+}
+ 
+h4 a {
+	font-size: 1.4em;
+}
+
+ul {
+	list-style-type:none;
+	margin-left: 0;
+}
+
+.xb ul {
+	margin-top: .8em;
+}
+
+.xb li {
+	border: 1px solid gainsboro; 
+	padding: 1em;
+	font-weight: bold;
+}
+
+.xb-invisible ul {
+	margin-top: .1em;
+}
+
+.xb-invisible li {
+	border: 1px solid gainsboro; 
+	padding: .1em 1em .1em 1em;
+}
+
+.economic-resource-type {
+	background-color: lightyellow;
+}
+
+.feature {
+	background-color: lightyellow;
+}
+
+.process-type {
+	background-color: beige;
+}
+
+.option {
+    background-color: whitesmoke;
+}
+
+.economic-agent {
+    background-color: #EDDCCC;
+}
+
+.description {
+	font-style: italic;
+	font-weight: normal;
+}
+
+.facets {
+    margin-left: 1em;
+	font-weight: normal;
+}
+
+.ui-spinner {
+	display: inline;
+}
+
+.ui-spinner-input {
+	width: 16px;
+	font-size: 80%;
+}
+.subfilter {
+    font-size: 1.1em;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 8px;
+}
+.facet {
+    font-size: 1.1em;
+    font-weight: bold;   
+}
+.filter h3 {
+    margin-bottom: 5px;
+}
+
+
+</style>
+{% endblock %}
+
+{% block body_class %}recipe{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div class="row-fluid">
+		<div class="span9">
+			<legend>
+			    {% trans "Recipe for " %} {{ resource_type }}
+
+			    {% if user.is_authenticated %}
+			        <a href="{% url edit_extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >
+				        {% trans "Change Recipe" %}
+			        </a>
+		        {% endif %}
+		    </legend>
+
+		    <h4>
+                {% trans "Produces" %} {{ output_ctype.quantity }} {{ output_ctype.unit_of_quantity.abbrev }} {% trans "of" %}
+				{% if resource_type.url %}
+					<a href="{{ resource_type.url }}" target="blank">{{ resource_type }}</a>
+				{% else %}
+					{{ resource_type }}
+				{% endif %}
+				{% if resource_type.photo %}
+					<img src="{% thumbnail resource_type.photo big_photo_size %}" />
+				{% elif resource_type.photo_url %}
+	        	    <img src="{{ resource_type.photo_url }}" width="200" height="128" />
+				{% endif %}
+			</h4>
+
+            {% if resource_type.facet_list %}
+				<div class="facets" >{{ resource_type.facet_list }}</div>
+			{% endif %}
+			
+			{% if resource_type.description %}
+				<div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
+			{% endif %}
+
+			{% for node in nodes %}
+				{% if not node.open and not node.close %}
+					</li>
+				{% endif %}
+		
+				{% if node.open %}
+					{% if node.show %}
+						<ul class="xb" >
+					{% else %}
+						<ul class="xb-invisible">
+					{% endif %}
+				{% endif %}
+
+				{% if node.show %}
+					<li  class="xb  {{ node.xbill_class }}" >
+{% comment %}
+                    <p>Open: {{ node.open }} Close: {{ node.close }}</p>
+{% endcomment %}
+					{{ node.xbill_explanation }}: {{ node.xbill_label }}
+					{% if node.xbill_object.url %}
+						<a href="{{ node.xbill_object.url }}" target="blank">{{ node.xbill_object }}</a>
+					{% else %}
+						 {{ node.xbill_object }}
+					{% endif %}
+
+					{% if node.xbill_object.photo %}
+						<img src="{% thumbnail node.xbill_object.photo photo_size %}" />
+					{% elif node.xbill_object.photo_url %}
+		        	    <img src="{{ node.xbill_object.photo_url }}" width="128" height="96" />
+					{% endif %}
+
+					{% if node.xbill_object.facet_list %}
+						<div class="facets" >{{ node.xbill_object.facet_list }}</div>
+					{% endif %}
+
+					{% if node.node.description %}
+						<div class="description" >{{ node.node.description|urlize|linebreaks }}</div>
+					{% endif %}
+
+
+					{% if node.xbill_object.description %}
+						<div class="description" >{{ node.xbill_object.description|urlize|linebreaks }}</div>
+					{% endif %}
+
+					
+				{% else %}
+					<li  class="xb-invisible  {{ node.xbill_class }}" >
+				{% endif %}
+
+				{% for close in node.close %}
+					</li>
+					</ul>
+				{% endfor %}
+
+			{% endfor %}
+
+		</div>
+
+		<div class="span3 filter">
+			<h3 >{% trans "Filter Recipe Contents" %}</h3>
+			<form id="category-form" action="." method="POST">
+				{% csrf_token %}
+				<p>
+					<input id="spinner" name="depth" value="{{ depth }}" /> {% trans "Depth" %}
+				</p>
+				<p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All" %}</p>
+{% comment %}
+				<p><input type="checkbox" class="category" id="processes" name="processes" value="processes" /> {% trans "Process Types" %}</p>
+				<p><input type="checkbox" class="category" id="inputs" name="inputs" value="inputs" /> {% trans "Inputs" %}</p>
+				<p><input type="checkbox" class="category" id="features" name="features" value="features" /> {% trans "Features" %}</p>
+				<p class="subfilter">{% trans "Inputs" %}:</p>
+{% endcomment %}
+	            {% for facet in facets %}
+                    <p class="facet"> {{ facet.name }} </p>
+                    {% for val in facet.values.all %}
+	                    <p><input type="checkbox" class="category" id="{{ val }}" name="{{ val }}" value="{{ val }}" /> {{ val.value }}</p>
+	                {% endfor %}
+	            {% endfor %}
+				<input type='hidden' id='categories' name='categories' value='' />
+				<input type="submit" name="submit" class="btn btn-info" value="Filter" />
+			</form>
+		</div>
+	</div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+{% endblock %}
+{% block extra_body %}
+	{{ block.super }}
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+	
+        $('#inventory').addClass('active');
+
+	    $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+		var selectedCats = "{{ selected_vals }}";
+                $('#categories').prop('value', selectedCats);
+
+		$('.category').each(function()
+		{
+			var cat = $(this)[0];
+            if (selectedCats.indexOf(cat.name) > -1)
+			{
+				$(this).prop('checked', true);
+			}
+		});
+
+		$('.category').click(function() 
+		{
+			var checkedCats = [];
+			var checkedBox = $(this)[0];
+			var allBox = $('#all')[0];
+			if (checkedBox == allBox)
+			{
+				$('.category').each(function()
+				{
+		            $(this).prop('checked', false);
+				});
+				$('#all').prop('checked', true);
+				checkedCats.push('all');
+			}
+			else
+			{
+				$('#all').prop('checked', false);
+				$('.category').each(function()
+				{
+					var cat = $(this)[0];
+		            if (cat.checked)
+					{
+						checkedCats.push(cat.value);
+					}
+				});
+			}
+			$('#categories').prop('value', checkedCats);
+		});
+
+		var depth = {{ depth }};
+		var selected_depth = {{ selected_depth }};
+
+		$(function() {
+		    var spinner = $( "#spinner" ).spinner({ min: 1, max: depth, width: 3 });
+			spinner.spinner( "value", selected_depth );	 
+
+		    $( "#disable" ).click(function() {
+		        if ( spinner.spinner( "option", "disabled" ) ) {
+		            spinner.spinner( "enable" );
+		        } else {
+		            spinner.spinner( "disable" );
+		        }
+		    });
+		    $( "#destroy" ).click(function() {
+		        if ( spinner.data( "ui-spinner" ) ) {
+		            spinner.spinner( "destroy" );
+		        } else {
+		            spinner.spinner();
+		        }
+		    });
+		    $( "#getvalue" ).click(function() {
+		        alert( spinner.spinner( "value" ) );
+		    });
+		    $( "#setvalue" ).click(function() {
+		        spinner.spinner( "value", depth );
+		    });
+	 
+		    $( "button" ).button();
+		});
+
+
+	}); // end document.ready
+
+    </script>
+{% endblock %}

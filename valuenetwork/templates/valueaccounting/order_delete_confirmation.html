@@ -1,0 +1,66 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load url from future %}
+
+{% block head_title %}{% trans "Confirm deletion of " %}{{ order }}{% endblock %}
+
+{% block body_class %}projects{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+		<legend>
+            {% trans "Are you sure you want to delete " %}{{ order }}?</br>
+            {% trans "The following processes and commitments will be deleted and the events will be orphaned" %}:
+        </legend>
+
+			{% if order.order_type == "customer" %}
+		        <h3 style="margin-top: 1em;" >{% trans "Order Items" %}:</h3>
+				<ul>
+				    {% for item in order.producing_commitments %}
+						<li>{{ item.quantity }} {{ item.unit_of_quantity }} {{ item.resource_type }} {{ item.feature_label }}</li>
+                    {% empty %}
+                        None
+					{% endfor %}
+				</ul>
+			{% endif %}	
+
+
+            <div class="row-fluid">
+                <div class="span12">
+                    
+                    {% for item in sked %}
+                        <p style="margin-left:{{ item.depth }}em" >
+                            <b>{{ item.class_label }}:</b> {{ item }} 
+                            {% if item.fulfilling_events %}
+                                <ul>
+                                {% for event in item.fulfilling_events %}
+                                    <li>
+                                        <b>{{ event.class_label }}:</b> {{ event }}
+                                    </li>
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div>
+                <form style="display: inline;" action="{% url 'delete_order' order_id=order.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" value="{% trans 'Delete' %}" class="btn btn-warning" />
+                    <input type="hidden" id="next" name="next" value="{{ next }}" />
+                </form>
+
+                <form style="display: inline;" action="{% url next %}" method="GET">
+                    <input type="submit" value="{% trans 'Cancel' %}" class="btn btn-info" />
+                </form>
+
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

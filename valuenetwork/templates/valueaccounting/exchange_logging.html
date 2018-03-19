@@ -1,0 +1,1272 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Exchange" %}: {{ exchange }}{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+.event {
+    margin-left: 2em; 
+    margin-bottom: 4px;
+}
+.btn {
+    margin-left: 10px;
+}
+h3, h4 {
+    color: firebrick;
+    margin-bottom: 4px;
+}
+.modal {
+    width: 600px;
+}
+.subsection-label {
+    font-weight: bold;
+}
+.detail-line {
+    margin: 0 0 0 2em;
+}
+li {
+    list-style-type: none;
+}
+.log-section {
+    border: solid 1px gainsboro;
+    background-color: beige; 
+    padding: 4px;
+    margin-bottom: 7px;   
+}
+.event-label {
+    color: green;
+    font-weight: bold;
+    font-style: normal;
+}
+.hdg {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #7D1818;
+}
+.onhand, .indent {
+    margin-left: 3em;
+}
+.unplanned {
+    color: 	#7D1818;
+}
+#id_notes, #id_url {
+    width: 32em;
+}
+.notes {
+    margin-left: 3em;
+    padding-right: 2em;
+    font-style: italic;
+}
+.total {
+    float: right;
+    color: green;
+    font-size: 10pt;
+    margin-bottom: 0;
+    margin-top: 2px;
+}
+.info {
+    float: right;
+    margin-left: 5px;
+}
+.btn-mini {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+.item-description {
+    height: 40px;
+    width: 480px;
+}
+.totals {
+    border: solid 2px firebrick;
+    background-color: oldlace;
+    margin-bottom: 12px;
+    padding-left: 1em;
+}
+.total-top {
+    font-weight: bold;
+    padding-right: 2em;
+}
+.bold {
+    font-weight: bold;
+}
+.commitment {
+    margin-left: 1em;
+}
+.trt {
+    border: solid 1px gainsboro;
+    background-color: lightyellow; 
+    padding: 4px;
+    margin-bottom: 7px;   
+}
+.trtheading {
+    color: #7D1818;
+    font-style: italic;
+    font-size: 1.2em;
+}
+.ce {
+    margin-left: 2em;
+}
+.modal-hdg {
+    font-weight: bold;
+    color: green;
+    font-size: 1.1em;
+}
+
+</style>
+
+{% endblock %}
+
+{% block body_class %}exchange{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+	<legend>
+        {% if exchange %}
+            {{ exchange }}
+        {% else %}
+            New {{ exchange_type.name }}
+        {% endif %}
+        {% if exchange.order %}
+            <form 
+                style="display: inline;" 
+                id="order" 
+                action="{% url order_schedule order_id=exchange.order.id %}" 
+                method="GET" >
+                <button style="display: inline;"  class="btn btn-info" title="Order for this sale" >Go to Order</button>
+            </form>
+        {% endif %}
+	</legend>
+
+	<div class="row-fluid">
+	
+        <div class="span5">
+            <div class="totals">
+                <span class="total-top">{% trans "Total transfer value" %}: {{ total_t }} </span> 
+                <span class="total-top">{% trans "Total reciprocal transfer value" %}: {{ total_rect }} </span> 
+            </div>
+            <form class="validateMe" id="exchangeForm" method="POST" action="">
+                {% csrf_token %}
+                {{ exchange_form|as_bootstrap }}
+                {% if agent %}
+                <div class="form-actions">
+                    <input type="submit" name="save" value="{% trans 'Save changes' %}" class="btn btn-primary" /> 
+                </div>
+                {% endif %}
+            </form>
+               
+        </div>
+        
+        <div class="span7">
+            <div class="trt">
+                <h3 class="trtheading">Transfers
+                <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left" 
+                    data-content="Log the planned and actual transfers for this exchange.  The types of transfers are determined by the type of exchange,
+                    as defined by your network.">
+                    <img src="{% static 'img/information-icon.png' %}" /></a>
+                </span></h3>
+                {% for slot in slots %}
+                    {% if not slot.is_reciprocal %}
+                        <div class="log-section">
+                            <h3>
+                                {{ slot.name }}
+                                {% if agent and exchange %}
+                                    <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
+                                        {% trans "New Commitment" %}
+                                    </a>
+                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
+                                        {% trans "New Transfer" %}
+                                    </a>
+                                {% endif %}
+                                <span class="total">Total: {{ slot.total }}</span>
+                            </h3>
+                            {% if agent and exchange %}
+                                <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="xfer{{ slot.id }}">{% trans "Log a New " %}{{ slot.name }}</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="validateMe" id="xferForm{{ slot.id }}" enctype="multipart/form-data" action="{% url add_transfer exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
+                                            {% csrf_token %}
+                                            {% with slot.add_xfer_form as ax_form %}
+                                            Event date:<br />{{ ax_form.event_date }}<br />
+                                            {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ax_form.from_agent }}<br />{% endif %}
+                                            {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
+                                            Quantity transferred:<br />{{ ax_form.quantity }}<br />
+                                            Resource type transferred:<br />{{ ax_form.resource_type }}<br />
+                                            {% if not slot.can_create_resource %}
+                                                {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                    Account from (if virtual account)<br />{{ ax_form.from_resource }}<br />
+                                                    Account to (if virtual account)<br />{{ ax_form.resource }}<br />
+                                                {% else %}
+                                                    Resource transferred (no entry if not inventoried)<br />{{ ax_form.resource }}<br />
+                                                {% endif %}
+                                            {% else %}
+                                                Resource transferred from (no entry if not inventoried)<br />{{ ax_form.from_resource }}<br />
+                                            {% endif %}
+                                            Description:<br />{{ ax_form.description }}<br />
+                                            {% if not slot.is_currency %}
+                                                Value (total, not per unit):<br />{{ ax_form.value }}<br />
+                                                Unit of value:<br />{{ ax_form.unit_of_value }}<br />
+                                            {% endif %}
+                                            {% if slot.is_contribution %}Can be a rewarded in a value equation:<br />{{ ax_form.is_contribution }}<br />{% endif %}
+                                            {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ax_form.is_to_distribute }}<br />{% endif %}
+                                            {% if slot.is_currency %}Event reference:<br />{{ ax_form.event_reference }}<br />{% endif %}
+                                            {% if slot.can_create_resource %}
+                                                <br />
+                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                Add to an existing resource:<br />{{ ax_form.resource }}<br />
+                                                <br /><b>OR create a new resource:</b><br />
+                                                Identifier: (for example, lot number or serial number)<br />{{ ax_form.identifier }}<br />
+                                                URL:<br />{{ ax_form.url }}<br />
+                                                Photo URL:<br />{{ ax_form.photo_url }}<br />
+                                                Current Resource Location:<br />{{ ax_form.current_location }}<br />
+                                                Resource Notes:<br />{{ ax_form.notes }}<br />
+                                                Resource Access Rules:<br />{{ ax_form.access_rules }}<br />
+                                                {{ slot.create_role_formset.management_form }}
+                                                <table>
+                                                    <tr>
+                                                        <td>Resource access role</td>
+                                                        <td>Assignment</td>
+                                                        <td>Is contact &nbsp;</td>
+                                                    </tr>
+                                                    {% for form in slot.create_role_formset %}
+                                                        {{ form.id }}  
+                                                        <tr class="role-row">
+                                                            <td class="td-role">{{ form.role }}</td>
+                                                            <td class="td-agent">{{ form.agent }}</td>
+                                                            <td class="text-center">{{ form.is_contact }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </table>
+                                            {% endif %}
+                                            {% endwith %}
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="modal hide fade" id="addCommitModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="commit">{% trans "Log a New Commitment" %}</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url add_transfer_commitment exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
+                                            {% csrf_token %}
+                                            {% with slot.add_commit_form as ac_form %}
+                                            Commitment date:<br />{{ ac_form.commitment_date }}<br />
+                                            Due date:<br />{{ ac_form.due_date }}<br />
+                                            {% if not slot.give_agent_is_context %}Transfer from:<br />{{ ac_form.from_agent }}<br />{% endif %}
+                                            {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ ac_form.to_agent }}<br />{% endif %}
+                                            Quantity:<br />{{ ac_form.quantity }}<br />
+                                            Resource type:<br />{{ ac_form.resource_type }}<br />
+                                            Description:<br />{{ ac_form.description }}<br />
+                                            {% if not slot.is_currency %}
+                                                Value (total, not per unit):<br />{{ ac_form.value }}<br />
+                                                Unit of value:<br />{{ ac_form.unit_of_value }}<br />
+                                            {% endif %}
+                                            {% endwith %}
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% for xfer in slot.xfers %}
+                                <div class="event">
+                                    {% if xfer.commitments.all %}
+                                        <span class="event-label">{% trans "Commitment" %}: </span>
+                                        {{ xfer.commit_text }}
+                                        {% if logger  %}
+                                            <a href="#cmitModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                                <i class="icon-edit"></i>
+                                            </a>
+                                            <div class="modal hide fade" id="cmitModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="cmit-label" aria-hidden="true">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="cmit-label">{% trans "Change Transfer Commitment" %}</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_commitments transfer_id=xfer.id %}" method="POST" >
+                                                        {% csrf_token %}
+                                                        {% with xfer.change_commitments_form as cc_form %}
+                                                        Commitment date:<br />{{ cc_form.commitment_date }}<br />
+                                                        Due date:<br />{{ cc_form.due_date }}<br />
+                                                        {% if not slot.give_agent_is_context %}Transfer from:<br />{{ cc_form.from_agent }}<br />{% endif %}
+                                                        {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ cc_form.to_agent }}<br />{% endif %}
+                                                        Quantity:<br />{{ cc_form.quantity }}<br />
+                                                        Resource type:<br />{{ cc_form.resource_type }}<br />
+                                                        Description:<br />{{ cc_form.description }}<br />
+                                                        {% if not slot.is_currency %}
+                                                            Value (total, not per unit):<br />{{ cc_form.value }}<br />
+                                                            Unit of value:<br />{{ cc_form.unit_of_value }}<br />
+                                                        {% endif %}
+                                                        {% endwith %}
+                                                        <div class="modal-footer">
+                                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                            <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            {% if not xfer.events.all %}
+                                                <form
+                                                    style="display: inline;" 
+                                                    class="delete-form" 
+                                                    id="deleteForm{{ xfer.id }}" 
+                                                    action="{% url delete_transfer_commitments transfer_id=xfer.id %}" 
+                                                    method="POST" >
+                                                    {% csrf_token %}
+                                                    <input type="hidden" id="next" name="next" value="exchange" />
+                                                    <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
+                                                </form>
+                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" alt="Record transfer based on commitment">Transfer This</a>
+                                                <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                        <h3 id="xfer-label">{% trans "Make Transfer from Commitment" %}</h3>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form class="validateMe" enctype="multipart/form-data" action="{% url transfer_from_commitment transfer_id=xfer.id %}" method="POST" >
+                                                            {% csrf_token %}
+                                                            {% with xfer.commit_transfer_form as ct_form %}
+                                                            Event date:<br />{{ ct_form.event_date }}<br />
+                                                            {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
+                                                            {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}
+                                                            Quantity transferred:<br />{{ ct_form.quantity }}<br />
+                                                            Resource type transferred:<br />{{ ct_form.resource_type }}<br />
+                                                            {% if not slot.can_create_resource %}
+                                                                {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                                    Account from (if virtual account)<br />{{ ct_form.from_resource }}<br />
+                                                                    Account to (if virtual account)<br />{{ ct_form.resource }}<br />
+                                                                {% else %}
+                                                                    Resource transferred (no entry if not inventoried)<br />{{ ct_form.resource }}<br />
+                                                                {% endif %}
+                                                            {% endif %}
+                                                            Description:<br />{{ ct_form.description }}<br />
+                                                            {% if not slot.is_currency %}
+                                                                Value (total, not per unit):<br />{{ ct_form.value }}<br />
+                                                                Unit of value:<br />{{ ct_form.unit_of_value }}<br />
+                                                            {% endif %}
+                                                            {% if slot.is_contribution %}Can be a rewarded in a value equation:<br />{{ ct_form.is_contribution }}<br />{% endif %}
+                                                            {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ct_form.is_to_distribute }}<br />{% endif %}
+                                                            {% if slot.is_currency %}Event reference:<br />{{ ct_form.event_reference }}<br />{% endif %}
+                                                            {% if slot.can_create_resource %}
+                                                                <br />
+                                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                                Add to an existing resource:<br />{{ ct_form.resource }}<br />
+                                                                <br /><b>OR create a new resource:</b><br />
+                                                                Identifier: (for example, lot number or serial number)<br />{{ ct_form.identifier }}<br />
+                                                                URL:<br />{{ ct_form.url }}<br />
+                                                                Photo URL:<br />{{ ct_form.photo_url }}<br />
+                                                                Current Resource Location:<br />{{ ct_form.current_location }}<br />
+                                                                Resource Notes:<br />{{ ct_form.notes }}<br />
+                                                                Resource Access Rules:<br />{{ ct_form.access_rules }}<br />
+                                                                {{ xfer.create_role_formset.management_form }}
+                                                                Resource access roles<br />
+                                                                {% for form in xfer.create_role_formset %}
+                                                                    <tr>
+                                                                        <td>{{ form.role }}</td>
+                                                                        <td>{{ form.agent }}</td>
+                                                                        <td>{{ form.is_contact }} Is contact</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% endwith %}
+                                                            <div class="modal-footer">
+                                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                                <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>              
+                                            {% endif %}                            
+                                        {% endif %}
+                                        {% if xfer.commit_description %}
+                                            <div class="notes"> {{ xfer.commit_description|urlize|linebreaks }} </div>
+                                        {% endif %}
+                                        {% if xfer.events.all %}
+                                            <div class="ce">>&nbsp;<span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.commit_event_text }}
+                                                {% if logger  %}
+                                                    <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                                        <i class="icon-edit"></i>
+                                                    </a>
+                            
+                                                    <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                            <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_events transfer_id=xfer.id %}" method="POST" >
+                                                                {% csrf_token %}
+                                                                {% with xfer.change_events_form as ce_form %}
+                                                                Event date:<br />{{ ce_form.event_date }}<br />
+                                                                {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ce_form.from_agent }}<br />{% endif %}
+                                                                {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ce_form.to_agent }}<br />{% endif %}
+                                                                Quantity transferred:<br />{{ ce_form.quantity }}<br />
+                                                                Resource type transferred:<br />{{ ce_form.resource_type }}<br />
+                                                                {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                                    Account from (if virtual account)<br />{{ ce_form.from_resource }}<br />
+                                                                    Account to (if virtual account)<br />{{ ce_form.resource }}<br />
+                                                                {% else %}
+                                                                    Resource transferred (only if inventoried):<br />{{ ce_form.resource }}<br />Description:<br />{{ ce_form.description }}<br />
+                                                                {% endif %}
+                                                                {% if not slot.is_currency %}
+                                                                    Value (total, not per unit):<br />{{ ce_form.value }}<br />
+                                                                    Unit of value:<br />{{ ce_form.unit_of_value }}<br />
+                                                                {% endif %}
+                                                                {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ ce_form.is_contribution }}<br />{% endif %}
+                                                                {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ce_form.is_to_distribute }}<br />{% endif %}
+                                                                {% if slot.is_currency %}Event reference:<br />{{ ce_form.event_reference }}<br />{% endif %}                                                               
+                                                                {% endwith %}
+                                                                <div class="modal-footer">
+                                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                                    <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <form
+                                                        style="display: inline;" 
+                                                        class="delete-form" 
+                                                        id="deleteForm{{ event.id }}" 
+                                                        action="{% url delete_transfer_events transfer_id=xfer.id %}" 
+                                                        method="POST" >
+                                                        {% csrf_token %}
+                                                        <input type="hidden" id="next" name="next" value="exchange" />
+                                                        <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if event.description %}
+                                                    <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.event_text }}
+                                        {% if logger  %}
+                                            <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                                <i class="icon-edit"></i>
+                                            </a>
+                                            <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_events transfer_id=xfer.id %}" method="POST" >
+                                                        {% csrf_token %}
+                                                        {% with xfer.change_events_form as cev_form %}
+                                                        Event date:<br />{{ cev_form.event_date }}<br />
+                                                        {% if not slot.give_agent_is_context %}Transferred from:<br />{{ cev_form.from_agent }}<br />{% endif %}
+                                                        {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ cev_form.to_agent }}<br />{% endif %}
+                                                        Quantity transferred:<br />{{ cev_form.quantity }}<br />
+                                                        Resource type transferred:<br />{{ cev_form.resource_type }}<br />
+                                                        {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                            Account from (if virtual account)<br />{{ cev_form.from_resource }}<br />
+                                                            Account to (if virtual account)<br />{{ cev_form.resource }}<br />
+                                                        {% else %}
+                                                            Resource transferred (only if inventoried):<br />{{ cev_form.resource }}<br />
+                                                        {% endif %}
+                                                        Description:<br />{{ cev_form.description }}<br />
+                                                        {% if not slot.is_currency %}
+                                                            Value (total, not per unit):<br />{{ cev_form.value }}<br />
+                                                            Unit of value:<br />{{ cev_form.unit_of_value }}<br />
+                                                        {% endif %}
+                                                        {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ cev_form.is_contribution }}<br />{% endif %}
+                                                        {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ cev_form.is_to_distribute }}<br />{% endif %}
+                                                        {% if slot.is_currency %}Event reference:<br />{{ cev_form.event_reference }}<br />{% endif %} 
+                                                        {% endwith %}
+                                                        <div class="modal-footer">
+                                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                            <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <form
+                                                style="display: inline;" 
+                                                class="delete-form" 
+                                                id="deleteForm{{ xfer.id }}" 
+                                                action="{% url delete_transfer_events transfer_id=xfer.id %}" 
+                                                method="POST" >
+                                                {% csrf_token %}
+                                                <input type="hidden" id="next" name="next" value="exchange" />
+                                                <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
+                                            </form>
+                                        {% endif %}
+                                        {% if xfer.description %}
+                                            <div class="notes"> {{ xfer.description|urlize|linebreaks }} </div>
+                                        {% endif %}
+                                        {% if xfer.events.all %}
+                                            {% with xfer.events.all|first as event %}
+                                                {% if event.description %}
+                                                    <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="trt">    
+                <h3 CLASS="trtheading">Reciprocal Transfers
+                <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left" 
+                    data-content="Log the planned and actual reciprocal transfers for this exchange.  The types of reciprocal transfers are determined by the type of exchange,
+                    as defined by your network.  They are in return for the primary transfers above.">
+                    <img src="{% static 'img/information-icon.png' %}" /></a>
+                </span></h3>
+                {% for slot in slots %}
+                    {% if slot.is_reciprocal %}
+                        <div class="log-section">
+                            <h3>
+                                {{ slot.name }}
+                                {% if agent and exchange %}
+                                    <a href="#addCommitModal{{ slot.id }}" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Log a new commitment or plan for a transfer" >
+                                        {% trans "New Commitment" %}
+                                    </a>
+                                    <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
+                                        {% trans "New Transfer" %}
+                                    </a>
+                                {% endif %}
+                                <span class="total">Total: {{ slot.total }}</span>
+                            </h3>
+                            {% if agent and exchange %}
+                                <div class="modal hide fade" id="addTransferModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer{{ slot.id }}" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="xfer{{ slot.id }}">{% trans "Log a New " %}{{ slot.name }}</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="validateMe" id="xferForm{{ slot.id }}" enctype="multipart/form-data" action="{% url add_transfer exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
+                                            {% csrf_token %}
+                                            {% with slot.add_xfer_form as ax_form %}
+                                            Event date:<br />{{ ax_form.event_date }}<br />
+                                            {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ax_form.from_agent }}<br />{% endif %}
+                                            {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ax_form.to_agent }}<br />{% endif %}
+                                            Quantity transferred:<br />{{ ax_form.quantity }}<br />
+                                            Resource type transferred:<br />{{ ax_form.resource_type }}<br />
+                                            {% if not slot.can_create_resource %}
+                                                {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                    Account from (if virtual account)<br />{{ ax_form.from_resource }}<br />
+                                                    Account to (if virtual account)<br />{{ ax_form.resource }}<br />
+                                                {% else %}
+                                                    Resource transferred from (no entry if not inventoried)<br />{{ ax_form.from_resource }}<br />
+                                                {% endif %}
+                                            {% endif %}
+                                            Description:<br />{{ ax_form.description }}<br />
+                                            {% if not slot.is_currency %}
+                                                Value (total, not per unit):<br />{{ ax_form.value }}<br />
+                                                Unit of value:<br />{{ ax_form.unit_of_value }}<br />
+                                            {% endif %}
+                                            {% if slot.is_contribution %}Can be a rewarded in a value equation:<br />{{ ax_form.is_contribution }}<br />{% endif %}
+                                            {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ax_form.is_to_distribute }}<br />{% endif %}
+                                            {% if slot.is_currency %}Event reference:<br />{{ ax_form.event_reference }}<br />{% endif %}
+                                            {% if slot.can_create_resource %}
+                                                <br />
+                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                Add to an existing resource:<br />{{ ax_form.resource }}<br />
+                                                <br /><b>OR create a new resource:</b><br />
+                                                Identifier: (for example, lot number or serial number)<br />{{ ax_form.identifier }}<br />
+                                                URL:<br />{{ ax_form.url }}<br />
+                                                Photo URL:<br />{{ ax_form.photo_url }}<br />
+                                                Current Resource Location:<br />{{ ax_form.current_location }}<br />
+                                                Resource Notes:<br />{{ ax_form.notes }}<br />
+                                                Resource Access Rules:<br />{{ ax_form.access_rules }}<br />
+                                                {{ slot.create_role_formset.management_form }}
+                                                <table>
+                                                    <tr>
+                                                        <td>Resource access role</td>
+                                                        <td>Assignment</td>
+                                                        <td>Is contact &nbsp;</td>
+                                                    </tr>
+                                                    {% for form in slot.create_role_formset %}
+                                                        {{ form.id }}  
+                                                        <tr class="role-row">
+                                                            <td class="td-role">{{ form.role }}</td>
+                                                            <td class="td-agent">{{ form.agent }}</td>
+                                                            <td class="text-center">{{ form.is_contact }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </table>
+                                            {% endif %}
+                                            {% endwith %}
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="modal hide fade" id="addCommitModal{{ slot.id }}" tabindex="-1" role="dialog" aria-labelledby="commit" aria-hidden="true">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                        <h3 id="commit">{% trans "Log a New Commitment" %}</h3>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url add_transfer_commitment exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
+                                            {% csrf_token %}
+                                            {% with slot.add_commit_form as ac_form %}
+                                            Commitment date:<br />{{ ac_form.commitment_date }}<br />
+                                            Due date:<br />{{ ac_form.due_date }}<br />
+                                            {% if not slot.give_agent_is_context %}Transfer from:<br />{{ ac_form.from_agent }}<br />{% endif %}
+                                            {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ ac_form.to_agent }}<br />{% endif %}
+                                            Quantity:<br />{{ ac_form.quantity }}<br />
+                                            Resource type:<br />{{ ac_form.resource_type }}<br />
+                                            Description:<br />{{ ac_form.description }}<br />
+                                            {% if not slot.is_currency %}
+                                                Value (total, not per unit):<br />{{ ac_form.value }}<br />
+                                                Unit of value:<br />{{ ac_form.unit_of_value }}<br />
+                                            {% endif %}
+                                            {% endwith %}
+                                            <div class="modal-footer">
+                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            {% for xfer in slot.xfers %}
+                                <div class="event">
+                                    {% if xfer.commitments.all %}
+                                        <span class="event-label">{% trans "Commitment" %}: </span>
+                                        {{ xfer.commit_text }}
+                                        {% if logger  %}
+                                            <a href="#cmitModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                                <i class="icon-edit"></i>
+                                            </a>
+                                            <div class="modal hide fade" id="cmitModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="cmit-label" aria-hidden="true">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="cmit-label">{% trans "Change Transfer Commitment" %}</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_commitments transfer_id=xfer.id %}" method="POST" >
+                                                        {% csrf_token %}
+                                                        {% with xfer.change_commitments_form as cc_form %}
+                                                        Commitment date:<br />{{ cc_form.commitment_date }}<br />
+                                                        Due date:<br />{{ cc_form.due_date }}<br />
+                                                        {% if not slot.give_agent_is_context %}Transfer from:<br />{{ cc_form.from_agent }}<br />{% endif %}
+                                                        {% if not slot.receive_agent_is_context %}Transfer to:<br />{{ cc_form.to_agent }}<br />{% endif %}
+                                                        Quantity:<br />{{ cc_form.quantity }}<br />
+                                                        Resource type:<br />{{ cc_form.resource_type }}<br />
+                                                        Description:<br />{{ cc_form.description }}<br />
+                                                        {% if not slot.is_currency %}
+                                                            Value (total, not per unit):<br />{{ cc_form.value }}<br />
+                                                            Unit of value:<br />{{ cc_form.unit_of_value }}<br />
+                                                        {% endif %}
+                                                        {% endwith %}
+                                                        <div class="modal-footer">
+                                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                            <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            {% if not xfer.events.all %}
+                                                <form
+                                                    style="display: inline;" 
+                                                    class="delete-form" 
+                                                    id="deleteForm{{ xfer.id }}" 
+                                                    action="{% url delete_transfer_commitments transfer_id=xfer.id %}" 
+                                                    method="POST" >
+                                                    {% csrf_token %}
+                                                    <input type="hidden" id="next" name="next" value="exchange" />
+                                                    <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
+                                                </form>
+                                                <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" alt="Record transfer based on commitment">Transfer This</a>
+                                                <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                    <div class="modal-header">
+                                                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                        <h3 id="xfer-label">{% trans "Make Transfer from Commitment" %}</h3>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form class="validateMe" enctype="multipart/form-data" action="{% url transfer_from_commitment transfer_id=xfer.id %}" method="POST" >
+                                                            {% csrf_token %}
+                                                            {% with xfer.commit_transfer_form as ct_form %}
+                                                            Event date:<br />{{ ct_form.event_date }}<br />
+                                                            {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ct_form.from_agent }}<br />{% endif %}
+                                                            {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ct_form.to_agent }}<br />{% endif %}
+                                                            Quantity transferred:<br />{{ ct_form.quantity }}<br />
+                                                            Resource type transferred:<br />{{ ct_form.resource_type }}<br />
+                                                            {% if not slot.can_create_resource %}
+                                                                {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                                    Account from (if virtual account)<br />{{ ct_form.from_resource }}<br />
+                                                                    Account to (if virtual account)<br />{{ ct_form.resource }}<br />
+                                                                {% else %}
+                                                                    Resource transferred (no entry if not inventoried)<br />{{ ct_form.resource }}<br />
+                                                                {% endif %}
+                                                            {% endif %}
+                                                            Description:<br />{{ ct_form.description }}<br />
+                                                            {% if not slot.is_currency %}
+                                                                Value (total, not per unit):<br />{{ ct_form.value }}<br />
+                                                                Unit of value:<br />{{ ct_form.unit_of_value }}<br />
+                                                            {% endif %}
+                                                            {% if slot.is_contribution %}Can be a rewarded in a value equation:<br />{{ ct_form.is_contribution }}<br />{% endif %}
+                                                            {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ct_form.is_to_distribute }}<br />{% endif %}
+                                                            {% if slot.is_currency %}Event reference:<br />{{ ct_form.event_reference }}<br />{% endif %}
+                                                            {% if slot.can_create_resource %}
+                                                                <br />
+                                                                <span class="modal-hdg">Incoming resource:</span><br>
+                                                                Add to an existing resource:<br />{{ ct_form.resource }}<br />
+                                                                <br /><b>OR create a new resource:</b><br />
+                                                                Identifier: (for example, lot number or serial number)<br />{{ ct_form.identifier }}<br />
+                                                                URL:<br />{{ ct_form.url }}<br />
+                                                                Photo URL:<br />{{ ct_form.photo_url }}<br />
+                                                                Current Resource Location:<br />{{ ct_form.current_location }}<br />
+                                                                Resource Notes:<br />{{ ct_form.notes }}<br />
+                                                                Resource Access Rules:<br />{{ ct_form.access_rules }}<br />
+                                                                {{ xfer.create_role_formset.management_form }}
+                                                                Resource access roles<br />
+                                                                {% for form in xfer.create_role_formset %}
+                                                                    <tr>
+                                                                        <td>{{ form.role }}</td>
+                                                                        <td>{{ form.agent }}</td>
+                                                                        <td>{{ form.is_contact }} Is contact</td>
+                                                                    </tr>
+                                                                {% endfor %}
+                                                            {% endif %}
+                                                            {% endwith %}
+                                                            <div class="modal-footer">
+                                                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                                <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>              
+                                            {% endif %}                            
+                                        {% endif %}
+                                        {% if xfer.events.all %}
+                                            <div class="ce">>&nbsp;<span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.commit_event_text }}
+                                                {% if logger  %}
+                                                    <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                                        <i class="icon-edit"></i>
+                                                    </a>
+                            
+                                                    <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                            <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_events transfer_id=xfer.id %}" method="POST" >
+                                                                {% csrf_token %}
+                                                                {% with xfer.change_events_form as ce_form %}
+                                                                Event date:<br />{{ ce_form.event_date }}<br />
+                                                                {% if not slot.give_agent_is_context %}Transferred from:<br />{{ ce_form.from_agent }}<br />{% endif %}
+                                                                {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ ce_form.to_agent }}<br />{% endif %}
+                                                                Quantity transferred:<br />{{ ce_form.quantity }}<br />
+                                                                Resource type transferred:<br />{{ ce_form.resource_type }}<br />
+                                                                {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                                    Account from (if virtual account)<br />{{ ce_form.from_resource }}<br />
+                                                                    Account to (if virtual account)<br />{{ ce_form.resource }}<br />
+                                                                {% else %}
+                                                                    Resource transferred (only if inventoried):<br />{{ ce_form.resource }}<br />
+                                                                {% endif %}
+                                                                Description:<br />{{ ce_form.description }}<br />
+                                                                {% if not slot.is_currency %}
+                                                                    Value (total, not per unit):<br />{{ ce_form.value }}<br />
+                                                                    Unit of value:<br />{{ ce_form.unit_of_value }}<br />
+                                                                {% endif %}
+                                                                {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ ce_form.is_contribution }}<br />{% endif %}
+                                                                {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ ce_form.is_to_distribute }}<br />{% endif %}
+                                                                {% if slot.is_currency %}Event reference:<br />{{ ce_form.event_reference }}<br />{% endif %}                                                               
+                                                                {% endwith %}
+                                                                <div class="modal-footer">
+                                                                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                                    <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                    <form
+                                                        style="display: inline;" 
+                                                        class="delete-form" 
+                                                        id="deleteForm{{ event.id }}" 
+                                                        action="{% url delete_transfer_events transfer_id=xfer.id %}" 
+                                                        method="POST" >
+                                                        {% csrf_token %}
+                                                        <input type="hidden" id="next" name="next" value="exchange" />
+                                                        <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
+                                                    </form>
+                                                {% endif %}
+                                                {% if event.description %}
+                                                    <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="event-label">{% trans "Transfer" %}: </span>{{ xfer.event_text }}
+                                        {% if logger  %}
+                                            <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                                <i class="icon-edit"></i>
+                                            </a>
+                                            <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                                    <h3 id="xfer-label">{% trans "Change Transfer" %}</h3>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_events transfer_id=xfer.id %}" method="POST" >
+                                                        {% csrf_token %}
+                                                        {% with xfer.change_events_form as cev_form %}
+                                                        Event date:<br />{{ cev_form.event_date }}<br />
+                                                        {% if not slot.give_agent_is_context %}Transferred from:<br />{{ cev_form.from_agent }}<br />{% endif %}
+                                                        {% if not slot.receive_agent_is_context %}Transferred to:<br />{{ cev_form.to_agent }}<br />{% endif %}
+                                                        Quantity transferred:<br />{{ cev_form.quantity }}<br />
+                                                        Resource type transferred:<br />{{ cev_form.resource_type }}<br />
+                                                        {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
+                                                            Account from (if virtual account)<br />{{ cev_form.from_resource }}<br />
+                                                            Account to (if virtual account)<br />{{ cev_form.resource }}<br />
+                                                        {% else %}
+                                                            Resource transferred (only if inventoried):<br />{{ cev_form.resource }}<br />Description:<br />{{ xfer.change_events_form.description }}<br />
+                                                        {% endif %}
+                                                        {% if not slot.is_currency %}
+                                                            Value (total, not per unit):<br />{{ cev_form.value }}<br />
+                                                            Unit of value:<br />{{ cev_form.unit_of_value }}<br />
+                                                        {% endif %}
+                                                        {% if slot.is_contribution %}Can be rewarded in a value equation:<br />{{ cev_form.is_contribution }}<br />{% endif %}
+                                                        {% if slot.is_to_distribute %}Can be distributed in a value equation:<br />{{ cev_form.is_to_distribute }}<br />{% endif %}
+                                                        {% if slot.is_currency %}Event reference:<br />{{ cev_form.event_reference }}<br />{% endif %} 
+                                                        {% endwith %}
+                                                        <div class="modal-footer">
+                                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                                            <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <form
+                                                style="display: inline;" 
+                                                class="delete-form" 
+                                                id="deleteForm{{ xfer.id }}" 
+                                                action="{% url delete_transfer_events transfer_id=xfer.id %}" 
+                                                method="POST" >
+                                                {% csrf_token %}
+                                                <input type="hidden" id="next" name="next" value="exchange" />
+                                                <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete transfer" >X</button>
+                                            </form>
+                                        {% endif %}
+                                        {% if xfer.description %}
+                                            <div class="notes"> {{ xfer.description|urlize|linebreaks }} </div>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                            
+                        </div> 
+                    {% endif %}
+
+                {% endfor %}        
+            </div>   
+        
+            <div class="log-section">
+                <h3 style="margin-bottom: 4px;" >
+                    {% trans "Work" %}  
+                    {% if logger and exchange %}
+                        <a href="#addWorkModal" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Add work done for this exchange.">
+                            {% trans "Log a work event" %}
+                        </a>
+                    {% endif %}
+                    <span class="info"> <a href="#" id="work-info" data-toggle="popover" data-trigger='hover' title="Work Events" 
+                        data-content="Enter the time you spent on this exchange. This might be preparing paperwork, 
+                        communicating, traveling, even logging the exchange." data-placement="left">
+                        <img src="{% static 'img/information-icon.png' %}" /></a>
+                    </span>
+                </h3> 
+                {% if logger and exchange %}
+                    <div class="modal hide fade" id="addWorkModal" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h3 id="work-label">{% trans "Add Work Done for This Exchange" %}</h3>
+                        </div>
+                        <div class="modal-body">
+                            <form class="validateMe" id="workForm" enctype="multipart/form-data" action="{% url add_work_for_exchange exchange_id=exchange.id %}" method="POST" >
+                                {% csrf_token %}
+                                {{ add_work_form }}
+                            <div class="modal-footer">
+                                <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                <input type="submit" class="btn btn-primary" name="submit" value="{% trans 'Save' %}" />
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+
+                {% for event in work_events %}
+                    <div class="event" >
+                        <span ><span class="event-label">{% trans "Work event" %}: </span><b> {{ event.resource_type.name }}</b> {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }} <span class="taken">{% trans "Done by" %} {{ event.from_agent.nick }}</span></span>
+                        {% if agent == event.from_agent or logger  %}
+                            
+                            <a href="#eventModal{{ event.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
+                                <i class="icon-edit"></i>
+                            </a>
+        
+                            <div class="modal hide fade" id="eventModal{{ event.id }}" tabindex="-1" role="dialog" aria-labelledby="event-label" aria-hidden="true">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                    <h3 id="event-label">{% trans "Change Time Contribution" %}</h3>
+                                </div>
+                                <div class="modal-body">
+                                    <form class="validateMe"  class="eventForm{{ event.id }} validateMe" enctype="multipart/form-data" action="{% url change_exchange_work_event event_id=event.id %}" method="POST" >
+                                        {% csrf_token %}
+                                        {{ event.changeform|as_bootstrap }}
+                                        <input type="hidden" id="next" name="next" value="exchange" />
+                                        <div class="modal-footer">
+                                            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+                                            <input type="submit" class="btn btn-primary" name="submit" value='{% trans "Save" %}' />
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <form
+                                style="display: inline;" 
+                                class="delete-form" 
+                                id="deleteForm{{ event.id }}" 
+                                action="{% url delete_event event_id=event.id %}" 
+                                method="POST" >
+                                {% csrf_token %}
+                                <input type="hidden" id="next" name="next" value="exchange" />
+                                <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete work contribution!" >X</button>
+                            </form>
+                        {% endif %}
+                        {% if event.description %}
+                        <div class="notes"> {{ event.description|urlize|linebreaks }} </div>
+                        {% endif %}                     
+                    </div>
+                {% endfor %}
+            </div> 
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+
+		$(".chzn-select").chosen();
+
+		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+
+        $('#work-info').popover()
+        $('#xfer-info').popover()
+        $('#rxfer-info').popover()
+		
+		jQuery.validator.addMethod("quantity",
+            function(value, element) {
+                var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
+                return this.optional(element) || isValidQuantity;
+            },
+            "Please enter a number less than 1000000 with no more than 2 decimal places"
+        );
+
+        jQuery.validator.setDefaults({ 
+            success: function(label) {
+		        label
+			        .text('').addClass('valid')
+			        .closest('.control-group').addClass('success');
+	        }
+        });
+
+        $.validator.addClassRules("quantity", { required: true, quantity: true, });
+        //$.validator.addClassRules("value", { required: true, number: true });
+		$.validator.addClassRules("url", { url: true });
+        $.validator.addClassRules("resourceType", { required: true});
+        $.validator.addClassRules("hours", { 
+			required: true,
+			number: true,
+			min: 0,
+			max: 24
+		});
+		$.validator.addClassRules("minutes", { 
+			required: true,
+			number: true,
+			min: 0,
+			max: 60
+		});
+        $.validator.addClassRules("date-entry", { required: true, date: true });
+
+        $.validator.addMethod("agentRequired", function (value, element) {
+            var form_id = element.form.id;
+            form_id = "#" + form_id;
+            var parent = element.parentElement;
+            var parentSib = parent.nextElementSibling;
+            var sib = parentSib.children[0];
+            var sibValue = sib.value;
+            if (sibValue){
+                var sibId = sib.id;
+                sibId = "#" + sibId;
+                $(sibId).removeClass('error').next('label.error').remove();
+            }
+            return this.optional(element) || sibValue;
+        }, "Both role and agent must be selected.");
+        
+        $.validator.addMethod("roleRequired", function (value, element) {
+            var form_id = element.form.id;
+            form_id = "#" + form_id;
+            var parent = element.parentElement;
+            var parentSib = parent.previousElementSibling;
+            var sib = parentSib.children[0];
+            var sibValue = sib.value;
+            if (sibValue){
+                var sibId = sib.id;
+                sibId = "#" + sibId;
+                $(sibId).removeClass('error').next('label.error').remove();
+            }
+            return this.optional(element) || sibValue;
+        }, "Both role and agent must be selected.");
+        
+        $.validator.addClassRules("select-role", { agentRequired: true });
+        $.validator.addClassRules("select-agent", { roleRequired: true });
+
+        $('.validateMe').each( function(){
+			var form = $(this);
+			form.validate({
+				highlight: function(label) {
+					$(label).closest('.control-group').addClass('error');
+				}
+			});
+		});
+
+        $("#btnAddReceipt").click(setReceiptModal);
+        $("#btnAddMaterial").click(setMaterialModal);
+
+        function setReceiptModal()
+        {
+            var targetId = "id_unorderedreceipt-resource_type";
+            var resourceTypeId = $("#id_unorderedreceipt-resource_type").val()
+            //alert("onload rtid " + resourceTypeId);
+            JsonSetUnitAndRule(resourceTypeId, targetId);
+        }
+
+        function setMaterialModal()
+        {
+            var targetId = "id_material-resource_type";
+            var resourceTypeId = $("#id_material-resource_type").val()
+            //alert("onload rtid " + resourceTypeId);
+            JsonSetUnitAndRule(resourceTypeId, targetId);
+        }
+
+	    $(".resource-type-selector").change(getUnitAndRule);
+
+		function getUnitAndRule(event)
+		{
+	        $(".chzn-select").trigger("liszt:updated");
+		    var resourceTypeId = event.target.value;
+            //alert("rt " + resourceTypeId);
+		    if (resourceTypeId)
+		    {
+                var targetId = event.target.id;
+                //alert("targetId " + targetId);
+                JsonSetUnitAndRule(resourceTypeId, targetId);
+		    }
+	    }
+	    
+	    $(".resource-type-for-resource").change(getResources);
+        
+        function getResources(event)
+        {
+            var resourceTypeId = event.target.value;
+            if (resourceTypeId)
+            {
+                var targetId = event.target.id;
+                var prefix = targetId.split('-')[0];
+                var resourceFieldId = "#" + prefix + "-resource";
+                var resourceField = $(resourceFieldId);
+                $(resourceFieldId).empty();
+                var fromResourceFieldId = "#" + prefix + "-from_resource";
+                var fromResourceField = $(fromResourceFieldId);
+                var jsonUrl = encodeURI("/accounting/json-resourcetype-resources-locations/" + resourceTypeId + "/");
+                $.get(jsonUrl,
+                    function(data){
+                    resourceField.append('<option value="">' + '--------' + '</option>');
+                    fromResourceField.append('<option value="">' + '--------' + '</option>');
+                    for(var i=0 ; i<data.length ; i++)
+                    {
+                        var id = data[i].fields['pk'];
+                        var name = data[i].fields['identifier']; 
+                        var loc = data[i].fields['location']; 
+                        if (loc){
+                            name = name + " at " + loc;
+                        }
+                        resourceField.append('<option value="' + id + '">' + name + '</option>');
+                        fromResourceField.append('<option value="' + id + '">' + name + '</option>');
+                    }
+                    //$(".chzn-select").trigger("liszt:updated");
+                });
+            }
+        }
+        
+
+        if($( '#use-case' ).val() == 'res_contr' || $( '#use-case' ).val() == 'cash_contr')
+        {
+            $( '#div_id_supplier' ).hide();
+        } else {
+            $( '#div_id_supplier' ).show();
+        }
+
+        $('#receiptForm').click(function (event) {
+            var isValid = $("#receiptForm").validate();
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        $('#paymentForm').click(function (event) {
+            var isValid = $("#paymentForm").validate();
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        $('#expenseForm').click(function (event) {
+            var isValid = $("#expenseForm").validate();
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        $('#workForm').click(function (event) {
+            var isValid = $("#workForm").validate();
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        $('#cashForm').click(function (event) {
+            var isValid = $("#cashForm").validate();
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+        $('#materialForm').click(function (event) {
+            var isValid = $("#materialForm").validate();
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+
+		$( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $( "#help" ).text("Show Help");
+        })
+        
+        {% if use_case.identifier == 'sale' %}
+            $("#id_context_agent").change(getCustomers);
+        {% endif %}
+
+
+	}); // end document.ready
+
+    function JsonSetUnitAndRule(resourceTypeId, targetId)
+    {
+	    if (targetId.search("usable") >= 0)
+	    {
+		    direction = "use";
+	    }
+	    else
+	    {
+		    direction = "other";
+	    }
+	    var prefix = targetId.split('-')[0];
+	    var unitName = "#" + prefix + "-unit_of_quantity";
+	    var jsonUrl = encodeURI("/accounting/json-directional-unit-and-rule/" + resourceTypeId + "/" + direction + "/");
+	    $.get(jsonUrl,
+		    function(data){
+			    var unit = data["unit"];
+                $(unitName).val(unit);
+                var inventory_rule = data["rule"];
+                //alert(inventory_rule);
+                if (inventory_rule == "yes") {
+                    //$('#div_id_unorderedreceipt-quantity').show(); 
+                    //$('#div_id_unorderedreceipt-unit_of_quantity').show(); 
+                    $('#div_id_unorderedreceipt-identifier').show(); 
+                    $('#div_id_unorderedreceipt-url').show(); 
+                    $('#div_id_unorderedreceipt-photo_url').show(); 
+                    $('#div_id_unorderedreceipt-notes').show(); 
+                    $('#div_id_unorderedreceipt-current_location').show(); 
+                    $('#div_id_unorderedreceipt-access_rules').show(); 
+                    $('.hideShow').show(); 
+                } else {
+                    //$('#div_id_unorderedreceipt-quantity').hide(); 
+                    //$('#div_id_unorderedreceipt-unit_of_quantity').hide(); 
+                    $('#div_id_unorderedreceipt-identifier').hide(); 
+                    $('#div_id_unorderedreceipt-url').hide(); 
+                    $('#div_id_unorderedreceipt-photo_url').hide(); 
+                    $('#div_id_unorderedreceipt-notes').hide();  
+                    $('#div_id_unorderedreceipt-current_location').hide(); 
+                    $('#div_id_unorderedreceipt-access_rules').hide(); 
+                    $('.hideShow').hide();                            
+                }                    
+		    });
+    }
+    
+    {% if use_case.identifier == 'sale' %}
+    function getCustomers()
+    {
+        $(".chzn-select").trigger("liszt:updated");
+        var selectedAgent = document.getElementById('id_context_agent').value;
+        var jsonUrl = encodeURI("/accounting/json-context-agent-customers/" + selectedAgent + "/");
+        var selectedCustomer = document.getElementById('id_customer').value;
+        //var customerField =  $("#id_customer");
+        $("#id_customer").empty();
+        $.get(jsonUrl,
+        function(data){
+            $("#id_customer").append('<option value="">' + '--------' + '</option>'); 
+            for(var i=0 ; i<data.length ; i++)
+            {
+                var id = data[i]['pk'];
+                var name = data[i].fields['nick']; 
+                if (selectedCustomer == id) {
+                    $("#id_customer").append('<option value="' + id + '" selected>' + name + '</option>');
+                } else {
+                    $("#id_customer").append('<option value="' + id + '">' + name + '</option>'); 
+                }
+            }
+            $(".chzn-select").trigger("liszt:updated");
+        });
+    }
+    {% endif %}
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Incoming value flows for " %} {{ resource }}{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<style>
+
+.ve {
+    font-size: 120%;
+    font-weight: bold;
+    color: firebrick;
+}
+.ves {
+    margin-bottom: 1em;
+}
+.type, .total {
+    font-weight: bold;
+}
+.work-item {
+    font-style: italic;
+    color: green;
+}
+.process {
+    color: blue;
+}
+.work, .pay, .total {
+    color: green;
+}
+.resource, .out, .receive{
+    color: firebrick;
+}
+.cite, .consume, .use {
+    color: purple;
+}
+.line {
+    margin-bottom: 3px;
+}
+.span9 {
+    margin-left: 0;
+}
+.explanation {
+    margin-left: 1em;
+    font-style: italic;
+    color: olive;
+}
+</style>
+{% endblock %}
+
+{% block body_class %}demand{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	  <div>
+		<legend>{% trans "Incoming Value Flows for " %} <a href="{% url resource resource_id=resource.id %}">{{ resource }}</a></legend>
+		<div class="ves" >
+            <span class="ve">{% trans "Using Value Equation" %}: {{ value_equation }} </span>
+            {% if ve_selection_form %}
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <form class="form-horizontal" style="display: inline;"  method="POST" action=".">
+                    {% csrf_token %}
+                    {{ ve_selection_form.value_equation.label }} {{ ve_selection_form.value_equation }}
+                    <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Recalc' %}" />
+                </form>
+            {% endif %}
+        </div>
+		<div class="span9">
+		
+            <p class="total" >
+                {% trans "Total accumulated value per unit " %}:   {{ resource.resource_type.unit_of_value.symbol }}{{ value_per_unit }}
+            </p>
+
+          {% for flow in flows %}
+            <p style="margin-left: {{ flow.depth }}em;" class="line">
+                {{ flow.depth }} 
+                <span class="type {{ flow.flow_class }}" >{{ flow.flow_type }}:</span>
+                {% if flow.flow_type == "Process" %}
+                    <a href="{{ flow.get_absolute_url }}">{{ flow.flow_description }}</a> {% trans "Production qty" %}: {{ flow.production_quantity }}
+                {% elif flow.flow_type == "Resource" %}
+                    <a href="{{ flow.get_absolute_url }}">{{ flow.flow_description }}</a>
+                {% elif flow.flow_type == "Time Contribution" %}
+                    <span class="work-item">{{ flow.flow_description }}</span>
+                {% else %}
+                    {{ flow.flow_description }}
+                {% endif %}
+                
+                {% comment %}
+                {% if flow.value_per_unit %}
+                    {% trans "Value per unit" %}: {{ flow.value_per_unit }}
+                {% endif %}
+                {% if flow.value_explanation %}
+                    </br><span class="explanation">
+                        {% trans "Explanation" %}: {{ flow.value_explanation }}
+                    </span>
+                {% endif %}
+                {% endcomment %}
+                
+             </p>
+          {% endfor %}
+
+		</div>
+
+        <div class="span3">
+            <h4>
+                Time contributions:
+            </h4>
+            <div id="chart_div" ></div>           
+            </div>
+        </div>
+
+	  </div>
+	</div>
+{% endblock %}
+
+{% block extra_script %}
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+
+		$( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
+            $( "#help" ).text("Hide Help"); 
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $( "#help" ).text("Show Help");
+        })
+    }); // end document.ready
+
+    google.load("visualization", "1", {packages:["corechart"]});
+    
+    google.setOnLoadCallback(drawChart);
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Member', 'Hours'],
+          {% for member, hours in member_hours %}
+              ['{{ member.nick }}',  {{ hours }} ],
+          {% endfor %}
+    ]);
+
+    var options = {
+      vAxis: {title: 'Member',  titleTextStyle: {color: 'red'}},
+      chartArea:{width:"100%",height:"100%"}
+    };
+
+    var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+    }
+
+    </script>
+{% endblock %}

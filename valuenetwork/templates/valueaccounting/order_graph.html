@@ -1,0 +1,123 @@
+{% load staticfiles %}
+<html>
+
+<head>
+	<title>Process Graph for Order {{ order_id }}</title>
+    <script src="http://code.jquery.com/jquery.min.js" type="text/javascript"></script>
+    <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js" type="text/javascript"></script>
+    <script src="{% static 'js/jMouseWheel-1.0.min.js' %}" type="text/javascript"></script>
+    <script src="{% static 'js/jquery.svg.min.js' %}" type="text/javascript"></script> 
+    <script src="{% static 'js/underscore-min.js' %}" type="text/javascript"></script> 
+	<link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.min.css">
+    
+    <script src="{% static 'js/fractaldom.js' %}" type="text/javascript"></script>
+	<link rel="stylesheet" type="text/css" href="{% static 'css/fractaldom.css' %}">
+
+	<style>
+		body {
+			background-color: white;
+			font-size: 70%;
+			overflow: hidden;
+		}
+			
+        .ui-dialog-titlebar-close { display:none; }
+
+        .ui-dialog-content .process-link a { color:blue; }
+
+	</style>
+</head>
+
+<body>
+</body>
+
+<script>
+
+    $(document).ready(function(){
+        var jsonUrl = encodeURI("/accounting/json-processes/" + {{ order_id }} + "/");
+
+        $("body").css("cursor", "wait");
+        $.getJSON( jsonUrl, function( data ) {
+            var d = fractaldom();
+	        d.appendTo($('body'));
+	        d.init();
+
+	        var minDate, maxDate;
+	        for (var i = 0; i < data.nodes.length; i++) {
+		        var N = data.nodes[i];
+		        var start = Date.parse(N.start);
+		        var end = Date.parse(N.end);
+		        var mid = (start + end)/2.0;
+		        N.mid = mid;	
+		        if (i == 0)
+			        minDate = maxDate = mid;
+		        else {
+			        if (mid < minDate) minDate = mid;
+			        if (mid > maxDate) maxDate = mid;
+		        }				
+	        }
+
+	        function getX(date) {
+		        return (maxDate!=minDate) ? 1500 * (date - minDate) / (maxDate - minDate) : 0;
+	        }
+
+	        var splitStartEnd = false;
+
+	        if (!splitStartEnd) {
+		        for (var i = 0; i < data.nodes.length; i++) {
+			        var N = data.nodes[i];
+
+			        var rx = getX(N.mid);
+
+			        var ry = 500 * Math.random();
+			        var x = d.newNode(N.id, { title: N.name });
+			        var id = N.id.split("-")[1];
+			        var pageUrl = encodeURI("/accounting/process/" + id + "/");
+			        var pageLink = '<a href="' + pageUrl + '" target="_blank" >' + N.name + '</a>';
+			        var pageSpan = '<span class="process-link" >' + pageLink + '</span>';
+			        x.append(pageSpan + '</b><br/>' + N.start + '..' + N.end);
+			        x.position( rx,ry );
+			        x.setWidth( Math.max(150, getX(Date.parse(N.end)) - getX(Date.parse(N.start))) );
+			        x.setHeight( 64 );
+		        }
+		        for (var i = 0; i < data.edges.length; i++) {
+			        var E = data.edges[i];
+			        d.newEdge(E.from_node, E.to_node, { label: E.label, lineWidth: E.width*3 });
+		        }
+	        }
+	        else {
+		        for (var i = 0; i < data.nodes.length; i++) {
+			        var N = data.nodes[i];
+
+			        var ry = 500 * Math.random();
+
+			        var xs = d.newNode(N.id+'s', { title: N.name });
+			        xs.append(N.name + '</b><br/>' + N.start);
+			        xs.position( getX(Date.parse(N.start)),ry );
+			        xs.setWidth( 150 );
+			        xs.setHeight( 64 );
+
+			        var xe = d.newNode(N.id+'e', { title: N.name });
+			        xe.append(N.end);
+			        xe.position( getX(Date.parse(N.end)), ry );
+			        xe.setWidth( 150 );
+			        xe.setHeight( 64 );
+
+			        d.newEdge(N.id + 's', N.id + 'e', { lineWidth: 15 })
+
+		        }
+		        for (var i = 0; i < data.edges.length; i++) {
+			        var E = data.edges[i];
+			        d.newEdge(E.from_node + 'e', E.to_node + 's', { label: E.label, lineWidth: E.width });
+		        }
+	        }
+
+	        d.layoutFD(false, true, 50);
+
+	        $("body").css("cursor", "default");
+        });
+
+	}); // end document.ready
+
+</script>
+
+</html>

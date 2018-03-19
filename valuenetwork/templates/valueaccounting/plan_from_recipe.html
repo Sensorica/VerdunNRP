@@ -1,0 +1,266 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Work Order from Recipe" %}{% endblock %}
+
+{% block extra_head %}
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" />
+
+<style>
+
+.selected {
+    font-size: 1.2em;
+}
+
+.select-buttons p {
+    margin-top: 20px;
+}
+#div_id_start_date, #rts {
+    margin-top: 20px
+}
+.resources {
+    display: none;
+    margin-left: 2em;
+}
+
+.description {
+    font-style: italic;
+    margin-left: 1em;
+}
+
+.list {
+    margin-top: 1em;
+}
+
+.elements {
+    margin-left: 1em;
+}
+
+</style>
+{% endblock %}
+
+{% block body_class %}x{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+      {% include "_messages.html" %}
+	  <div>
+		<legend>{% trans "Plan Work Order Using Recipe" %}</legend>
+		<form class="form-horizontal" id="processForm" method="POST" action=".">
+	      {% csrf_token %}
+		  <div class="row-fluid">
+			<div class="span12">
+                {% if selected_context_agent %}
+                    <p class="selected">
+                    <i>Chosen:</i>&nbsp;&nbsp;
+                    {% trans "Project " %} 
+	                <input type="text" name="selected-context-agent~{{ selected_context_agent.id }}" value="{{ selected_context_agent }}"
+                        readonly="readonly" /> 
+                    </p>
+                {% else %}
+                    {% trans "Choose a project " %} {{ ca_form.context_agent }} &nbsp;&nbsp; 
+	                <input type="submit" name="get-related" value="{% trans 'Get recipes' %}" class="btn btn-primary" />
+                {% endif %}
+            </div>
+          </div>
+
+		  {% if selected_context_agent %}
+
+		    <div class="row-fluid">
+			  <div class="span6">
+			  
+                <div id="rts">
+                    <h3>{% trans "Choose a Resource Type..." %}</h3>
+                    {% for item in resource_types %}
+                        <p>
+                            <input type="radio" id="rt-{{ item.id }}" name="rt" 
+                            {% if item.recipe_is_staged %} 
+                                {% if item.recipe_needs_starting_resource %} 
+                                    class="resourceflow" 
+                                {% else %}
+                                    class="workflow"
+                                {% endif %}
+                            {% else %}
+                                class="manufacturing" 
+                            {% endif %}
+                            value="{{ item.id }}" />
+                            {{ item }} ( {{ item.facet_values_list }} ) 
+                            {% if item.recipe_is_staged %} 
+                                Work Flow Recipe
+                            {% else %}
+                                Manufacturing Recipe
+                            {% endif %}
+                        </p>
+                        {% if item.onhand_resources %}
+                            <div id="resources-{{ item.id }}" class = "resources" >
+                            <p>This recipe needs a starting resource</p>
+                            {% for resource in item.onhand_resources %}
+                                <p>
+                                    <input type="radio" id="resource-{{ resource.id }}" name="resourcesFor-{{ item.id }}" value="{{ resource.id }}" />
+                                    {{ resource.identifier }}
+                                </p>
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                {% if resource_type_lists %}
+                    <div id="lists">
+                        <h3>{% trans "...or choose a Resource Type List" %}</h3>
+                        {% for rtl in resource_type_lists %}
+                            <div>
+                                <input type="radio" id="list-{{ rtl.id }}" name="rt" class="{{ rtl.recipe_class }}" value="list-{{ rtl.id }}" />
+                                {{ rtl.name }} 
+                                {% if rtl.recipe_class == "workflow" %} 
+                                    - Work Flow Recipes
+                                {% else %}
+                                    - Manufacturing or mixed Recipes
+                                {% endif %}
+                                {% if rtl.description %}
+                                    <div class="description">
+                                        {{ rtl.description|urlize|linebreaks }}
+                                    </div>
+                                {% endif %}
+                                {% if rtl.list_elements.all %}
+                                    <div class="elements">
+                                        {% trans "Resource Types" %}: {{ rtl.resource_types_string }}
+                                    </div>
+                                {% endif %}
+                                
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+              </div>
+              <div class="span6">
+                    <table>
+                        <tr>
+                            <td style="text-align: right;" >
+                                <span id="dateLabel">Due date</span>
+                            </td>
+                            <td> {{ date_name_form.date }}</td>
+                        </tr>
+                        <tr id="date-choice" >
+                            <td style="text-align: right;" >{{ date_name_form.start_date_or_due_date.label_tag }} </td>
+                            <td>  {{ date_name_form.start_date_or_due_date }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: right;" >{{ date_name_form.order_name.label_tag }}</td>
+                            <td>  {{ date_name_form.order_name }}</td>
+                        </tr>
+                    </table>
+                    <hr />                
+                    <div class="select-buttons">
+                            <p>
+                                <input type="submit" name="create-order" id="createOrder" value="{% trans 'Create plan from recipe' %}" disabled="true" class="btn btn-primary" />
+                            </p>
+                    </div>
+               </div>
+            </div>
+   
+	      {% endif %}
+
+		</form>
+      </div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+	
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+
+ 	$(document).ready(function(){
+
+	    $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $( "#help" ).text("Show Help");
+        })
+        
+        $("#date-choice").hide();
+
+        //$(".chzn-select").chosen();
+
+        //$( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
+        $( "#id_date" ).datepicker({ 
+			dateFormat: "yy-mm-dd",
+    		onClose: function() {
+      			$( this ).valid();
+			}
+		 });
+        
+        /*
+            Todos for next function:
+            1. If a resourceflow radio button is clicked, 
+                autoselect the first resource.
+            2. If a resourceflow radio button is deselected,
+                unselect the resources and hide the div.
+            
+        */
+        $("[type=radio]").click(function() {
+            var cls = $(this).attr('class'); 
+            $("#createOrder").removeAttr("disabled");  
+            if (cls == "workflow")
+            {
+                $("#date-choice").show();
+                $("#dateLabel").html('Date');
+            }
+            else if (cls == "manufacturing")
+            {
+                $("#date-choice").hide();
+                $("#dateLabel").html('Due Date');
+            }
+            else if (cls == "resourceflow")
+            {
+                $("#date-choice").hide();
+                $("#dateLabel").html('Start Date');
+                var itemId = $(this).attr('id'); 
+                var itemNbr = itemId.split("-")[1];
+                var resourcesId = "#resources-" + itemNbr;
+                $(resourcesId).show();
+            }
+
+            $( "input[type=radio]" ).each(function() {
+                if ($( this ).attr( "name" ) == "rt")
+                {   
+                    if ($( this ).attr( "class" ) == "resourceflow")
+                    {
+                        var itemId = $(this).attr('id'); 
+                        var itemNbr = itemId.split("-")[1];
+                        var resourcesId = "#resources-" + itemNbr;
+                        if ($( this ).prop( "checked" ))
+                        {
+                            var x = $(resourcesId);
+                        }
+                        else
+                        {
+                            $(resourcesId).hide();
+                        }
+                    }
+                }
+                    
+            });
+        });
+
+	}); // end document.ready
+
+
+    </script>
+
+{% endblock %}

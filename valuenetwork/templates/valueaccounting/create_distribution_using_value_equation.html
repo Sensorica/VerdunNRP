@@ -1,0 +1,461 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Distribution" %}{% endblock %}
+
+{% block extra_head %}
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+.name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+.bucket {
+    margin-top: 15px;
+}
+#filters {
+    margin-bottom: 20px;
+}
+.to {
+    margin-left: 2em;
+    font-style: italic;
+}
+.filt {
+    margin-left: 2em;
+}
+.pct {
+    margin-left: 1em;
+}
+.hdg {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: firebrick;
+}
+.item-description
+{
+	width: 70em;
+    height: 40px;
+}
+td {
+    padding-right: 3em;
+}
+.spc {
+    padding-top: 8px;
+}
+.top {
+    vertical-align: top;
+    padding-top: 8px;
+}
+.warning {
+    border: firebrick solid 1px;
+    color: firebrick;
+    padding: 10px;
+    margin-left: 15px;
+    font-size: 1.1em;
+    vertical-align: top;
+}
+#loading {
+    margin-top: 1em;
+    margin-left: 3em;
+}
+.indent {
+    margin-left: 1em;
+}
+#selection {
+    border: 1px gainsboro solid;
+    margin-bottom: 15px;
+}
+#selection td {
+    padding: 5px 10px 5px 10px;
+}
+.or {
+    font-weight: bold;
+    color: darkturquoise;
+    padding-right: 6px;
+}
+#partialDist {
+    display: none;
+}
+#distributions {
+    margin-top: 20px;
+}
+tr.even td 
+{
+    color:#000000;
+    background-color:#EAF2D3;
+}
+th
+{
+    background-color:#C8D6E8;
+}
+#test {
+    margin-bottom: 10px;
+}
+
+</style>
+{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div>
+	{% if context_agent %}
+        <legend>{% trans "Create Distribution for " %} {{ context_agent }}
+            <a class="indent" href="{% url value_equation_sandbox value_equation_id=ve.id %}">Value Equation Sandbox</a>
+            <a class="indent" href="{% url edit_value_equation value_equation_id=ve.id %}">Edit Value Equation</a> 
+            <a class="indent" href="{% url value_equations %}">Value Equations List</a>
+        </legend>
+
+        <p class="hdg">Distribution:</p>
+        <form id="distForm" class="validateMe" action="." method="POST" >
+            {% csrf_token %}
+            <p>Value Equation</p>
+            <p>{{ header_form.value_equation }}</p>
+            <table id="selection">
+              <tr><td>Select one or more sources to be distributed</td><td class="or">OR</td><td>Enter amount to distribute</td></tr>
+              <tr>
+                <td class="top">
+                    <span id="cashRcpt">
+                    {{ header_form.events_to_distribute }}<br />
+                    </span>
+                </td>
+                <td>&nbsp;</td>
+                <td><span class="spc"> {{ header_form.money_to_distribute }}</span><br />and source Cash Resource Account<br />
+                <span class="spc">{{ header_form.resource }}</span></td>
+              </tr>
+              <tr>
+                    <td id="partialDist" > 
+                        {% trans "if you selected one cash receipt, you may distribute any part of it" %}</br>
+                        {{ header_form.partial_distribution }}
+                    </td>
+              </tr>
+            </table>
+            <p>Distribution date</p>
+            <p>{{ header_form.start_date }}</p>
+            <p>Comments</p>
+            <p>{{ header_form.notes }}</p>
+            <div id="filters">
+                <span class="hdg">Bucket filters:</span>
+                {% for bucket in buckets %}
+                    <div class="bucket"><span class="name">{{ bucket.name }}</span><span class="pct"> {{ bucket.percentage }}</span>%</div>
+                    {% if bucket.distribution_agent %}<div class="to"> Distribute to <span class="dist-to">{{ bucket.distribution_agent.name }}</span></div> {% endif %}
+                    {% if bucket.filter_method %}
+                        <div class="filt">
+                        {% if bucket.filter_method == 'dates' %}
+                            <p>Enter start and end dates (both optional)</p>
+                            <div id="div-start_date" class="control-group  " style="display:inline;" >
+
+                                <div class="controls" style="display:inline;">
+                                    {{ bucket.form.start_date }} 
+                                </div>
+                            </div>                                    
+                            through
+                            <div id="div-end_date" class="control-group  " style="display:inline;">
+
+                                <div class="controls" style="display:inline;">
+                                    {{ bucket.form.end_date }}
+                                </div>
+                            </div>
+                            <p>Network/Project (optional)</p>
+                            <div id="div-context_agent" class="control-group">
+                                <div class="controls">
+                                    {{ bucket.form.context_agent }}
+                                </div>
+                            </div>
+                        {% else %}
+                            {{ bucket.form|as_bootstrap }} 
+                        {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <input id="calculate" type="submit" name="submit" class="btn btn-primary" style="display: inline; vertical-align: top;" value="{% trans 'Distribute Income' %}" />
+            <span class="warning"><b>WARNING</b>: This operation cannot be undone. Please test your data entry below first!</span>
+            <span id="loading" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></span> 
+            
+            <div id="distributions">
+                <input id="test" type="submit" name="test-only" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'TEST Distribution Here First !' %}" />
+                <span id="loadingTest" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></span> 
+   
+                {% if agent_totals %} 
+                    <div class="hdg">TEST ONLY - Agent Totals:</div>
+                    <table class="table table-bordered table-condensed" >
+                        <thead>
+                            <th>{% trans "Agent" %}</th>
+                            <th style="text-align: right;">{% trans "Distribution Amount" %}</th>
+                        </thead>
+                        <tbody> 
+                            {% for at in agent_totals %}
+                                <tr class="{% cycle 'odd' 'even' %}">
+                                    <td>{{ at.to_agent.name }}</td>
+                                    <td style="text-align: right;" >{{ at.quantity }}</td>
+                                </tr>
+                            {% endfor %}
+                        <tbody> 
+                    </table>
+                {% elif no_totals %}
+                   <div><b>{{ no_totals }}</b></div>
+                {% endif %}
+            </div>
+        </form>            
+    {% else %}
+        <h2>You need a {{ context_types }}.</h2>
+        <p>
+            Read the 
+            <a href="https://docs.google.com/presentation/d/1ztnDX-Cf-PmQPUNxAfntNBBpLH9mhsQ2lrJ77Ty8Plw/edit?usp=sharing" target= "_blank">
+                Network Setup tutorial</a> 
+            and create one.
+        </p>
+    {% endif %}
+    </div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+	{{ block.super }}
+
+    <script type="text/javascript">
+    
+    var cashReceipts = {{ events_to_distribute }};
+    var crAmount = 0;
+
+	$(document).ready(function(){
+	
+        $('#distribution').addClass('active');
+	
+        $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+        
+        $(".chzn-select").chosen();
+        
+        $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+        
+        jQuery.validator.addMethod("money",
+            function(value, element) {
+                var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
+                return this.optional(element) || isValidQuantity;
+            },
+            "Please enter a number less than 1000000 with no more than 2 decimal places"
+        );
+        
+        jQuery.validator.setDefaults({ 
+            success: function(label) {
+                label
+                    .text('').addClass('valid')
+                    .closest('.control-group').addClass('success');
+            }
+        });
+
+        $.validator.addClassRules("money", { money: true });
+        //$.validator.addClassRules("partial", { partial: true });
+        $.validator.addClassRules("date-entry", { date: true });
+        $.validator.addClassRules("date-required", { required: true });
+        $.validator.addClassRules("order", { required: true });
+        $.validator.addClassRules("shipment-event", { required: true });
+       
+        $('.validateMe').each( function(){
+            var form = $(this);
+            form.validate({
+                highlight: function(label) {
+                    $(label).closest('.control-group').addClass('error');
+                }
+            });
+        });
+
+        $("#calculate").click(showLoading);
+        $("#test").click(showLoadingTest);
+		$("#id_value_equation").change(reloadPage);
+		$("#id_events_to_distribute").change(adjustDist);
+		//$("#id_input_distributions").change(inputDistributionChanged);
+		//$("#id_20-shipments").change(shipmentsChanged);
+ 
+	}); // end document.ready
+
+	
+	function showLoading()
+	{
+        $("#loading").show();
+        $(".warning").hide();
+    } 
+    
+    function showLoadingTest()
+    {
+        $("#loadingTest").show();
+    }
+    
+    function reloadPage()
+    {
+        var selectedVE = document.getElementById('id_value_equation').value;
+        var agentId = {{ context_agent.id }};
+        var url = '/accounting/create-distribution-using-value-equation/' + agentId + '/' + selectedVE + '/'
+        window.location.replace(url);
+    }
+    
+    function inputDistributionChanged(event)
+    {
+        var selectedDists = $("#id_input_distributions").val();
+        adjustDist();
+        var shipmentSelectors = $(".shipment-event");
+        if (shipmentSelectors[0])
+        {
+            getShipments(selectedDists, shipmentSelectors);
+        }
+        var orderSelectors = $(".order");
+        if (orderSelectors[0])
+        {
+            getOrders(selectedDists, orderSelectors);
+        }
+        
+    }
+    
+    function getOrders(selectedDists, orderSelectors)
+    {
+        
+
+        if (selectedDists)
+        {
+            distId = selectedDists[0];
+            var jsonUrl = encodeURI("/accounting/json-distribution-related-order/" + distId + "/");
+            $.get(jsonUrl, function(data){
+                var orderId = data["order_id"];
+                var orderDesc = data["order_description"];
+                if (orderId)
+                {
+                    for(var i=0 ; i<orderSelectors.length ; i++)
+                    {
+                        var sel = orderSelectors[i];
+                        var selId = "#" + sel.id;
+                        $(selId)
+                            .append($("<option></option>")
+                            .attr("value",orderId)
+                            .text(orderDesc)); 
+                        $(selId).val(orderId);
+                        $(selId).trigger("liszt:updated");
+                    }
+                }
+            });
+        }
+        else
+        {
+            for(var i=0 ; i<orderSelectors.length ; i++)
+            {
+                var sel = orderSelectors[i];
+                var selId = "#" + sel.id;
+                $(selId).val([]).trigger("liszt:updated");
+            }
+        }
+
+    }
+    
+    function getShipments(selectedDists, shipmentSelectors)
+    {
+        
+        if (selectedDists)
+        {
+            distId = selectedDists[0];
+            var jsonUrl = encodeURI("/accounting/json-distribution-related-shipment/" + distId + "/");
+            $.get(jsonUrl, function(data){
+                var shipId = data["ship_id"];
+                var shipDesc = data["ship_description"];
+                if (shipId)
+                {
+                    var shipArray = [shipId,];
+                    for(var i=0 ; i<shipmentSelectors.length ; i++)
+                    {
+                        var sel = shipmentSelectors[i];
+                        var selId = "#" + sel.id;
+                        $(selId)
+                            .append($("<option></option>")
+                            .attr("value",shipId)
+                            .text(shipDesc)); 
+                        $(selId).val(shipId);
+                        $(selId).trigger("liszt:updated");
+                    }
+                }
+            });
+        }
+        else
+        {
+            for(var i=0 ; i<shipmentSelectors.length ; i++)
+            {
+                var sel = shipmentSelectors[i];
+                var selId = "#" + sel.id;
+                $(selId).val([]).trigger("liszt:updated");
+            }
+        }
+
+    }
+    
+    function adjustDist()
+    {
+        var selectedCrs = $("#id_events_to_distribute :selected");
+        var count=$("#id_events_to_distribute :selected").length;
+        if (count)
+        {
+            $("#sourceDist").hide();
+            //$("#or1").hide();
+        }
+        if (count == 1)
+        {
+            var cr = selectedCrs[0];
+            var crVal = cr.value;
+            crAmount = cashReceipts[crVal];
+            $("#partialDist").show();
+            $("#id_partial_distribution").val(crAmount);
+            $("#id_partial_distribution").rules("add", {
+                min: 0,
+                max: crAmount
+            });
+        }
+        else
+        {
+            $("#id_partial_distribution").val("");
+            $("#id_partial_distribution").rules("add", {
+                max: 0
+            });
+            $("#id_partial_distribution").val(0);
+            $("#partialDist").hide();
+        }
+        if (count == 0)
+        {
+            //$("#sourceDist").show();
+            $("#cashRcpt").show();
+            //$("#or1").show();
+            count=$("#id_input_distributions :selected").length;
+            if (count)
+            {
+                $("#cashRcpt").hide();
+                //$("#or1").hide();
+            }
+        }
+        if (count != 0) {
+            $("#id_money_to_distribute").val('0.0');
+            $("#id_resource").attr('selectedIndex', '-1').find("option:selected").removeAttr("selected");
+            $("#id_money_to_distribute").prop("disabled", true);
+            $("#id_resource").prop("disabled", true);
+        } else {
+            $("#id_resource").prop("disabled", false);
+            $("#id_money_to_distribute").prop("disabled", false);
+        }
+    }
+
+    </script>
+
+{% endblock %}
