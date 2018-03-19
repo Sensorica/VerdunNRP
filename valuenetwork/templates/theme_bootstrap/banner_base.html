@@ -1,0 +1,63 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+
+        <div class="hero-unit well">
+            {% block banner %}
+            {% endblock %}
+        </div>
+
+        {% if layout %}
+            <div class="row-fluid">
+                <div class="span{{layout.column_width}}">
+                    {% include "_projects_panel.html" %}
+                </div>
+                {% if layout.use_work_or_html_panel %}
+                    <div class="span{{layout.column_width}}">
+                        {% block column-1 %}
+
+                        {% if layout.use_work_panel %}
+                            {% include "_work_panel.html" %}
+                        {% else %}
+                            {{ layout.panel_1|safe|urlize|linebreaks }}
+                        {% endif %}
+
+                        {% endblock %}
+                    </div>
+                {% endif %}
+                {% if layout.use_needs_or_html_panel %}
+                    <div class="span{{layout.column_width}}">
+                        {% block column-2 %}
+
+                        {% if layout.use_needs_panel %}
+                            {% include "_needs_panel.html" %}
+                        {% else %}
+                            {{ layout.panel_2|safe|urlize|linebreaks }}
+                        {% endif %}
+
+                        {% endblock %}
+                    </div>
+                {% endif %}
+                {% if layout.use_creations_or_html_panel %}
+                    <div class="span{{layout.column_width}}">
+                        {% block column-3 %}
+
+                        {% if layout.use_creations_panel %}
+                            {% include "_creations_panel.html" %}
+                        {% else %}
+                            {{ layout.panel_3|safe|urlize|linebreaks }}
+                        {% endif %}
+
+                        {% endblock %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+    </div>
+{% endblock %}
