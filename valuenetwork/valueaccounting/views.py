@@ -672,6 +672,7 @@ def change_exchange_type(request, exchange_type_id):
                 for form in slot.formset:
                     if form.is_valid():
                         data = form.cleaned_data
+                        # TAG do you really want to delete the whole thing?
                         old_value = data.get("id")
                         new_value = data.get("facet_value")
                         if old_value:
@@ -10815,62 +10816,65 @@ def exchange_events_csv(request):
     writer.writerow(["Exchange Type", "Exchange ID", "Transfer Type", "Transfer ID", "Event ID", "Date", "Event Type", "Resource Type", "Quantity", "Unit of Quantity", "Value", "Unit of Value", "From Agent", "To Agent", "Project", "Description", "URL"])
     event_ids_split = event_ids.split(",")
     for event_id in event_ids_split:
-        event = EconomicEvent.objects.get(pk=event_id)
-        if event.from_agent == None:
-            from_agent = ""
-        else:
-            from_agent = event.from_agent.nick
-        if event.to_agent == None:
-            to_agent = ""
-        else:
-            to_agent = event.to_agent.nick
-        if event.url == "":
-            if event.transfer:
-                if event.transfer.exchange.url == "":
-                    url = ""
-                else:
-                    url = event.transfer.exchange.url
+        try:
+            event = EconomicEvent.objects.get(pk=event_id)
+            if event.from_agent == None:
+                from_agent = ""
             else:
-                if event.exchange.url == "":
-                    url = ""
+                from_agent = event.from_agent.nick
+            if event.to_agent == None:
+                to_agent = ""
+            else:
+                to_agent = event.to_agent.nick
+            if event.url == "":
+                if event.transfer:
+                    if event.transfer.exchange.url == "":
+                        url = ""
+                    else:
+                        url = event.transfer.exchange.url
                 else:
-                    url = event.exchange.url
-        else:
-            url = ""
-        if event.exchange:
-            exchange_name = event.exchange.exchange_type.name
-            exchange_id = event.exchange.id
-        else:
-            exchange_name = ""
-            exchange_id = ""
-        if event.transfer:
-            transfer_name = event.transfer.transfer_type.name
-            transfer_id = event.transfer.id
-            exchange_name = event.transfer.exchange.exchange_type.name
-            exchange_id = event.transfer.exchange.id
-        else:
-            transfer_name = ""
-            transfer_id = ""
-        writer.writerow(
-            [exchange_name,
-             exchange_id,
-             transfer_name,
-             transfer_id,
-             event.id,
-             event.event_date,
-             event.event_type.name,
-             event.resource_type.name,
-             event.quantity,
-             event.unit_of_quantity,
-             event.value,
-             event.unit_of_value,
-             from_agent,
-             to_agent,
-             event.context_agent.name,
-             event.description,
-             url,
-            ]
-        )
+                    if event.exchange.url == "":
+                        url = ""
+                    else:
+                        url = event.exchange.url
+            else:
+                url = ""
+            if event.exchange:
+                exchange_name = event.exchange.exchange_type.name
+                exchange_id = event.exchange.id
+            else:
+                exchange_name = ""
+                exchange_id = ""
+            if event.transfer:
+                transfer_name = event.transfer.transfer_type.name
+                transfer_id = event.transfer.id
+                exchange_name = event.transfer.exchange.exchange_type.name
+                exchange_id = event.transfer.exchange.id
+            else:
+                transfer_name = ""
+                transfer_id = ""
+            writer.writerow(
+                [exchange_name,
+                 exchange_id,
+                 transfer_name,
+                 transfer_id,
+                 event.id,
+                 event.event_date,
+                 event.event_type.name,
+                 event.resource_type.name,
+                 event.quantity,
+                 event.unit_of_quantity,
+                 event.value,
+                 event.unit_of_value,
+                 from_agent,
+                 to_agent,
+                 event.context_agent.name,
+                 event.description,
+                 url,
+                ]
+            )
+        except:
+            pass
     return response
 
 
@@ -10928,9 +10932,14 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
                         % ('accounting/exchange', 0, exchange.id))
 
             if context_agent_id:
-                context_agent = EconomicAgent.objects.get(id=context_agent_id)
-                init = { "context_agent": context_agent }
-                exchange_form = ExchangeForm(initial=init)
+                try:
+                    context_agent = EconomicAgent.objects.get(id=context_agent_id)
+                    init = { "context_agent": context_agent }
+                    exchange_form = ExchangeForm(initial=init)
+                except:
+                    context_agent = None
+                    context_agent_id = None
+                    exchange_form = ExchangeForm()
             else:
                 exchange_form = ExchangeForm()
             slots = exchange_type.slots()
@@ -10953,7 +10962,12 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
         exchange = get_object_or_404(Exchange, id=exchange_id)
 
         if request.method == "POST":
+            # TAG have to verify that the user is authorized to do this
+            # for now just make sure the user exists, otherwise reject
             #import pdb; pdb.set_trace()
+            if not request.user:
+                raise ValidationError("must log in to modify exchange")
+
             exchange_form = ExchangeForm(instance=exchange, data=request.POST)
             if exchange_form.is_valid():
                 exchange = exchange_form.save()
@@ -10972,6 +10986,7 @@ def exchange_logging(request, exchange_type_id=None, exchange_id=None, context_a
         work_events = exchange.work_events()
         slots = exchange.slots_with_detail()
 
+        # TAG transfer totals that differentiate between resource types?
         for slot in slots:
             if slot.is_reciprocal:
                 total_rect = total_rect + slot.total
@@ -12025,7 +12040,8 @@ def change_value_equation(request, value_equation_id):
 @login_required
 def delete_value_equation(request, value_equation_id):
     ve = get_object_or_404(ValueEquation, id=value_equation_id)
-    ve.delete()
+    if ve.is_deletable():
+        ve.delete()
     return HttpResponseRedirect('/%s/'
         % ('accounting/value-equations'))
 
