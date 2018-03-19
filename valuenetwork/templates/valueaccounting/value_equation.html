@@ -1,0 +1,154 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load url from future %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Value Time Contributions for " %} {{ project }}{% endblock %}
+
+{% block extra_head %}
+<style>
+
+textarea {
+  width: 800px;
+}
+
+tr.even td 
+{
+	color:#000000;
+	background-color:#EAF2D3;
+}
+
+th
+{
+	background-color:#C8D6E8;
+}
+
+.temp { color: red; }
+
+#id_equation {
+    height: 40px;
+}
+.btn-head {
+    margin-left: 4em;
+    margin-bottom: 3px;
+}
+
+</style>
+
+{% endblock %}
+
+{% block body_class %}projects{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+      {% include "_messages.html" %}
+	  <div>
+		<legend>{% trans "Value Time Contributions for " %} {{ project }}
+            <a class="btn btn-info btn-head" href="{% url 'create_distribution' agent_id=project.id %}">{% trans "Distribute Income" %}</a>
+            &nbsp;<a href="{% url 'sales_and_distributions' agent_id=project.id %}">{% trans "Sales and Distributions" %}</a>
+		</legend>
+		<form method="POST" action=".">
+		    {% csrf_token %}
+            <p class="temp">This page is a demo/prototype page for working on the value equation and the 
+                requirements for the value equation portion of the valnet application. 
+            </p>
+{% comment %}
+            <p><input type="submit" class="btn btn-info" name="resummarize" value="{% trans 'Re-Summarize' %}" /></p>
+{% endcomment %}
+		    <p>
+			    {% trans "Enter an equation using the parameters hours, rate, reputation, seniority, and importance." %} 
+			    </br>{% trans "The result will be the value of the time contribution." %}
+			    </br>{% trans "Please leave a space between each element of the equation." %}
+        	</p>
+
+{% comment %}
+		    <p>
+			    {% trans "Your equation will be saved along with its results, so that the community can decide on which equation to use." %}
+		    </p>
+{% endcomment %}
+		    <div style="float: left;">
+	            {{ form|as_bootstrap }}
+		    </div>
+
+	        <div class="form-actions" style="float: left;">
+	            <button class="btn btn-primary" type="submit">{% trans "Compute" %}</button>
+	        </div>
+
+		    <div style="clear:both;"></div>
+		</form>
+
+
+	<div style="float: left; width: 60%">
+		<table style="width: 100%;" class="table table-bordered table-hover table-condensed" >
+			<thead>
+				<th>{% trans "Member" %}</th>
+				<th>{% trans "Project" %}</th>
+				<th>{% trans "Resource Type" %}</th>
+				<th>{% trans "Event Type" %}</th>
+				<th>{% trans "Rate" %}</th>
+				<th>{% trans "Hours" %}</th>
+				<th>{% trans "Reputation" %}</th>
+				<th>{% trans "Seniority" %}</th>
+				<th>{% trans "Importance" %}</th>
+				<th>{% trans "Value" %}</th>
+			</thead>
+			<tbody>	
+				{% for event in events %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ event.agent }}</td>
+						<td>{{ event.context_agent }}</td>
+						<td>{{ event.resource_type }}</td>
+						<td>{{ event.event_type.name }}</td>
+						<td style="text-align: right;" >{{ event.resource_type_rate }}</td>
+						<td style="text-align: right;" >{{ event.quantity_formatted }}</td>
+						<td style="text-align: right;" >{{ event.reputation }}</td>
+						<td style="text-align: right;" >{{ event.agent.seniority }}</td>
+						<td style="text-align: right;" >{{ event.importance }}</td>
+						<td style="text-align: right;" >{{ event.value_formatted }}</td>
+					</tr>
+				{% endfor %}
+			<tbody>	
+		</table>
+		<div class="pagination">
+			<span class="step-links">
+				{% if events.has_previous %}
+				    <a href="?page={{ events.previous_page_number }}">{% trans "previous" %}</a>
+				{% endif %}
+
+				<span class="current">
+				    {% trans "Page" %} {{ events.number }} {% trans "of" %} {{ events.paginator.num_pages }}.
+				</span>
+
+				{% if events.has_next %}
+				    <a href="?page={{ events.next_page_number }}">{% trans "next" %}</a>
+				{% endif %}
+			</span>
+		</div>
+	</div>
+	<div style="float: left; padding-left: 1em;">
+		{% if agent_totals %}
+		<table style="width: 100%;" >
+			<thead>
+				<th>{% trans "Member" %}</th>
+				<th>{% trans "Total Value" %}</th>
+				<th>{% trans "Percentage" %}</th>
+				<th>{% trans "Distribution Amount" %}</th>
+			</thead>
+			<tbody>	
+				{% for at in agent_totals %}
+					<tr class="{% cycle 'odd' 'even' %}">
+						<td>{{ at.agent }}</td>
+						<td style="text-align: right;" >{{ at.value }}</td>
+						<td style="text-align: right;" >{{ at.percentage }}</td>
+						<td style="text-align: right;" >{{ at.amount }}</td>
+					</tr>
+				{% endfor %}
+			<tbody>	
+		</table>
+		{% endif %}
+	</div>
+	<div style="clear:both;"></div>
+	</div>
+    </div>
+{% endblock %}

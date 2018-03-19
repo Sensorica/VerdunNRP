@@ -1,0 +1,242 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load thumbnail %}
+
+{% block head_title %}{% trans "Timeline" %}{% endblock %}
+
+{% block extra_head %}
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="http://api.simile-widgets.org/timeline/2.3.1/timeline-api.js?bundle=true,defaultLocale=en" type="text/javascript"></script>
+
+<style>
+
+	tr.even td 
+	{
+		color:#000000;
+		background-color:#EAF2D3;
+	}
+
+	th
+	{
+		background-color:#C8D6E8;
+	}
+
+/*#my-timeline { overflow-x:hidden; overflow-y:scroll;}*/
+
+</style>
+{% endblock %}
+
+{% block body_class %}projects{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+		<h1>{% trans "Timeline" %}</h1>
+		<p>{% trans "Double-click on date in bottom lane to slide to that date. Click on process in top lane to show details." %}</p>	
+		<div id="my-timeline" style="height: 600px; border: 1px solid #aaa"></div>
+
+{% comment %}
+		{% if unassigned %}
+			<div style="margin-top: 1em;" >
+				<h4>{% trans "Unassigned Tasks" %}</h4>
+				<table class="table table-bordered table-hover table-condensed" >
+					<thead>
+						<th>{% trans "Due Date" %}</th>
+						<th>{% trans "Process" %}</th>
+						<th>{% trans "Project" %}</th>
+						<th>{% trans "Description" %}</th>
+						<th>{% trans "Url" %}</th>
+						<th>{% trans "Role" %}</th>
+						<th>{% trans "Type" %}</th>
+                        <th>&nbsp;</th>
+					</thead>
+					<tbody>
+						{% for c in unassigned %}
+							<tr class="{% cycle 'odd' 'even' %}">
+								<td>
+									<a href="#" class="duedate" title="{% trans 'Click to locate on Timeline' %}">
+										{{ c.due_date }}
+									</a>
+								</td>
+								<td>{{ c.process }}</td>
+								<td>{{ c.project }}</td>
+								{% if c.description %}
+									<td>{{ c.description|urlize|linebreaks }}</td>
+								{% elif c.process.description %}
+									<td>{{ c.process.description|urlize|linebreaks }}</td>
+								{% else %}
+									<td>&nbsp;</td>
+								{% endif %}
+								{% if c.url %}
+									<td><a href="{{ c.url }}">{% trans "Open" %}</a></td>
+								{% elif c.process.url %}
+									<td><a href="{{ c.process.url }}">{% trans "Open" %}</a></td>
+								{% else %}
+									<td>&nbsp;</td>
+								{% endif %}
+								<td>{{ c.from_agent_role }}</td>
+								<td>{{ c.resource_type }}</td>
+								<td><button>{% trans "Take it!" %}</button></td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+		{% endif %}
+    </div>
+{% endcomment %}
+
+
+<script>
+var tl;
+$(document).ready(function() {
+
+    SimileAjax.History.enabled = false;
+   var eventSource = new Timeline.DefaultEventSource();
+   var bandInfos = [
+     Timeline.createBandInfo({
+         eventSource:    eventSource,
+         date:           "{{ timeline_date }}",
+         width:          "85%", 
+         intervalUnit:   Timeline.DateTime.WEEK, 
+         intervalPixels: 100
+     }),
+     Timeline.createBandInfo({
+         overview:       true,
+         eventSource:    eventSource,
+         date:           "{{ timeline_date }}",
+         width:          "15%", 
+         intervalUnit:   Timeline.DateTime.MONTH, 
+         intervalPixels: 200
+     })
+   ];
+   bandInfos[1].syncWith = 0;
+   bandInfos[1].highlight = true;
+   
+   tl = Timeline.create(document.getElementById("my-timeline"), bandInfos);
+
+	Timeline.GregorianDateLabeller.prototype.labelPrecise = function(date) {
+	    return SimileAjax.DateTime.removeTimeZoneOffset(
+    	    date, 
+    	    this._timeZone //+ (new Date().getTimezoneOffset() / 60)
+    	).toLocaleDateString();
+	};
+	
+	var jsonUrl = encodeURI("/accounting/json-timeline/");
+
+	var orderId = {{ orderId }};
+	var useContextId = {{ useContextId }};
+	var fromDate = "{{ from_date }}" + "/";
+	var toDate = "{{ to_date }}" + "/";
+	var contextId = {{ context_id }} + "/";
+	
+	if (orderId)
+	{
+        var jsonUrl = encodeURI("/accounting/json-order-timeline/" + orderId);
+    }
+    else if (useContextId)
+    {
+        var jsonUrl = encodeURI("/accounting/json-context-timeline/" + contextId);
+    }
+    else
+    {
+        var jsonUrl = encodeURI("/accounting/json-timeline/" + fromDate + toDate + contextId);
+    }
+
+    
+    tl.loadJSON(jsonUrl, function(data, url) {
+        eventSource.loadJSON(data, url);
+    });
+
+	$(".duedate").click(function() 
+	{
+		var date = this.text;
+		tl.getBand(0).setCenterVisibleDate(Timeline.DateTime.parseGregorianDateTime(date));
+	});
+
+        var oldFillInfoBubble = Timeline.DefaultEventSource.Event.prototype.fillInfoBubble;
+        Timeline.DefaultEventSource.Event.prototype.fillInfoBubble = function(elmt, theme, labeller) {
+            oldFillInfoBubble.call(this, elmt, theme, labeller);
+
+            var eventObject = this;
+            var obj = eventObject._obj;
+            var div = document.createElement("div");
+            var innards = "";
+            if(obj.previous.length)
+			{
+            	innards += "<h4>Previous processes:</h4>"; 
+				for(i=0;i<obj.previous.length;i++)
+				{
+					var splt = obj.previous[i].split("~");
+				    var url = splt[0];
+				    var label = splt[1];
+					innards += "<a href='" + url + "' target='_blank' >" + label + "</a>";
+                    innards += "</br>";
+				}
+			}
+			if(obj.next.length)
+			{
+            	innards += "<h4>Next processes:</h4>"; 
+				for(i=0;i<obj.next.length;i++)
+				{
+				    var splt = obj.next[i].split("~");
+				    var url = splt[0];
+				    var label = splt[1];
+					innards += "<a href='" + url + "' target='_blank' >" + label + "</a>";
+                    innards += "</br>";
+				}
+			}
+            if(obj.consumableReqmts.length)
+			{
+            	innards += "<h4>Consumable Requirements:</h4>"; 
+				for(i=0;i<obj.consumableReqmts.length;i++)
+				{
+					innards += obj.consumableReqmts[i];
+                    innards += "</br>";
+				}
+			}
+            if(obj.usableReqmts.length)
+			{
+            	innards += "<h4>Usable Requirements:</h4>"; 
+				for(i=0;i<obj.usableReqmts.length;i++)
+				{
+					innards += obj.usableReqmts[i];
+                    innards += "</br>";
+				}
+			}
+            if(obj.workReqmts.length)
+			{
+            	innards += "<h4>Work Requirements:</h4>"; 
+				for(i=0;i<obj.workReqmts.length;i++)
+				{
+					innards += obj.workReqmts[i];
+                    innards += "</br>";
+				}
+			}
+            if(obj.orderItems.length)
+			{
+            	innards += "<h4>Order Items:</h4>"; 
+				for(i=0;i<obj.orderItems.length;i++)
+				{
+					innards += obj.orderItems[i];
+                    innards += "</br>";
+				}
+			}
+            div.innerHTML = innards;
+            elmt.appendChild(div);
+        }
+
+ });
+
+ var resizeTimerID = null;
+$(window).resize(function() {
+     if (resizeTimerID == null) {
+         resizeTimerID = window.setTimeout(function() {
+             resizeTimerID = null;
+             tl.layout();
+         }, 600);
+     }
+ });
+</script>
+{% endblock %}

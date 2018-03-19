@@ -1,0 +1,377 @@
+{% extends "site_base.html" %}
+
+{% load staticfiles %}
+{% load i18n %}
+{% load bootstrap_tags %}
+
+{% block head_title %}{% trans "Value Equation Sandbox" %}{% endblock %}
+
+{% block extra_head %}
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+<link rel="stylesheet" href="{% static 'css/chosen.css' %}" />
+
+<style>
+
+.name {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+.bucket {
+    margin-top: 15px;
+}
+#filters {
+    margin-bottom: 20px;
+}
+.to {
+    margin-left: 2em;
+    font-style: italic;
+}
+.filt {
+    margin-left: 2em;
+}
+.pct, .indent {
+    margin-left: 1em;
+}
+.hdg {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: firebrick;
+}
+tr.even td 
+{
+    color:#000000;
+    background-color:#EAF2D3;
+}
+th
+{
+    background-color:#C8D6E8;
+}
+.note {
+    font-size: 1.2em;
+    color: firebrick;
+    margin-top: 0;
+    margin-bottom: 13px;
+}
+#ve-btn {
+    margin-left: 1em;
+    margin-bottom: 8px;
+}
+#loading {
+    margin-top: 1em;
+    margin-left: 3em;
+}
+img {
+    margin-left: 1em;
+}
+#detail-section {
+    margin-top: 40px;
+}
+#form-section {
+    border: solid 1px gainsboro;
+    padding: 10px;
+    background-color: #F5FFE0; /*#F2F7E5;*/
+}
+.order, .shipment-event {
+    width: 96%;
+}
+</style>
+{% endblock %}
+
+{% block body_class %}work{% endblock %}
+
+{% block body_base %}
+    <div class="container">
+        {% include "_messages.html" %}
+       
+        <legend>
+            {% trans "Value Equation Sandbox" %}
+            <a class="indent" href="{% url edit_value_equation value_equation_id=ve.id %}">Edit Value Equation</a> 
+            {% if ve.live and user.is_staff %}
+                <a class="indent" href="{% url create_distribution_using_value_equation agent_id=ve.context_agent.id value_equation_id=ve.id %}">Distribute Income</a>
+            {% endif %}
+            <a class="indent" href="{% url value_equations %}">Value Equations List</a>
+        </legend>
+              
+        <div class="note">(Your distribution will be displayed but will not be saved.)</div>
+        <div class="row-fluid">
+            <div class="span6" id="form-section">
+                <p class="hdg">Distribution:</p>
+                <form id="headerForm" class="validateMe" action="." method="POST" >
+                    {% csrf_token %}
+                    <p>Value Equation</p>
+                    <p>{{ header_form.value_equation }}</p>
+                    <p>Amount to distribute</p>
+                    <p>{{ header_form.amount_to_distribute }}</p>
+                    <span class="hdg">Bucket filters:</span>
+                    <div id="filters">
+                        {% for bucket in buckets %}
+                            <div class="bucket"><span class="name">{{ bucket.name }}</span><span class="pct"> {{ bucket.percentage }}</span>%</div>
+                            {% if bucket.distribution_agent %}<div class="to"> Distribute to <span class="dist-to">{{ bucket.distribution_agent.name }}</span></div> {% endif %}
+                            {% if bucket.filter_method %}
+                              <div class="filt">
+                                {% if bucket.filter_method == 'dates' %}
+                                    <p>Enter start and end dates (both optional)</p>
+                                    <div id="div-start_date" class="control-group  " style="display:inline;" >
+
+                                        <div class="controls" style="display:inline;">
+                                            {{ bucket.form.start_date }} 
+                                        </div>
+                                    </div>                                    
+                                    through
+                                    <div id="div-end_date" class="control-group  " style="display:inline;">
+
+                                        <div class="controls" style="display:inline;">
+                                            {{ bucket.form.end_date }}
+                                        </div>
+                                    </div>
+                                    <div id="div-context_agent" class="control-group">
+                                        <div class="controls">
+                                            {{ bucket.form.context_agent }}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {{ bucket.form|as_bootstrap }} 
+                                {% endif %}
+                              </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <input id="calculate" type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Calculate Distribution' %}" />
+                </form>
+
+            </div>
+
+            <div class="span6">
+
+                <div id="loading" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></div> 
+  
+                {% if agent_totals %}
+                  <div id="distributions">
+{% comment %}
+                    <form 
+                        id="change-ve" 
+                        action="{% url edit_value_equation value_equation_id=ve.id %}" 
+                        method="GET" >
+                        <button style="display: inline;"  class="btn btn-info" title="Change this value equation" >Change Value Equation</button>
+                    </form>
+{% endcomment %}
+                    <span class="hdg">Agent Totals:</span>
+                    <table class="table table-bordered table-condensed" >
+                        <thead>
+                            <th>{% trans "Agent" %}</th>
+                            <th style="text-align: right;">{% trans "Distribution Amount" %}</th>
+                        </thead>
+                        <tbody> 
+                            {% for at in agent_totals %}
+                                <tr class="{% cycle 'odd' 'even' %}">
+                                    <td>{{ at.to_agent.name }}</td>
+                                    <td style="text-align: right;" >{{ at.quantity }}</td>
+                                </tr>
+                            {% endfor %}
+                            <tr>
+                                <th> Total </th>
+                                <td  style="text-align: right;"> {{ total }} </td>
+                            </tr>
+                        <tbody> 
+                    </table>
+                  </div>
+
+                  <div id="subtotals" >
+                    <span class="hdg">Subtotals:</span>
+                    <table class="table table-bordered table-condensed" >
+                        <thead>
+                            <th>{% trans "Agent" %}</th>
+                            <th>{% trans "Filter" %}</th>
+                            <th style="text-align: right;">{% trans "Qty" %}</th>
+                            <th style="text-align: right;">{% trans "Value Added" %}</th>
+                            <th style="text-align: right;">{% trans "Distr Amount" %}</th>
+                            <th style="text-align: right;">{% trans "Rate" %}</th>
+                        </thead>
+                        <tbody> 
+                            {% for sub in agent_subtotals %}
+                                <tr class="{% cycle 'odd' 'even' %}">
+                                    <td>{{ sub.agent.nick }}</td>
+                                    <td>{{ sub.bucket_rule.filter }}</td>
+                                    <td style="text-align: right;" >{{ sub.quantity }}</td>
+                                    <td style="text-align: right;" >{{ sub.value }}</td>
+                                    <td style="text-align: right;" >{{ sub.distr_amt }}</td>
+                                    <td style="text-align: right;" >{{ sub.rate }}</td>
+                                </tr>
+                            {% endfor %}
+                        <tbody> 
+                    </table>
+                  </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if details %}
+            <div class="row-fluid" id="detail-section">
+                <span class="hdg">Details:*</span> * Does not include buckets with a distribution directly to one agent.</br>
+                <span class="hdg">Event count:</span> {{ event_count }}
+                <table class="table table-bordered table-condensed" >
+                    <thead>
+                        <th>{% trans "Bucket" %}</th>
+                        <th>{% trans "Filter" %}</th>
+                        <th>{% trans "Contributor" %}</th>
+                        <th>{% trans "Contribution Date" %}</th>
+                        <th>{% trans "Contribution Type" %}</th>
+                        <th>{% trans "Contribution" %}</th>
+                        <th>{% trans "Claim equation" %}</th>
+                        <th>{% trans "Distributed" %}</th>
+                        <th>{% trans "Explanation" %}</th>
+                    </thead>
+                    <tbody> 
+                        {% for detail in details %}
+                            <tr class="{% cycle 'odd' 'even' %}">
+                                <td>{{ detail.vebr.value_equation_bucket.name }}</td>
+                                <td>{{ detail.vebr.filter }}</td>
+                                <td>{{ detail.from_agent.nick }}</td>
+                                <td>{{ detail.event_date }}</td>
+                                <td>{{ detail.event_type }} - {{ detail.resource_type }}</td>
+                                <td>
+                                    {{ detail.quantity }} 
+                                    {% if detail.unit_of_quantity %}
+                                        {{ detail.unit_of_quantity.abbrev }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ detail.vebr.claim_creation_equation }}</td>
+                                <td>{{ detail.distr_amt }}</td>
+                                <td>{{ detail.explanation }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            <th colspan="4" style="" ></th>
+                            <td style="text-align: right;">Total:</td>
+                            <td>{{ hours }}</td>
+                            <th  colspan="3"></th>
+                        </tr>
+                    <tbody> 
+                </table> 
+            </div>
+        {% endif %}
+       
+    </div>
+{% endblock %}
+{% block extra_script %}
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+    <script src="{% static 'js/chosen.jquery.js' %}"></script>
+{% endblock %}
+
+{% block extra_body %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+    
+        $('#distribution').addClass('active');
+    
+        $("#calculate").click(showLoading);
+        
+        function showLoading()
+        {
+            $("#loading").show();
+            $("#distributions").hide();
+            $("#subtotals").hide();
+            $("#detail-section").hide();
+        }
+        
+        {% if agent_totals %}         
+            $("#loading").hide();
+        {% endif %}
+
+        $(".chzn-select").chosen();
+        
+        $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
+        
+        $( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+        jQuery.validator.addMethod("quantity",
+            function(value, element) {
+                var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
+                return this.optional(element) || isValidQuantity;
+            },
+            "Please enter a number less than 1000000 with no more than 2 decimal places"
+        );
+
+        jQuery.validator.setDefaults({ 
+            success: function(label) {
+                label
+                    .text('').addClass('valid')
+                    .closest('.control-group').addClass('success');
+            }
+        });
+
+        $.validator.addClassRules("quantity", { required: true, quantity: true, });
+        //$.validator.addClassRules("date-entry", { date: true, required: false });       
+
+        $('.validateMe').each( function(){
+            var form = $(this);
+            form.validate({
+                highlight: function(label) {
+                    $(label).closest('.control-group').addClass('error');
+                }
+            });
+        });
+
+
+        $("#id_value_equation").change(reloadPage);
+
+        function reloadPage()
+        {
+            var selectedVE = document.getElementById('id_value_equation').value;
+            var url = '/accounting/value-equation-sandbox/' + selectedVE + '/'
+            window.location.replace(url);
+        }
+
+/* reloading the page instead of ajax call for now - too difficult to build the input fields
+        $("#id_value_equation").change(getBuckets); 
+
+        function getBuckets()
+        {
+            var selectedVE = document.getElementById('id_value_equation').value;
+            $('#change-ve').attr('action', '/accounting/edit-value-equation/' + selectedVE + '/' );
+            var jsonUrl = encodeURI("/accounting/json-value-equation-buckets/" + selectedVE + "/");
+            $("#filters").empty();
+            $.get(jsonUrl,
+            function(data){
+                var filters = ""
+                for(var i=0 ; i<data.length ; i++)
+                {
+                    var sequence = data[i].fields['sequence'];
+                    var name = data[i].fields['name']; 
+                    var pct = data[i].fields['percentage']; 
+                    var agent = data[i].fields['agent_name']; 
+                    var filterMethod = data[i].fields['filter_method'];
+
+                    filters = filters + '<div class="bucket"><span class="name">' + name + '</span><span class="pct">' + pct + '</span>%</div>'
+                    if (agent != 'null') {
+                        filters = filters + '<div class="to">Distribute to <span class="dist-to">' + agent + '</span></div>'
+                    } else {
+                        filters = filters + '<div class="filt">'
+                        if (filterMethod == 'dates') {
+                            filters = filters + '<p>Enter start and end dates (both optional)</p>'
+                          
+
+                        }
+                    }
+                }
+                $("#filters").append(filters)
+            });
+        }
+*/
+
+    }); // end document.ready
+    </script>
+
+{% endblock %}
