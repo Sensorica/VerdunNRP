@@ -1,0 +1,41 @@
+{% load i18n %}
+{% load thumbnail %}
+
+<legend>
+    {% if layout.work_panel_headline %}
+        {{ layout.work_panel_headline|safe|urlize }}
+    {% else %}
+        Work to do
+    {% endif %}
+</legend>
+
+{% if not layout.work_panel_headline %}
+    <p style="font-style: italic;" >
+        Your work will be eligible for income sharing.
+    </p>
+{% endif %}
+
+<ul>
+    {% for item in work_to_do %}
+        <li>
+            <b>{{ item.resource_type.name }}</b> &mdash; {% trans "updated" %} {{ item.changed_date }}</br>
+            {% if item.process %}
+                <i>{% trans "Purpose:" %} {{ item.process.timeline_description }}</i>
+                <p style="margin-left: 1em; margin-bottom: 0; font-size: 90%;">
+                    <a href="{% url unfold_commitment commitment_id=item.id %}">Learn more...</a>
+                </p>
+
+                    {% comment %}
+                    <div style="display: inline;" >
+                        <a href="" role="button" class="btn btn-info" title="This button does not work yet. It will soon.">
+                            {% trans "do this work?" %}
+                        </a>
+                    </div>
+                    <p style="margin-left: 1em; margin-bottom: 0; font-size: 90%;">
+                        {% trans "for process" %}: <a href="{% url unfold process_id=item.process.id %}">{{ item.process.name }}</a>
+                    </p>
+                    {% endcomment %}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>

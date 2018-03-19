@@ -1,0 +1,13 @@
+{% load i18n %}
+
+{% if active_projects|length > 0 %}
+    <legend>Most active projects</legend>
+
+    <ul>
+        {% for project in active_projects %}
+            <li>
+                <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
