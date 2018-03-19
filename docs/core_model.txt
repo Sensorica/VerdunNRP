@@ -1,0 +1,402 @@
+DISCLAIMER: this is early work in process. Being revised, cleaned up,
+stuff changing, being deleted, etc. etc. Do not take this as "the model".
+Thank you very much.
+
+
+""" Models based on REA
+
+These models are based on the Bill McCarthy's Resource-Event-Agent accounting model:
+https://www.msu.edu/~mccarth4/
+http://en.wikipedia.org/wiki/Resources,_events,_agents_(accounting_model)
+
+REA is also the basis for ISO/IEC FDIS 15944-4 ACCOUNTING AND ECONOMIC ONTOLOGY
+http://global.ihs.com/doc_detail.cfm?item_s_key=00495115&item_key_date=920616
+
+We have changed the classical REA model for value network purposes, as described here:
+https://docs.google.com/document/d/1YpFaytWfeuGMxZWW6yY59ZTfL0PseAQ_LxqjjBhGogs/edit?usp=sharing
+
+The model descriptions below are copied and pasted from 
+https://github.com/valnet/valuenetwork/blob/master/valuenetwork/valueaccounting/models.py
+We removed the Django-specific code in preparation for translating
+into various Linked Open Data formats.
+
+Some parts of the model are stable, some are not.
+The classes that are stable are marked with *.
+Even in the stable classes, however, some of the attributes may not be stable.
+
+We are currently working on another section of the model dealing with ValueEquations
+and income distribution that is not yet included here, but should be when it is baked.
+
+"""
+
+Location:
+"Should be part of another ontology and just referenced here."
+    name = text
+    description = text
+    address = text
+    latitude = float
+    longitude = float
+
+
+
+Unit:
+"Will become qudt:Unit"
+
+    
+PARTY_TYPE_CHOICES = (
+    'individual'
+    'organization',
+    'network'
+    'project',
+    'community'
+)
+    
+    
+AgentType:
+"This and its party_type will be part of another ontology, which will have Person and Group
+as subclasses, and could also allow for additional types using AdditionalType."
+    name = text
+    party_type = reference to one of a list of PARTY_TYPE_CHOICES
+    description = text
+    
+  
+*EconomicAgent:
+"A person or organization that is authorized to perform
+EconomicEvents involving EconomicResources.  This will be 
+part of another ontology
+with Agent as superclass, Person and Group as subclasses."
+    name = text
+    nick = text
+    url = url
+    agent_type = reference to an AgentType
+    description = text
+    email = email address
+    location = reference to a Location
+    reputation = decimal number #derived data
+    photo = reference to a photo
+
+    
+ASSOCIATION_BEHAVIOR_CHOICES = (
+    'supplier',
+    'customer',
+    'member',
+    'child',
+)
+
+AgentRelationshipRole:
+    identifier = text
+    name = text
+    plural_name = text
+    association_behavior = reference to one of a list of ASSOCIATION_BEHAVIOR_CHOICES
+    description = text
+    label = text
+    inverse_label = text
+    
+
+RELATIONSHIP_STATE_CHOICES = (
+    'active'
+    'inactive'
+    'potential'
+)    
+
+AgentRelationship:
+"An association between 2 agents, defining a role in relationship to each other."
+    is_associate = reference to an EconomicAgent #to Agent in other ontology
+    has_associate = reference to an EconomicAgent #to Agent in other ontology
+    relationship_type = reference to an AgentRelationshipRole
+    description = text
+    state = reference to one of a list of RELATIONSHIP_STATE_CHOICES
+
+    
+EVENT_TYPE_RELATIONSHIP_CHOICES = (
+    'in',
+    'out',
+    'give',
+    'take',
+)
+
+EVENT_TYPE_RELATED_CHOICES = (
+    'process',
+    'exchange',
+    'agent'
+)
+
+RESOURCE_EFFECT_CHOICES = (
+    'increase',
+    'decrease',
+    'transfer', #means - for from_agent, + for to_agent
+    'no effect', #used for citations and currently for work resource types
+    #These last two are currently used by workflows which change resource stage.
+    #They are themselves subject to change.
+    'to be changed', #prepare for change of stage or state
+    'change', #change stage or state
+)
+    
+*EventType:
+"Defines the behavior of EconomicEvents,
+and the relationships of CommitmentTypes and Commitments
+to EconomicInteractions."
+    identifier
+    name = text
+    label = text #used in graphs
+    inverse_label = text #used in graphs
+    relationship = reference to one of a list of EVENT_TYPE_RELATIONSHIP_CHOICES
+    related_to = reference to one of a list of EVENT_TYPE_RELATED_CHOICES
+    resource_effect = reference to one of a list of RESOURCE_EFFECT_CHOICES
+    
+* EventTypes in use:
+Resource Production
+Resource Consumption
+Citation
+Resource Use
+Time Contribution
+To Be Changed
+Change
+Cash Contribution
+Resource Contribution
+Receipt
+Expense
+Payment
+Cash Receipt
+Shipment
+Todo
+Damage
+
+* EventType example properties:
+
+identifier: 'citation'
+name: 'Citation'
+label: 'cites'
+inverse_label: 'cited by'
+relationship: 'in'
+related_to: 'process'
+resource_effect: 'no effect'
+
+identifier: 'consumption'
+name: 'Resource Consumption'
+label: 'consumes'
+inverse_label: 'consumed by'
+relationship: 'in'
+related_to: 'process'
+resource_effect: 'decrease'
+
+identifier: 'cash-receipt'
+name: 'Cash Receipt'
+label: 'receives cash'
+inverse_label: 'cash received by'
+relationship: 'take'
+related_to: 'exchange'
+resource_effect: 'increase'
+
+
+InteractionType
+"Supertype of ProcessType and ExchangeType"
+    name = text
+    description = text
+    url = url
+
+
+INVENTORY_RULE_CHOICES = (
+    ('yes', _('Keep inventory')),
+    ('no', _('Not worth it')),
+    ('never', _('Does not apply')),
+)    
+  
+*ResourceType:
+"Defines the behavior of EconomicResources.
+Part of Recipes."
+    name = text  
+    parent = reference to another EconomicResourceType
+    species = #placeholder - need a more general term, and need to figure out if it is resource type or something new
+    unit = reference to a Unit
+        help_text=_('if this resource type has different units of use and inventory, this is the unit of inventory'))
+    unit_of_use = reference to a Unit
+        help_text=_('if this resource type has different units of use and inventory, this is the unit of use'))
+    substitutable = boolean
+        help_text=_('Can any resource of this type be substituted for any other resource of this type?'))
+    inventory_rule = reference to one of a list of inventory_rule_choices
+    photo = reference to a photo
+    url = url
+    description = text
+    rate = decimal number
+
+    
+AgentResourceType:
+"Defines the relationship between
+an Agent, an EconomicResourceType and an EventType.
+For example, a given Agent might sell one EconomicResourceType,
+buy another EconomicResourceType, and provide work of yet
+another EconomicResourceType."
+    agent = reference to an EconomicAgent
+    resource_type = reference to an EconomicResourceType
+    event_type = reference to an EventType
+    lead_time = number of days
+    value = a decimal number #could be price, pay rate, etc.
+    unit_of_value = reference to a Unit
+    description = models.TextField(_('description'), null=True, blank=True)
+    
+  
+ORDER_TYPE_CHOICES = (
+    'Customer order', #from an EconomicAgent that is outside the Network
+    'Purchase order', #to an EconomicAgent that is outside the Network
+    'Transfer order', #between EconomicAgents that are part of the same Network
+    'Work order', #an internal order to do something (what some people call a project)
+)
+
+*Order:
+"An Order is a contract or agreement between two EconomicAgents,
+or in the case of a Work Order, a plan decided within a context_agent,
+where the details are specified by Commitments.
+A context_agent is a group within which EconomicInteractions occur."
+    order_type =reference to one of a list of ORDER_TYPE_CHOICES
+    name = text
+    receiver = reference to an EconomicAgent
+    provider = reference to an EconomicAgent
+    order_date = date
+    due_date = date
+    description = text
+    
+    
+*ProcessType(InteractionType):
+"Defines the behavior of Processes.
+Part of Recipes."
+    estimated_duration = reference to a QuantityValue
+ 
+ 
+ExchangeType(InteractionType):
+"Defines the behavior of Exchanges.
+Examples: Sale, Purchase, Customer Order, Distribution"
+
+    
+EconomicInteraction:
+"Superclass of Process and Exchange"
+    name = text
+    context_agent = reference to an EconomicAgent
+    url = url
+    plannedStartDate
+    plannedEndDate
+    startDate
+    endDate
+    description = text
+
+    
+*CommitmentType:
+"Defines Commitments.
+Part of Recipes."
+    interaction_type = reference to an InteractionType
+    resource_type = reference to an EconomicResourceType
+    event_type = reference to an EventType
+    stage = reference to a ProcessType
+    quantity = decimal number
+    unit_of_quantity = reference to Unit
+    description = text
+    
+
+*Process(EconomicInteraction):
+"Changes input EconomicResources into output EconomicResources."
+    process_type = reference to a ProcessType
+    
+    
+Exchange:
+"Trades given EconomicResources for taken EconomicResources
+between EconomicAgents."
+    exchange_type = reference to an ExchangeType
+    order = reference to an Order
+    
+    
+*Commitment:
+"A promise or plan from one EconomicAgent 
+to another (or the same) EconomicAgent
+to perform one or more EconomicEvents in the future."
+    independent_demand = reference to an Order      #Which of these two
+    order_item = reference to another Commitment    #did we decide to keep?
+                                                    #Could get independent_demand
+                                                    #from order_item...
+                                                    #independent_demand is explained in detail in
+                                                    #http://hillside.net/plop/plop97/Proceedings/haugen.pdf
+                                                    #Short version: an independent_demand has no other cause
+                                                    #within a system other than some agent's decision.
+                                                    #Dependent demands are other demands that are required
+                                                    #to satisfy the independent_demand.
+    event_type = reference to an EventType
+    commitment_type = reference to a CommitmentType
+    stage = reference to a ProcessType
+    commitDate
+    startDate
+    endDate
+    plannedStartDate
+    plannedEndDate
+    from_agent = reference to an EconomicAgent
+    to_agent = reference to an EconomicAgent
+    resource_type = reference to an EconomicResourceType
+        #you don't always know the resource that is being committed
+    resource = reference to an EconomicResource
+        #sometimes you do know 
+        #- reserving a room is a commitment, usually for an exact room
+    economic_interaction = reference to an EconomicInteraction
+    context_agent = reference to an EconomicAgent
+    description = text
+    url = url
+    quantity = decimal number
+    unit_of_quantity = reference to a Unit
+    quality = decimal number
+    value = decimal number
+    unit_of_value = reference to a Unit
+   
+   
+*EconomicResource:
+"Something of value to some EconomicAgents."
+    resource_type = reference to an EconomicResourceType
+    tracking_id = text
+    stage = reference to a ProcessType
+    url = url
+    quantity = decimal number
+    unit_of_quantity = reference to a Unit
+    quality = decimal number
+    description = text
+    photo = reference to a photo
+    location = reference to a Location
+    
+    
+*EconomicEvent:
+"A change in an EconomicResource, performed by some EconomicAgents.
+The type of change is defined by the EventType."
+    event_type = reference to an EventType
+    event_date = date
+    from_agent = reference to an EconomicAgent
+    to_agent = reference to an EconomicAgent
+    resource_type = reference to an EconomicResourceType
+    resource = reference to an EconomicResource
+    economic_interaction = reference to an EconomicInteraction
+    context_agent = reference to an EconomicAgent     
+    url = url
+    description = text
+    quantity = decimal number
+    unit_of_quantity = reference to a Unit
+    quality = decimal number
+    value = decimal number
+    unit_of_value = reference to a Unit
+    commitment = reference to a Commitment
+   
+   
+# I see a lot of implementations of Faceted Classification
+# in different semantic web formats.
+# We should pick one.
+# For some of the difficulties, see http://www.webpages.uidaho.edu/~mbolin/putkey.pdf
+*Facet:
+"Used with FacetValue to classify ResourceTypes."
+    name = text
+    description = text
+
+
+*FacetValue:
+"Used with Facet to classify ResourceTypes."
+    facet = reference to Facet
+    value = text
+    description = text
+
+
+*ResourceTypeFacetValue:
+    resource_type = reference to EconomicResourceType
+    facet_value = reference to FacetValue
+
