@@ -6,14 +6,14 @@
     {% if process.outgoing_commitments %}
         <li class="section deliverables-section">{% trans "Deliverables" %}:</li>
         <ul>
-		    {% for item in process.outgoing_commitments %}	
+		    {% for item in process.outgoing_commitments %}
 			    <li class="deliverable" >
 				     <span class="name deliverable-name">
                         {{ item.resource_type.name }}
                         {% if item.stage %}
                             @{{ item.stage.name }}
                         {% endif %}
-                        :</span> 
+                        :</span>
                         {{ item.quantity }} {{ item.unit_of_quantity }}
 				    {% if item.description %}
 					    <ul>
@@ -25,8 +25,8 @@
 			        <ul>
 				        {% for event in item.fulfilling_events %}
 					        <li class="subline" >
-						        <span class="prefix created-prefix">{{ event.event_type.name }}:</span> 
-						        {{ event.from_agent }} 
+						        <span class="prefix created-prefix">{{ event.event_type.name }}:</span>
+						        {{ event.from_agent }}
 						        {% if event.resource %}
                                     <a href="{% url resource resource_id=event.resource.id %}" target="_blank">{{ event.resource_type.name }} {{ event.resource.label }}</a>
                                 {% else %}
@@ -43,13 +43,13 @@
 				        {% for wanter in item.associated_wanting_commitments %}
                             {% if wanter.process or wanter.exchange %}
                                 <li class="subline" >
-                                    <span class="dependency">{% trans "Wanted by" %}:</span> 
+                                    <span class="dependency">{% trans "Wanted by" %}:</span>
                                     {% if wanter.process %}
-                                        <a href="{{ wanter.process.get_absolute_url }}" target="_blank">{{ wanter.process.name }}</a> 
+                                        <a href="{{ wanter.process.get_absolute_url }}" target="_blank">{{ wanter.process.name }}</a>
                                     {% elif wanter.exchange %}
                                         <a href="{{ wanter.exchange.get_absolute_url }}" target="_blank">{{ wanter.exchange }}</a>
                                     {% endif %}
-                                    {{ wanter.quantity }} {{ wanter.unit_of_quantity }} {{ wanter.due_date }} 
+                                    {{ wanter.quantity }} {{ wanter.unit_of_quantity }} {{ wanter.due_date }}
                                 </li>
                             {% endif %}
 				        {% endfor %}
@@ -66,7 +66,7 @@
 			{% for item in process.unfinished_work_requirements %}
 				<li class="work">
 					<span class="name deliverable-name">{{ item.resource_type.name }}:</span> {{ item.quantity }} {{ item.unit_of_quantity }}
-					
+
 					{% if item.from_agent %}
 					    <span class="taken">{% trans "Taken by" %} {{ item.from_agent.nick }}</span>
 					    {% if agent == item.from_agent and work_now %}
@@ -75,7 +75,7 @@
 					{% else %}
 					     <span class="due">{% trans "due" %} {{ item.due_date }}</span>
 					    {% if agent %}
-						    <div style="display: inline;" >
+						    <div class="ib">
 							    <a href="#commitmentModal{{ item.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
 								    {% trans "Take this task" %}
 							    </a>
@@ -131,27 +131,27 @@
 	                {% endif %}
 
 			    </li>
-			    
+
 			    {% if item.onhand %}
 			        <ul>
 				    {% for resource in item.onhand %}
 					    <li class="subline" >
-					        <span class="prefix onhand-prefix">{% trans "Onhand" %}:</span> 
+					        <span class="prefix onhand-prefix">{% trans "Onhand" %}:</span>
 					        <a class="resource" href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource }}</a>
 				        </li>
-					    
+
 				    {% endfor %}
 				    </ul>
 			    {% endif %}
-		    {% endfor %}	
-		    </ul>				
+		    {% endfor %}
+		    </ul>
         </li>
     {% endif %}
-    
+
     {% if process.consumed_input_requirements %}
         <li class="section materials-section" >{% trans "Consumable Requirements" %}:</li>
         <ul>
-		    {% for reqmt in process.consumed_input_requirements %}	
+		    {% for reqmt in process.consumed_input_requirements %}
 			    <li class="material" >
 				    <span class="name material-name">{{ reqmt.resource_type.name }}:</span>  {{ reqmt.quantity }} {{ reqmt.unit_of_quantity }}
 			    </li>
@@ -164,8 +164,8 @@
 			        <ul>
 				        {% for resource in reqmt.onhand %}
 					        <li class="subline" >
-						        <span class="prefix onhand-prefix">{% trans "Onhand" %}:</span> 
-						        <a href="{% url resource resource_id=resource.id %}" target="_blank">{{ resource.resource_type.name }} {{ resource.label }}</a> 
+						        <span class="prefix onhand-prefix">{% trans "Onhand" %}:</span>
+						        <a href="{% url resource resource_id=resource.id %}" target="_blank">{{ resource.resource_type.name }} {{ resource.label }}</a>
 						        {{ resource.quantity }} {{ resource.unit_of_quantity }}
 					        </li>
 				        {% endfor %}
@@ -175,9 +175,9 @@
 			        <ul>
 				        {% for ct in reqmt.associated_producing_commitments %}
 					        <li class="subline" >
-						        <span class="dependency">{% trans "Promised" %}:</span> 
-						         {{ ct.quantity }} {{ ct.unit_of_quantity }} <span class="due">{{ ct.due_date }}</span> 
-						         <a href="{{ ct.process.get_absolute_url }}" target="_blank">{% trans "by Process" %}: {{ ct.process.name }}</a> 
+						        <span class="dependency">{% trans "Promised" %}:</span>
+						         {{ ct.quantity }} {{ ct.unit_of_quantity }} <span class="due">{{ ct.due_date }}</span>
+						         <a href="{{ ct.process.get_absolute_url }}" target="_blank">{% trans "by Process" %}: {{ ct.process.name }}</a>
 					        </li>
 				        {% endfor %}
 				    </ul>
@@ -186,7 +186,7 @@
 			        <ul>
 				        {% for source in reqmt.resource_type.producing_agent_relationships %}
 					        <li class="subline" >
-						        <span class="prefix source-prefix">{% trans "Possible source" %}:</span> {{ source.agent.name }} 
+						        <span class="prefix source-prefix">{% trans "Possible source" %}:</span> {{ source.agent.name }}
 						        {% trans "Lead time" %}: {{ source.lead_time }} {% trans "days" %}
 					        </li>
 				        {% endfor %}
@@ -196,10 +196,10 @@
 		</ul>
 	{% endif %}
 
-	{% if process.used_input_requirements %}	
+	{% if process.used_input_requirements %}
 		<li class="section tools-section" >{% trans "Usable Requirements" %}:</li>
 		<ul>
-		    {% for reqmt in process.used_input_requirements %}	
+		    {% for reqmt in process.used_input_requirements %}
 			    <li class="subline" >
 
 				    <span class="name tool-name">{{ reqmt.resource_type.name }}:</span> {{ reqmt.quantity }}{{ reqmt.unit_of_quantity }}
@@ -213,8 +213,8 @@
 		            <ul>
 			            {% for resource in reqmt.onhand %}
 				            <li class="subline" >
-					            <span class="prefix onhand-prefix">{% trans "Onhand" %}:</span> 
-					            <a href="{% url resource resource_id=resource.id %}" target="_blank">{{ resource.resource_type.name }} {{ resource.label }}</a> 
+					            <span class="prefix onhand-prefix">{% trans "Onhand" %}:</span>
+					            <a href="{% url resource resource_id=resource.id %}" target="_blank">{{ resource.resource_type.name }} {{ resource.label }}</a>
 					            {{ resource.quantity }} {{ resource.unit_of_quantity }}
 				            </li>
 			            {% endfor %}
@@ -224,8 +224,8 @@
 		            <ul>
 			            {% for ct in reqmt.associated_producing_commitments %}
 				            <li class="subline" >
-					            <span class="dependency">{% trans "Promised" %}:</span> 
-					            {{ ct.quantity }} {{ ct.unit_of_quantity }} <span class="due">{{ ct.due_date }}</span> 
+					            <span class="dependency">{% trans "Promised" %}:</span>
+					            {{ ct.quantity }} {{ ct.unit_of_quantity }} <span class="due">{{ ct.due_date }}</span>
 					            <a href="{{ ct.process.get_absolute_url }}" target="_blank">{% trans "by Process" %}: {{ ct.process.name }}</a>
 				            </li>
 			            {% endfor %}
@@ -235,7 +235,7 @@
 		            <ul>
 			            {% for source in reqmt.resource_type.producing_agent_relationships %}
 				            <li class="subline" >
-					            <span class="prefix source-prefix">{% trans "Possible source" %}:</span> {{ source.agent.name }} 
+					            <span class="prefix source-prefix">{% trans "Possible source" %}:</span> {{ source.agent.name }}
 					            {% trans "Lead time" %}: {{ source.lead_time }} {% trans "days" %}
 				            </li>
 			            {% endfor %}
