@@ -3,6 +3,10 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_resource_type %}
+{% type_facet as t_facet %}
 
 {% block head_title %}{% trans "Change Pattern" %}: {{ pattern.name }}{% endblock %}
 
@@ -172,9 +176,9 @@ th, td {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans "Change Pattern" %}: 
+		        {% trans "Change Pattern" %}:
 		        <input id="patternName" name="patternName" value="{{ pattern.name }}" />
-		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change Resource Type Facets" %}</a>
+		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change {{ t_resource_type|title }} {{ t_facet|title}}s" %}</a>
 		        &nbsp;&nbsp;&nbsp;<span id="saving"></span>
 	        </legend>
 
@@ -188,20 +192,20 @@ th, td {
                     <div class="span6">
                         <div class="row-fluid">
                             <div class="span12">
-                                    <span class="slot-label" >{{ slot.label|capfirst }}</span> 
+                                    <span class="slot-label" >{{ slot.label|capfirst }}</span>
                                     {% trans "Selections you will see in forms" %}: </br>
                                     <span class="selections">{{ slot.rts.resource_type }}</br>
                             </div>
                         </div>
                         <div class="row-fluid">
                             <div class="span8 resourcesHeader">
-                                <h4>{% trans "Resource Types" %}</h4>
+                                <h4>{% trans "{{ t_resource_type|title }}s" %}</h4>
                             </div>
                             <div class="span4 facetsHeader">
-                                <h4>{% trans "Resource Type Facets" %}</h4>
+                                <h4>{% trans "{{ t_resource_type|title }} {{ t_facet|title }}s" %}</h4>
                             </div>
                         </div>
-                        
+
                         {% for item in slot.resource_types %}
                             <div class="row-fluid {% cycle 'odd' 'even' %}">
                                 <div class="span8 resources">
@@ -222,7 +226,7 @@ th, td {
                             <div class="span8">
                                 <table>
                                     <thead>
-				                        <th>{% trans "Pattern Facets" %}</th>
+				                        <th>{% trans "Pattern {{ t_facet|title }}s" %}</th>
 				                        <th>{% trans "Del" %}</th>
 			                        </thead>
 			                        <tbody>
@@ -231,7 +235,7 @@ th, td {
 				                            <tr>
 				                                {{ form.id }}
 					                            <td>
-						                            {{ form.facet_value }} 
+						                            {{ form.facet_value }}
 					                            </td>
 					                            <td>
 						                            {{ form.DELETE }}
@@ -242,12 +246,12 @@ th, td {
 				                </table>
 			                </div>
 			                <div class="span4">
-            			        <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" 
+            			        <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;"
                                     title="{% trans 'Save all changes and see results' %}" value="{% trans 'Save changes' %}" />
                             </div>
                         </div>
                     </div>
-                    
+
                 </div>
 
                 {% endfor %}
@@ -272,65 +276,65 @@ th, td {
 		$(".chzn-select").chosen();
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
-        
+
         $("#patternName").blur(saveName);
 
 	}); // end document.ready
-	
+
 	function saveName(event)
     {
         var name = event.target.value;
         id = {{ pattern.id }};
         notifySaving();
         var jqxhr = $.post("{% url change_pattern_name  %}",  { patternId: id, name: name },
-            function( data ) 
+            function( data )
             {
                 notifySaved();
             })
-            .fail(function() 
-            { 
-                notifyProblem(); 
+            .fail(function()
+            {
+                notifyProblem();
             }
-        );   
+        );
     }
-    
+
     function notifySaving()
     {
-        $("#saving").css("color","green"); 
+        $("#saving").css("color","green");
         $("#saving").text("Saving new name...");
     }
 
     function notifySaved()
     {
-        $("#saving").css("color","green"); 
+        $("#saving").css("color","green");
         $("#saving").text("Saved new name");
     }
 
     function notifyProblem()
     {
-        $("#saving").css("color","red"); 
+        $("#saving").css("color","red");
         $("#saving").text("Problem saving new name");
     }
 
-    $(document).ajaxSend(function(event, xhr, settings) 
+    $(document).ajaxSend(function(event, xhr, settings)
     {
-        function getCookie(name) 
+        function getCookie(name)
         {
             var cookieValue = null;
-            if (document.cookie && document.cookie != '') 
+            if (document.cookie && document.cookie != '')
             {
                 var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) 
+                for (var i = 0; i < cookies.length; i++)
                 {
                     var cookie = jQuery.trim(cookies[i]);
                     // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) 
+                    if (cookie.substring(0, name.length + 1) == (name + '='))
                     {
                         cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                         break;
@@ -340,7 +344,7 @@ th, td {
             return cookieValue;
         }
 
-        function sameOrigin(url) 
+        function sameOrigin(url)
         {
             // url could be relative or scheme relative or absolute
             var host = document.location.host; // host + port
@@ -354,17 +358,17 @@ th, td {
                 !(/^(\/\/|http:|https:).*/.test(url));
         }
 
-        function safeMethod(method) 
+        function safeMethod(method)
         {
             return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
         }
 
-        if (!safeMethod(settings.type) && sameOrigin(settings.url)) 
+        if (!safeMethod(settings.type) && sameOrigin(settings.url))
         {
             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
         }
     });
-    
+
     </script>
 
 {% endblock %}

@@ -3,8 +3,11 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
+{% load types %}
 
-{% block head_title %}{% trans "Agent association type" %}: {{ agent_assoc_type.name }}{% endblock %}
+{% type_agent_association_type as typename %}
+
+{% block head_title %}{% trans typename|title %}: {{ agent_assoc_type.name }}{% endblock %}
 
 {% block extra_head %}
 
@@ -36,7 +39,7 @@
         {% include "_messages.html" %}
 
 		<legend>
-			{% trans "Agent Association Type" %}: {{ agent_assoc_type.name }}
+			{% trans typename|title %}: {{ agent_assoc_type.name }}
 {% comment %}
 			{% if user_agent and change_form %}
 		        <a href="#agentChangeForm" role="button" class="btn btn-primary indent" data-toggle="modal">{% trans "Change" %}</a>
