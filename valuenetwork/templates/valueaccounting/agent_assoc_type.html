@@ -19,7 +19,7 @@
 }
 #id_notes, #id_access_rules {
   width: 500px;
-  height: 100px;    
+  height: 100px;
 }
 .text-center {
     text-align: center;
@@ -41,13 +41,13 @@
 			{% if user_agent and change_form %}
 		        <a href="#agentChangeForm" role="button" class="btn btn-primary indent" data-toggle="modal">{% trans "Change" %}</a>
 	        {% endif %}
-	        
+
 	        {% if user.is_staff and agent.is_deletable %}
                 <form
-                    style="display: inline;" 
-                    class="delete-agent-form" 
-                    id="deleteAgentForm" 
-                    action="{% url delete_agent agent_id=agent.id %}" 
+                    style="display: inline;"
+                    class="delete-agent-form"
+                    id="deleteAgentForm"
+                    action="{% url delete_agent agent_id=agent.id %}"
                     method="POST" >
                     {% csrf_token %}
                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete Agent" >Delete</button>
@@ -77,46 +77,43 @@
 
 		    </div>
 	    {% endif %}
-	    
+
 {% endcomment %}
 
 		<div class="row-fluid">
-		
+		    {% comment %} No point in making this a table (except to screw up mobile) {% endcomment %}
 		    <div class="span6">
-	            <table class="table table-bordered" >
-                    <tr>
-                        <th style="text-align: right;">{% trans "Identifier" %}</th>
-                        <td>{{ agent_assoc_type.identifier }}</td>
-                    </tr>
-	                <tr>
-                        <th style="text-align: right;">{% trans "Name" %}</th>
-                        <td>{{ agent_assoc_type.name }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right;">{% trans "Plural Name" %}</th>
-                        <td>{{ agent_assoc_type.plural_name }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right;">{% trans "Association Behavior" %}</th>
-                        <td>{{ agent_assoc_type.association_behavior }}</td>
-                    </tr>
-	                {% if agent.description %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "Description" %}</th>
-	                        <td>{{ agent_assoc_type.description|urlize|linebreaks }}</td>
-                        </tr>
-                    {% endif %}
-                    <tr>
-                        <th style="text-align: right; vertical-align: top; ">{% trans "Label" %}</th>
-                        <td>{{ agent_assoc_type.label }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right; vertical-align: top; ">{% trans "Inverse Label" %}</th>
-                        <td>{{ agent_assoc_type.inverse_label }}</td>
-                    </tr>
-	            </table>
-	        
-	        </div>
+          <div>
+              <b>{% trans "Identifier" %}</b>:
+              <span class="pull-right">{{ agent_assoc_type.identifier }}</span>
+          </div>
+          <div>
+              <b>{% trans "Name" %}</b>:
+              <span class="pull-right">{{ agent_assoc_type.name }}</span>
+          </div>
+          <div>
+              <b>{% trans "Plural Name" %}</b>:
+              <span class="pull-right">{{ agent_assoc_type.plural_name }}</span>
+          </div>
+          <div>
+              <b>{% trans "Association Behavior" %}</b>:
+              <span class="pull-right">{{ agent_assoc_type.association_behavior }}</span>
+          </div>
+	        {% if agent.description %}
+	        <div>
+	           <b>{% trans "Description" %}</b>
+	           <div>{{ agent_assoc_type.description|urlize|linebreaks }}</div>
+          </div>
+          {% endif %}
+          <div>
+            <b>{% trans "Label" %}</b>:
+            <span class="pull-right">{{ agent_assoc_type.label }}</span>
+          </div>
+          <div>
+            <b>{% trans "Inverse Label" %}</b>:
+            <span class="pull-right">{{ agent_assoc_type.inverse_label }}</span>
+          </div>
+	      </div>
 
     </div>
 
@@ -140,15 +137,15 @@
 		$('#projects').addClass('active');
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
-        $('td.td-role > select').addClass('select-role');   
-        $('td.td-agent > select').addClass('select-agent');  
+        $('td.td-role > select').addClass('select-role');
+        $('td.td-agent > select').addClass('select-agent');
 
         $.validator.addMethod("agentRequired", function (value, element) {
             alert("value " + value + " element " + element);
@@ -159,20 +156,20 @@
         }, "Both role and agent must be entered.");
 
         $.validator.addClassRules("select-role", { agentRequired: true });
-        
-        jQuery.validator.setDefaults({ 
+
+        jQuery.validator.setDefaults({
             success: function(label) {
                 label
                     .text('').addClass('valid')
                     .closest('.control-group').addClass('success');
             }
         });
-       
+
 
     }); // end document.ready
 
 */
 
     </script>
-    
+
 {% endblock %}

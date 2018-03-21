@@ -19,7 +19,7 @@
 }
 #id_notes, #id_access_rules {
   width: 500px;
-  height: 100px;    
+  height: 100px;
 }
 .text-center {
     text-align: center;
@@ -41,13 +41,13 @@
 			{% if user_agent and change_form %}
 		        <a href="#agentChangeForm" role="button" class="btn btn-primary indent" data-toggle="modal">{% trans "Change" %}</a>
 	        {% endif %}
-	        
+
 	        {% if user.is_staff and agent.is_deletable %}
                 <form
-                    style="display: inline;" 
-                    class="delete-agent-form" 
-                    id="deleteAgentForm" 
-                    action="{% url delete_agent agent_id=agent.id %}" 
+                    style="display: inline;"
+                    class="delete-agent-form"
+                    id="deleteAgentForm"
+                    action="{% url delete_agent agent_id=agent.id %}"
                     method="POST" >
                     {% csrf_token %}
                     <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete Agent" >Delete</button>
@@ -77,36 +77,37 @@
 
 		    </div>
 	    {% endif %}
-	    
+
 {% endcomment %}
 
 		<div class="row-fluid">
-		
-		    <div class="span6">
-	            <table class="table table-bordered" >      
-                    <tr>
-                        <th style="text-align: right;">{% trans "Subject" %}</th>
-                        <td>{{ agent_association.is_associate }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right;">{% trans "Relationship" %}</th>
-                        <td>{{ agent_association.association_type.label }}</td>
-                    </tr>
-	                <tr>
-                        <th style="text-align: right;">{% trans "Object" %}</th>
-                        <td>{{ agent_association.has_associate }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right;">{% trans "Description" %}</th>
-                        <td>{{ agent_association.description }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right;">{% trans "State" %}</th>
-                        <td>{{ agent_association.state }}</td>
-                    </tr>
 
-	            </table>
-	        
+		    <div class="span6">
+              {% comment %} No more tables like this {% endcomment %}
+	            <div>
+                    <div>
+                        <b>{% trans "Subject" %}</b>:
+                        <span class="pull-right">{{ agent_association.is_associate }}</span>
+                    </div>
+                    <div>
+                        <b>{% trans "Relationship" %}</b>:
+                        <span class="pull-right">{{ agent_association.association_type.label }}</span>
+                    </div>
+	                  <div>
+                        <b>{% trans "Object" %}</b>:
+                        <span class="pull-right">{{ agent_association.has_associate }}</span>
+                    </div>
+                    <div>
+                        <b>{% trans "Description" %}</b>
+                        <div>{{ agent_association.description }}</div>
+                    </div>
+                    <div>
+                        <b>{% trans "State" %}</b>
+                        <span class="pull-right">{{ agent_association.state }}</span>
+                    </div>
+
+	            </div>
+
 	        </div>
 
     </div>
@@ -131,15 +132,15 @@
 		$('#projects').addClass('active');
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
-        $('td.td-role > select').addClass('select-role');   
-        $('td.td-agent > select').addClass('select-agent');  
+        $('td.td-role > select').addClass('select-role');
+        $('td.td-agent > select').addClass('select-agent');
 
         $.validator.addMethod("agentRequired", function (value, element) {
             alert("value " + value + " element " + element);
@@ -150,20 +151,20 @@
         }, "Both role and agent must be entered.");
 
         $.validator.addClassRules("select-role", { agentRequired: true });
-        
-        jQuery.validator.setDefaults({ 
+
+        jQuery.validator.setDefaults({
             success: function(label) {
                 label
                     .text('').addClass('valid')
                     .closest('.control-group').addClass('success');
             }
         });
-       
+
 
     }); // end document.ready
 
 */
 
     </script>
-    
+
 {% endblock %}

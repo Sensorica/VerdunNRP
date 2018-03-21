@@ -2,7 +2,7 @@
 
 {% load staticfiles %}
 {% load i18n %}
-{% load humanize %} 
+{% load humanize %}
 
 {% block head_title %}{% trans "Value Accounting for " %} {{ agent }}{% endblock %}
 
@@ -13,7 +13,7 @@
 
 <style>
 
-    td 
+    td
     {
         text-align: right;
         padding-left: 1em;
@@ -43,7 +43,7 @@ h4 {
         {% include "_messages.html" %}
     <div>
         <legend>{% trans "Value Accounting for " %} {{ agent }}</legend>
-        
+
     <div class="row-fluid">
 
         <div class="span7">
@@ -51,17 +51,17 @@ h4 {
             {% for event in events %}
                 <ul>
                     <li>
-                        {{ event.event_type.name }} 
-                        {{ event.event_date }} 
-                        {% trans "to" %} {{ event.to_agent.name }} 
-                        {{ event.quantity_formatted }} 
+                        {{ event.event_type.name }}
+                        {{ event.event_date }}
+                        {% trans "to" %} {{ event.to_agent.name }}
+                        {{ event.quantity_formatted }}
                     </li>
                     <ul>
                         <li>{% trans "Value Equation" %}
                             {% with event.bucket_rule_for_context_agent as rule %}
                                 {% if rule %}
-                                    {% trans "Bucket" %}: {{ rule.value_equation_bucket.name }}, 
-                                    {% trans "Claim duration" %}: {{ rule.get_claim_rule_type_display }}, 
+                                    {% trans "Bucket" %}: {{ rule.value_equation_bucket.name }},
+                                    {% trans "Claim duration" %}: {{ rule.get_claim_rule_type_display }},
                                     {% trans "Equation" %}: {{ rule.claim_creation_equation }}
                                 {% else %}
                                     not found
@@ -72,9 +72,9 @@ h4 {
                             <ul>
                                 {% for claim in event.claims %}
                                     <li>
-                                        {% trans "Claim against" %} {{ claim.against_agent.name }} 
-                                        {% trans "for" %} {{ claim.original_value_formatted }} 
-                                        {% trans "from" %} {{ claim.claim_date }} 
+                                        {% trans "Claim against" %} {{ claim.against_agent.name }}
+                                        {% trans "for" %} {{ claim.original_value_formatted }}
+                                        {% trans "from" %} {{ claim.claim_date }}
                                         <b>{% trans "- outstanding" %}: {{ claim.value_formatted }}</b>
                                     </li>
                                     {% if claim.distribution_events %}
@@ -90,42 +90,23 @@ h4 {
                                 {% endfor %}
                             </ul>
                         {% endif %}
-                        
+
                     </ul>
                 </ul>
-        
+
             {% endfor %}
         </div>
         <div class="span5 summary">
-            <table>
-                <tr>
-                    <th>{% trans "Contributions with no Value Equation" %}:</th>
-                    <td>{{ no_bucket }}</td>
-                </tr>
-                <tr>
-                    <th>{% trans "Contributions with Value Equations" %}:</th>
-                    <td>{{ with_bucket }}</td>
-                </tr>
-                <tr>
-                    <th>{% trans "Total Value of Contribution Claims" %}:</th>
-                    <td>${{ claim_value }}</td>
-                </tr>
-                <tr>
-                    <th>{% trans "Income Distributions to Claims" %}:</th>
-                    <td>${{ claim_distributions }}</td>
-                </tr>
-                <tr>
-                    <th>{% trans "Outstanding Claims" %}:</th>
-                    <td>${{ outstanding_claims }}</td>
-                </tr>
-                <tr>
-                    <th>{% trans "Other Distributions" %}:</th>
-                    <td>${{ other_distributions }}</td>
-                </tr>
-
-            </table>
+            <div>
+            {% chair {% trans "Contributions with no Value Equation" %} {{ no_bucket }} %}
+            {% chair {% trans "Contributions with Value Equations" %} {{ with_bucket }} %}
+            {% chair {% trans "Total Value of Contribution Claims" %} ${{ claim_value }} %}
+            {% chair {% trans "Income Distributions to Claims" %} ${{ claim_distributions }} %}
+            {% chair {% trans "Outstanding Claims" %} ${{ outstanding_claims }} %}
+            {% chair {% trans "Other Distributions" %} ${{ other_distributions }} %}
+            </div>
         </div>
-    
+
     </div>
 
     <div class="pagination">
