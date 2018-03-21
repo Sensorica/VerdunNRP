@@ -4,7 +4,13 @@
 {% load i18n %}
 
 {% block extra_head_base %}
-    {% block extra_head %}{% endblock %}
+    {% block extra_head %}
+    <style type='text/css'>
+      .ib, legend > a {
+        display: inline-block;
+      }
+    </style>
+    {% endblock %}
 {% endblock %}
 
 {% block footer %}
