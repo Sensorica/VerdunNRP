@@ -7,7 +7,7 @@
 {% block extra_head %}
 <style>
 
-    tr.even td 
+    tr.even td
     {
         color:#000000;
         background-color:#EAF2D3;
@@ -34,13 +34,13 @@
                 <a href="#adjustmentForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Adjust Quantity" %}</a>&nbsp;&nbsp;
             {% endif %}
         </legend>
-        
+
         <p>
             {% trans "Current Quantity" %}: {{ resource.quantity }} {{ resource.unit_of_quantity }}
         </p>
-        
+
         {% if agent %}
-            <div class="modal hide fade" id="adjustmentForm" tabindex="-1" role="dialog" aria-labelledby=adjustment-label" aria-hidden="true">
+            <div class="modal hide fade" id="adjustmentForm" tabindex="-1" role="dialog" aria-labelledby="adjustment-label" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3 id="adjustment-label">{% trans "Adjust quantity of" %} {{ resource }}</h3>
@@ -65,7 +65,7 @@
               </div>
             </div>
         {% endif %}
-        
+
         <table style="width: 100%;" class="table table-bordered table-hover table-condensed" >
             <thead>
                 <th>{% trans "Date" %}</th>
@@ -77,9 +77,9 @@
                 <th>{% trans "URL" %}</th>
                 <th>{% trans "Description" %}</th>
                 <th>{% trans "Process" %}</th>
-                
+
             </thead>
-            <tbody> 
+            <tbody>
                 {% for event in events %}
                     <tr class="{% cycle 'odd' 'even' %}">
                         <td>{{ event.event_date }}</td>
@@ -103,7 +103,7 @@
                         </td>
                     </tr>
                 {% endfor %}
-            </tbody>    
+            </tbody>
         </table>
 <div class="pagination">
     <span class="step-links">
@@ -138,7 +138,7 @@
     $(document).ready(function(){
 
         $('#inventory').addClass('active');
-        
+
         jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -146,7 +146,7 @@
             },
             "Please enter a number less than 1000000 with no more than 2 decimal places"
         );
-        
+
         $('#adjustment-form').validate(
         {
             rules: {

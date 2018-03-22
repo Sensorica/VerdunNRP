@@ -4,6 +4,10 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_resource_type %}
+{% type_process_type as t_process_type %}
 
 {% block head_title %}{% trans " Edit Recipe for " %} {{ resource_type }}{% endblock %}
 
@@ -14,9 +18,9 @@
 
 <style>
 h4 {
-	margin-top: 1em; 
+	margin-top: 1em;
 	margin-bottom: 1em;
-} 
+}
 h4 a {
 	font-size: 1.4em;
 }
@@ -37,7 +41,7 @@ ul {
 }
 
 .xb li {
-	border: 1px solid gainsboro; 
+	border: 1px solid gainsboro;
 	padding: 1em;
 	font-weight: bold;
 }
@@ -89,7 +93,7 @@ ul {
 .modal-line {
     font-weight: normal;
     margin-top: .2em;
-    margin-bottom: 3px; 
+    margin-bottom: 3px;
 }
 .desc textarea {
     width: 90%;
@@ -106,7 +110,9 @@ ul {
 .facets {
     font-weight: bold;
 }
-
+div.logical-only {
+	display: inline;
+}
 
 </style>
 {% endblock %}
@@ -131,14 +137,14 @@ ul {
 			{% elif resource_type.photo_url %}
         	    		<img src="{{ resource_type.photo_url }}" width="200" height="128" />
 			{% endif %}
-		
 
-			<div style="display: inline;" >
-				<a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change Resource Type" %}</a>
+
+			<div class="logical-only">
+				<a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change {{ t_resource_type|title }}" %}</a>
 			</div>
 
         </h4>
-        
+
 			<div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -167,12 +173,12 @@ ul {
 		{% if resource_type.description %}
 			<div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
 		{% endif %}
-		
+
 		{% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
         {% if not resource_type.producing_process_type_relationships %}
 		    <div style="margin-bottom: 2px;" >
 			    <a href="#processForm{{ resource_type.id }}" role="button" class="btn btn-info" data-toggle="modal">
-					    {% blocktrans %}Add a process type to create {{ resource_type }}{% endblocktrans %}
+					    {% blocktrans %}Add a {{ t_process_type }} to create {{ resource_type }}{% endblocktrans %}
 			    </a>
 		    </div>
         {% endif %}
@@ -202,7 +208,7 @@ ul {
 			{% if not node.open and not node.close %}
 				</li>
 			{% endif %}
-    
+
 			{% if node.open %}
     				<ul class="xb" >
 			{% endif %}
@@ -235,7 +241,7 @@ ul {
 					{% endif %}
 
 					{% if xb_type == "process-type" %}
-						<div style="display: inline;" >
+						<div class="logical-only">
 							<a href="#processChangeForm{{ object_node_id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
 						</div>
 
@@ -261,14 +267,14 @@ ul {
 
 						</div>
 
-						<div style="display: inline;" >
+						<div class="logical-only">
 							<a href="{% url delete_process_type_confirmation process_type_id=xbill_object.id resource_type_id=resource_type.id %}" role="button" class="btn btn-warning" >Delete</a>
 						</div>
 
 					{% endif %}
 
 					{% if xb_type == "economic-resource-type" %}
-						<div style="display: inline;">
+						<div class="logical-only">
 							<a href="#changeInputForm{{ node_id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
 						</div>
 
@@ -294,7 +300,7 @@ ul {
 
 						</div>
 
-						<div style="display: inline;" >
+						<div class="logical-only">
 							<a href="{% url delete_process_input process_input_id=xbill_node.id resource_type_id=resource_type.id %}" role="button" class="btn btn-warning" >
 								{% trans "Delete" %}
 							</a>
@@ -305,8 +311,8 @@ ul {
 
 					{% if xb_type == "economic-agent" %}
 
-						<div style="display: inline;" >
-							<a href="#changeSourceForm{{ node_id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>							
+						<div class="logical-only">
+							<a href="#changeSourceForm{{ node_id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
 						</div>
 
 						<div class="modal hide fade sourceForm" id="changeSourceForm{{ node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-source-label" aria-hidden="true">
@@ -329,7 +335,7 @@ ul {
 
 						</div>
 
-						<div style="display: inline;" >
+						<div class="logical-only">
 							<a href="{% url delete_source source_id=xbill_node.id resource_type_id=resource_type.id %}" role="button" class="btn btn-warning" >
 								{% trans "Delete" %}
 							</a>
@@ -355,12 +361,12 @@ ul {
 						<div>
                             {% with rtype=xbill_object %}
 						        {% if rtype.is_process_output %}
-						        
+
                                     {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
                                     {% if not rtype.producing_process_type_relationships %}
-							            <div style="display: inline;" >
+							            <div class="logical-only">
 								            <a href="#processForm{{ rtype.node_id }}" role="button" class="btn btn-info" data-toggle="modal">
-									            {% blocktrans %}Add a process type to produce {{ rtype }}{% endblocktrans %}
+									            {% blocktrans %}Add a {{ t_process_type }} to produce {{ rtype }}{% endblocktrans %}
 								            </a>
 							            </div>
                                     {% endif %}
@@ -388,13 +394,13 @@ ul {
 						        {% endif %}
 
                                 {% if not xbill_node.event_type.relationship == "work" %}
-                                
+
                                     {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
                                     {% if not rtype.producing_process_type_relationships %}
-						                <div style="display: inline;" >
+						                <div class="logical-only">
 							                <a href="#sourceForm{{ rtype.node_id }}" role="button" class="btn btn-info" data-toggle="modal">
 							                    Add a source for {{ rtype }}
-					                        </a>							
+					                        </a>
 						                </div>
 
 						                <div class="modal hide fade sourceForm" id="sourceForm{{ rtype.node_id }}" tabindex="-1" role="dialog" aria-labelledby="source-label" aria-hidden="true">
@@ -418,7 +424,7 @@ ul {
 						                </div>
 					                {% endif %}
 						        {% endif %}
-						        
+
 						    {% endwith %}
 						</div>
 						{% endif %}
@@ -426,7 +432,7 @@ ul {
 						{% if xb_type == "process-type" %}
 						    {% with ptype=xbill_object %}
 						        {% with xbill_consumable_prefix=ptype.xbill_consumable_prefix %}
-						            <div style="display: inline;" >
+						            <div class="logical-only">
 							            <a href="#consumableForm{{ xbill_consumable_prefix }}" role="button" class="btn btn-info" data-toggle="modal">
 								            {% trans "Add consumable" %}
 							            </a>
@@ -441,11 +447,11 @@ ul {
 								            <form class="consumable-form" action="{% url create_process_type_input process_type_id=ptype.id slot='c' %}" method="POST" >
 									            {% csrf_token %}
                                                 {% with iform=ptype.xbill_consumable_form %}
-					                                <p class="modal-line">{% trans "Resource Type" %} </p>
-                                                    <p>{{ iform.resource_type }} 
+					                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                                    <p>{{ iform.resource_type }}
 							                        <a href="#createResourceForm{{ xbill_consumable_prefix }}" role="button" class="add-another" data-toggle="modal">
 								                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-							                        </a> </p> 
+							                        </a> </p>
 							                        <p class="modal-line">{% trans "at stage" %} </p>
                                                     <p>{{ iform.stage }} </p>
 					                                <p class="modal-line">{% trans "Quantity" %} </p>
@@ -487,7 +493,7 @@ ul {
 
 						                      <div class="modal-footer">
 							                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-							                    <input type="submit" name="submit" id="consume~{{ xbill_consumable_prefix }}" value="{% trans 'Save changes' %}" class="btn btn-primary save-resource-type" /> 
+							                    <input type="submit" name="submit" id="consume~{{ xbill_consumable_prefix }}" value="{% trans 'Save changes' %}" class="btn btn-primary save-resource-type" />
 							                    {% comment %}
 							                    <button class="btn btn-primary save-resource-type" id="consume~{{ xbill_consumable_prefix }}">{% trans "Save changes" %}</button>
 							                    {% endcomment %}
@@ -502,7 +508,7 @@ ul {
                                 {% endwith %}
 
                                 {% with xbill_usable_prefix=ptype.xbill_usable_prefix %}
-						            <div style="display: inline;" >
+						            <div class="logical-only">
 							            <a href="#usableForm{{ xbill_usable_prefix }}" role="button" class="btn btn-info" data-toggle="modal">
 								            {% trans "Add usable" %}
 							            </a>
@@ -517,11 +523,11 @@ ul {
 								            <form class="usable-form" action="{% url create_process_type_input process_type_id=ptype.id slot='u' %}" method="POST" >
 									            {% csrf_token %}
                                                 {% with iform=ptype.xbill_usable_form %}
-					                                <p class="modal-line">{% trans "Resource Type" %} </p>
-                                                    <p>{{ iform.resource_type }} 
+					                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                                    <p>{{ iform.resource_type }}
 							                        <a href="#createResourceForm{{ xbill_usable_prefix }}" role="button" class="add-another" data-toggle="modal">
 								                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-							                        </a> </p>                   
+							                        </a> </p>
 					                                <p class="modal-line">{% trans "Quantity" %} </p>
                                                     <p>{{ iform.quantity }} </p>
                                                     <p class="modal-line">{% trans "Unit of Quantity" %} </p>
@@ -561,7 +567,7 @@ ul {
 
 						                      <div class="modal-footer">
 							                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-							                    <input type="submit" name="submit" id="use~{{ xbill_usable_prefix }}" value="{% trans 'Save changes' %}" class="btn btn-primary save-resource-type" /> 
+							                    <input type="submit" name="submit" id="use~{{ xbill_usable_prefix }}" value="{% trans 'Save changes' %}" class="btn btn-primary save-resource-type" />
 							                    {% comment %}
 							                    <button class="btn btn-primary save-resource-type" id="use~{{ xbill_usable_prefix }}">{% trans "Save" %}</button>
 							                    {% endcomment %}
@@ -576,7 +582,7 @@ ul {
                                 {% endwith %}
 
                                 {% with citable_prefix=ptype.xbill_citable_prefix %}
-						            <div style="display: inline;" >
+						            <div class="logical-only">
 							            <a href="#citeForm{{ citable_prefix }}" role="button" class="btn btn-info" data-toggle="modal">
 								            {% trans "Add citable" %}
 							            </a>
@@ -591,11 +597,11 @@ ul {
 								            <form class="cite-form" action="{% url create_process_type_citable process_type_id=ptype.id %}" method="POST" >
 									            {% csrf_token %}
                                                 {% with cform=ptype.xbill_citable_form %}
-					                                <p class="modal-line">{% trans "Resource Type" %} </p>
-                                                    <p>{{ cform.resource_type }} 
+					                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                                    <p>{{ cform.resource_type }}
 							                        <a href="#createResourceForm{{ citable_prefix }}" role="button" class="add-another" data-toggle="modal">
 								                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-							                        </a> </p>                   
+							                        </a> </p>
                                                     <p class="modal-line">{% trans "Description" %} </p>
                                                     <p class="desc">{{ cform.description }} </p>
                                                 {% endwith %}
@@ -643,7 +649,7 @@ ul {
                                 {% endwith %}
 
 
-						        <div style="display: inline;" >
+						        <div class="logical-only">
 							        <a href="#workForm{{ ptype.node_id }}" role="button" class="btn btn-info" data-toggle="modal">
 								        {% trans "Add work" %}
 							        </a>
@@ -669,7 +675,7 @@ ul {
 
 						        </div>
 {% comment %}
-						        <div style="display: inline;" >
+						        <div class="logical-only">
 							        <a href="#featureForm{{ ptype.node_id }}" role="button" class="btn btn-info" data-toggle="modal">
 								        {% trans "Add feature" %}
 							        </a>
@@ -695,9 +701,9 @@ ul {
 
 						        </div>
 {% endcomment %}
-						        
+
                                 <div class="pattern" >{% trans "Pattern:" %} {{ ptype.process_pattern }}</div>
-                                
+
 						        {% if ptype.description %}
 						            <div class="description" >{{ ptype.description|urlize|linebreaks }}</div>
 					            {% endif %}
@@ -707,8 +713,8 @@ ul {
 
 						{% if xb_type == "feature" %}
 
-						<div style="display: inline;" >
-							<a href="#changeFeatureForm{{ object_node_id }}" role="button" class="btn btn-primary" data-toggle="modal">Change</a>							
+						<div class="logical-only">
+							<a href="#changeFeatureForm{{ object_node_id }}" role="button" class="btn btn-primary" data-toggle="modal">Change</a>
 						</div>
 
 						<div class="modal hide fade" id="changeFeatureForm{{ object_node_id }}" tabindex="-1" role="dialog" aria-labelledby="change-feature-label" aria-hidden="true">
@@ -731,7 +737,7 @@ ul {
 
 						</div>
 
-						<div style="display: inline;" >
+						<div class="logical-only">
 							<a href="{% url delete_feature_confirmation feature_id=xbill_object.id resource_type_id=resource_type.id %}" role="button" class="btn btn-warning" >
 								{% trans "Delete" %}
 							</a>
@@ -823,7 +829,7 @@ ul {
     <script type="text/javascript">
 
 	$(document).ready(function(){
-	
+
         $('#inventory').addClass('active');
 
 	    function html_unescape(text) {
@@ -841,7 +847,7 @@ ul {
 	    $("select").chosen({placeholder_text_single: ""});
 
 	   $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -875,13 +881,13 @@ ul {
         $.validator.addClassRules("numeric", { number: true });
 		$.validator.addClassRules("quantity", { required: true, number: true });
 		$.validator.addClassRules("days", { required: true, number: true });
-		$.validator.addClassRules("hours", { 
+		$.validator.addClassRules("hours", {
 			required: true,
 			number: true,
 			min: 0,
 			max: 24
 		});
-		$.validator.addClassRules("minutes", { 
+		$.validator.addClassRules("minutes", {
 			required: true,
 			number: true,
 			min: 0,
@@ -889,7 +895,7 @@ ul {
 		});
 
 		$(".resource-type-selector").change(getUnit);
-		
+
 		$(".staged-selector").change(getStages);
 
 		function getUnit(event)
@@ -913,7 +919,7 @@ ul {
                     $(unitName).trigger("liszt:updated");
 				});
 		}
-		
+
 
         function getStages(event)
         {
@@ -930,8 +936,8 @@ ul {
                         for(var i=0 ; i<data.length ; i++)
                         {
                             var id = data[i]['pk'];
-                            var name = data[i].fields['name']; 
-                            $(stageFieldName).append('<option value="' + id + '">' + name + '</option>') 
+                            var name = data[i].fields['name'];
+                            $(stageFieldName).append('<option value="' + id + '">' + name + '</option>')
                         }
                     }
                     else
@@ -942,7 +948,7 @@ ul {
                 });
         }
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 				label
 					.text('').addClass('valid')
@@ -967,7 +973,7 @@ ul {
 				}
 			});
 		});
-        
+
 
 		$('.resource-change-form').each( function(){
 			var form = $(this);
@@ -1139,7 +1145,7 @@ ul {
                         for(var i=0 ; i<data.length ; i++) //will be only one
                         {
                             var id = data[i]['pk'];
-                            var name = data[i].fields['name']; 
+                            var name = data[i].fields['name'];
                             var selx = $(selId);
                             selx.append('<option value="' + id + '" selected="selected">' + name + '</option>');
                             selx.trigger("liszt:updated");
@@ -1148,8 +1154,8 @@ ul {
                         $(modalId).modal('hide');
                         $form.trigger( "reset" );
 			        })
-			        .fail(function() 
-			        { 
+			        .fail(function()
+			        {
 				        alert("Check your name field.");
 			        }
 		        );

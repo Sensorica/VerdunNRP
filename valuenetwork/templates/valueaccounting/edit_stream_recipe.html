@@ -4,6 +4,10 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_process_type as t_process_type %}
+{% type_resource_type as t_resource_type %}
 
 {% block head_title %}{% trans " Edit Workflow Recipe for " %} {{ resource_type }}{% endblock %}
 
@@ -14,9 +18,9 @@
 
 <style>
 h4 {
-    margin-top: 1em; 
+    margin-top: 1em;
     margin-bottom: 1em;
-} 
+}
 h4 a, h4 {
     font-size: 1.4em;
 }
@@ -32,13 +36,13 @@ textarea {
 }
 .economic-resource-type {
     background-color: whitesmoke;
-    border: 1px solid gainsboro; 
+    border: 1px solid gainsboro;
     padding: 1em 1em .5em 1em;
     font-weight: bold;
 }
 .change-resource-type {
     background-color: mintcream;
-    border: 1px solid gainsboro; 
+    border: 1px solid gainsboro;
     padding: 1em;
     font-weight: bold;
 }
@@ -79,7 +83,7 @@ textarea {
 .modal-line {
     font-weight: normal;
     margin-top: .2em;
-    margin-bottom: 3px; 
+    margin-bottom: 3px;
 }
 .desc textarea {
     width: 90%;
@@ -99,7 +103,9 @@ textarea {
 .align-center {
     text-align: center;
 }
-    
+div.logical-only {
+  display: inline;
+}
 </style>
 {% endblock %}
 
@@ -123,12 +129,12 @@ textarea {
                         <img src="{{ resource_type.photo_url }}" width="200" height="128" />
             {% endif %}
 
-            <div style="display: inline;" >
+            <div class="logical-only" >
                 <a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
             </div>
 
         </h4>
-        
+
         <div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -157,22 +163,22 @@ textarea {
         {% else %}
             <br />
         {% endif %}
-        
+
         {% for process_type in process_types %}
          {% if process_type.input_stream_resource_type_relationship.count > 0 %}
           <div class="row-fluid">
            <div class="span12">
-           
+
             <div class="bottom-space">
                 <a href="#insertProcessForm{{ process_type.id }}" role="button" class="btn btn-info" data-toggle="modal">
-                {% blocktrans %}Insert a process type here {% endblocktrans %}
+                {% blocktrans %}Insert a {{ t_process_type }} here {% endblocktrans %}
                 </a>
             </div>
-            
+
             <div class="modal hide fade processForm" id="insertProcessForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                    <h3 id="process-insert-label">{% blocktrans %}Insert process type for {% endblocktrans %} {{ resource_type }} </h3>
+                    <h3 id="process-insert-label">{% blocktrans %}Insert {{ t_process_type }} for {% endblocktrans %} {{ resource_type }} </h3>
                 </div>
                 <div class="modal-body">
                     <form class="process-form" action="{% url create_process_type_for_streaming resource_type_id=resource_type.id process_type_id=process_type.id %}" method="POST">
@@ -185,18 +191,18 @@ textarea {
                         </div>
                     </form>
                 </div>
-            </div>            
+            </div>
            </div>
           </div>
          {% endif %}
-          
+
          <div class="process-type">
- 
+
           <div class="row-fluid">
            <div class="span12">
-            <div class="process-hdr" style="display: inline;"> {{ process_type.name }} </div>
+            <div class="process-hdr logical-only"> {{ process_type.name }} </div>
 
-            <div style="display: inline;" >
+            <div class="logical-only">
                 <a href="#processChangeForm{{ process_type.id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
             </div>
 
@@ -217,20 +223,20 @@ textarea {
                     </form>
                 </div>
             </div>
-    
+
             <form style="display: inline;" action="{% url delete_process_type_confirmation process_type_id=process_type.id resource_type_id=resource_type.id %}" method="POST" >
                 {% csrf_token %}
                 <input type="hidden" name="next" value="{% url edit_stream_recipe resource_type_id=resource_type.id %}" />
                 <button class="btn btn-warning" title="Delete process type" >Delete</button>
             </form>
-            
+
             {% if "Time Contribution" in process_type.process_pattern.non_change_event_type_names %}
-                <div style="display: inline;" >
+                <div class="logical-only">
                     <a href="#workForm{{ process_type.id }}" role="button" class="btn btn-info" data-toggle="modal">
                     {% trans "Add work" %}
                     </a>
                 </div>
-            
+
                 <div class="modal hide fade" id="workForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="work-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -249,14 +255,14 @@ textarea {
                     </div>
                 </div>
             {% endif %}
-            
+
             {% if "Resource Consumption" in process_type.process_pattern.non_change_event_type_names %}
-                <div style="display: inline;" >
+                <div class="logical-only">
                     <a href="#consumableForm{{ process_type.id }}" role="button" class="btn btn-info" data-toggle="modal">
                     {% trans "Add consumable" %}
                     </a>
                 </div>
-            
+
                 <div class="modal hide fade" id="consumableForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="consumable-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -266,14 +272,14 @@ textarea {
                         <form class="consumable-form" action="{% url create_process_type_input process_type_id=process_type.id slot='c' %}" method="POST" >
                             {% csrf_token %}
                             {% with iform=process_type.xbill_consumable_form %}
-                                <p class="modal-line">{% trans "Resource Type" %} </p>
-                                <p>{{ iform.resource_type }} 
+                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                <p>{{ iform.resource_type }}
                                 {% comment %}
                                 <a href="#createResourceForm{{ process_type.id }}" role="button" class="add-another" data-toggle="modal">
                                 <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-                                </a> 
+                                </a>
                                 {% endcomment %}
-                                </p>                   
+                                </p>
                                 <p class="modal-line">{% trans "Quantity" %} </p>
                                 <p>{{ iform.quantity }} </p>
                                 <p class="modal-line">{% trans "Unit of Quantity" %} </p>
@@ -286,19 +292,19 @@ textarea {
                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
                                 <button class="btn btn-primary">{% trans "Save changes" %}</button>
                             </div>
-                        
+
                         </form>
                     </div>
                 </div>
             {% endif %}
-            
+
             {% if "Resource use" in process_type.process_pattern.non_change_event_type_names %}
-                <div style="display: inline;" >
+                <div class="logical-only">
                     <a href="#usesForm{{ process_type.id }}" role="button" class="btn btn-info" data-toggle="modal">
                     {% trans "Add usable" %}
                     </a>
                 </div>
-                
+
                 <div class="modal hide fade" id="usesForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="uses-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -308,14 +314,14 @@ textarea {
                         <form class="uses-form" action="{% url create_process_type_input process_type_id=process_type.id slot='u' %}" method="POST" >
                             {% csrf_token %}
                             {% with iform=process_type.xbill_usable_form %}
-                                <p class="modal-line">{% trans "Resource Type" %} </p>
-                                <p>{{ iform.resource_type }} 
+                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                <p>{{ iform.resource_type }}
                                 {% comment %}
                                 <a href="#createResourceForm{{ process_type.id }}" role="button" class="add-another" data-toggle="modal">
                                 <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-                                </a> 
+                                </a>
                                 {% endcomment %}
-                                </p>                   
+                                </p>
                                 <p class="modal-line">{% trans "Quantity" %} </p>
                                 <p>{{ iform.quantity }} </p>
                                 <p class="modal-line">{% trans "Unit of Quantity" %} </p>
@@ -331,15 +337,15 @@ textarea {
                         </form>
                     </div>
                 </div>
-            {% endif %}           
-            
+            {% endif %}
+
             {% if "Citation" in process_type.process_pattern.non_change_event_type_names %}
-                <div style="display: inline;" >
+                <div class="logical-only">
                     <a href="#citesForm{{ process_type.id }}" role="button" class="btn btn-info" data-toggle="modal">
                     {% trans "Add citable" %}
                     </a>
                 </div>
-                
+
                 <div class="modal hide fade" id="citesForm{{ process_type.id }}" tabindex="-1" role="dialog" aria-labelledby="cites-label" aria-hidden="true">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -349,14 +355,14 @@ textarea {
                         <form class="cites-form" action="{% url create_process_type_citable process_type_id=process_type.id %}" method="POST" >
                             {% csrf_token %}
                             {% with iform=process_type.stream_recipe_citable_form %}
-                                <p class="modal-line">{% trans "Resource Type" %} </p>
-                                <p>{{ iform.resource_type }} 
-                                {% comment %} 
+                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                <p>{{ iform.resource_type }}
+                                {% comment %}
                                 <a href="#createResourceForm{{ process_type.id }}" role="button" class="add-another" data-toggle="modal">
                                 <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-                                </a> 
-                                {% endcomment %} 
-                                </p>                  
+                                </a>
+                                {% endcomment %}
+                                </p>
                                 <p class="modal-line">{% trans "Description" %} </p>
                                 <p class="desc">{{ iform.description }} </p>
                             {% endwith %}
@@ -368,20 +374,20 @@ textarea {
                         </form>
                     </div>
                 </div>
-            {% endif %}   
-            
-            
+            {% endif %}
+
+
             {% if process_type.description %}
                 <div class="description" >{{ process_type.description|urlize|linebreaks }}</div>
             {% endif %}
           </div>
-  
+
           <div class="row-fluid">
-          
+
             <div class="span6 inputs">
                 <h5 class="align-center">Inputs</h5>
-                
-                {% for ptrt in process_type.to_be_changed_resource_type_relationships %}                
+
+                {% for ptrt in process_type.to_be_changed_resource_type_relationships %}
                     <div class="change-resource-type">
                         {{ ptrt.stream_label }}
                         {% if ptrt.resource_type.facet_list %}
@@ -391,14 +397,14 @@ textarea {
                             <div class="description" >{{ ptrt.description|urlize|linebreaks }}</div>
                         {% endif %}
                     </div>
-                {% endfor %} 
-                
+                {% endfor %}
+
                 {% for ptrt in process_type.all_input_except_change_resource_type_relationships %}
                   <div class="economic-resource-type">
-                    <div style="display: inline;">
+                    <div class="logical-only">
                         {{ ptrt.stream_label }}
                     </div>
-                    <div style="display: inline;">
+                    <div class="logical-only">
                         <a href="#changeInputForm{{ ptrt.id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
                     </div>
 
@@ -420,21 +426,21 @@ textarea {
                         </div>
                     </div>
 
-                    <div style="display: inline;" >
+                    <div class="logical-only">
                       <form style="display: inline;" action="{% url delete_process_type_input process_input_id=ptrt.id resource_type_id=resource_type.id %}" method="POST" >
                         {% csrf_token %}
                         <button class="btn btn-warning" title="Delete input item" >Delete</button>
                         <input type="hidden" name="next" value="{% url edit_stream_recipe resource_type_id=resource_type.id %}" />
                       </form>
                     </div>
-                    
+
                     {% if ptrt.resource_type.facet_list %}
                         <div class="facets" >{{ ptrt.resource_type.facet_list }}</div>
                     {% endif %}
                     {% if ptrt.description %}
                         <div class="description" >{{ ptrt.description|urlize|linebreaks }}</div>
                     {% endif %}
-                    
+
                   </div>
                 {% endfor %}
             </div>
@@ -453,29 +459,29 @@ textarea {
                     </div>
                 {% endfor %}
             </div>
-            
-           </div> 
+
+           </div>
           </div>
          </div>
-     
+
          <div class="row-fluid">
            <div class="span12">
             <img src="{% static 'img/bullet-arrow-down-icon.png' %}" />
            </div>
          </div>
- 
+
        {% endfor %}
- 
+
         <div >
             <a href="#processForm0" role="button" class="btn btn-info" data-toggle="modal">
-            {% blocktrans %}Add a process type to change {{ resource_type }}{% endblocktrans %}
+            {% blocktrans %}Add a {{ t_process_type }} to change {{ resource_type }}{% endblocktrans %}
             </a>
         </div>
-        
+
         <div class="modal hide fade processForm" id="processForm0" tabindex="-1" role="dialog" aria-labelledby="process-label" aria-hidden="true">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h3 id="process-label">{% blocktrans %}Add next process type for {% endblocktrans %} {{ resource_type }} </h3>
+                <h3 id="process-label">{% blocktrans %}Add next {{ t_process_type }} for {% endblocktrans %} {{ resource_type }} </h3>
             </div>
             <div class="modal-body">
                 <form class="process-form" action="{% url create_process_type_for_streaming resource_type_id=resource_type.id %}" method="POST">
@@ -488,8 +494,8 @@ textarea {
                     </div>
                 </form>
             </div>
-        </div>  
-    
+        </div>
+
     </div>
 
 {% endblock %}
@@ -506,7 +512,7 @@ textarea {
     <script type="text/javascript">
 
     $(document).ready(function(){
-    
+
         $('#inventory').addClass('active');
 
         function html_unescape(text) {
@@ -524,7 +530,7 @@ textarea {
         $("select").chosen();
 
        $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -558,13 +564,13 @@ textarea {
         $.validator.addClassRules("numeric", { number: true });
         $.validator.addClassRules("quantity", { required: true, number: true });
         $.validator.addClassRules("days", { required: true, number: true });
-        $.validator.addClassRules("hours", { 
+        $.validator.addClassRules("hours", {
             required: true,
             number: true,
             min: 0,
             max: 23
         });
-        $.validator.addClassRules("minutes", { 
+        $.validator.addClassRules("minutes", {
             required: true,
             number: true,
             min: 0,
@@ -595,7 +601,7 @@ textarea {
                 });
         }
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
                 label
                     .text('').addClass('valid')
@@ -620,7 +626,7 @@ textarea {
                 }
             });
         });
-        
+
 
         $('.resource-change-form').each( function(){
             var form = $(this);
@@ -659,7 +665,7 @@ textarea {
             });
 
         });
-        
+
         $('.cites-form').each( function(){
             var form = $(this);
             form.validate({
@@ -750,7 +756,7 @@ textarea {
                         for(var i=0 ; i<data.length ; i++) //will be only one
                         {
                             var id = data[i]['pk'];
-                            var name = data[i].fields['name']; 
+                            var name = data[i].fields['name'];
                             var selx = $(selId);
                             selx.append('<option value="' + id + '" selected="selected">' + name + '</option>');
                             selx.trigger("liszt:updated");
@@ -759,8 +765,8 @@ textarea {
                         $(modalId).modal('hide');
                         $form.trigger( "reset" );
                     })
-                    .fail(function() 
-                    { 
+                    .fail(function()
+                    {
                         alert("Check your name field.");
                     }
                 );
