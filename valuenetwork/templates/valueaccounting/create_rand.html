@@ -3,6 +3,9 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_resource_type %}
 
 {% block head_title %}{% trans "Create R&amp;D Project" %}{% endblock %}
 
@@ -62,9 +65,9 @@
 
 				{{ process_form|as_bootstrap }}
 				<div class="form-actions">
-					<input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
-					<input type="submit" name="keep-going" value="{% trans 'Save and continue editing' %}" class="btn btn-primary" />  
-					<span id="outputError" style="color: red;"> </span> 
+					<input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" />
+					<input type="submit" name="keep-going" value="{% trans 'Save and continue editing' %}" class="btn btn-primary" />
+					<span id="outputError" style="color: red;"> </span>
 			   	</div>
 			</div>
 			<div class="span6">
@@ -72,36 +75,36 @@
 				{{ output_formset.management_form }}
 				{% for form in output_formset %}
 					<div class="row-fluid formset-top">
-						{% trans "Resource Type" %}: {{ form.resource_type }} 
+						{% trans "{{ t_resource_type|title }}" %}: {{ form.resource_type }}
 					</div>
 {% comment %}
 					<div class="row-fluid">
-						{% trans "Event Type" %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }} 
+						{% trans "Event Type" %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }}
 					</div>
 {% endcomment %}
 					<div class="row-fluid">
-						{% trans "Quantity" %}: {{ form.quantity }} {% trans "Unit" %}: {{ form.unit_of_quantity }} 
+						{% trans "Quantity" %}: {{ form.quantity }} {% trans "Unit" %}: {{ form.unit_of_quantity }}
 					</div>
 					<div class="row-fluid formset-bottom">
-						{% trans "Description" %}: {{ form.description }} 
+						{% trans "Description" %}: {{ form.description }}
 					</div>
 				{% endfor %}
 				<legend style="margin-top: 1em;"  class="section">{% trans "Inputs" %}:</legend>
 				{{ input_formset.management_form }}
 				{% for form in input_formset %}
 					<div class="row-fluid formset-top">
-						{% trans "Resource Type" %}: {{ form.resource_type }} 
+						{% trans "{{ t_resource_type|title }}" %}: {{ form.resource_type }}
 					</div>
 {% comment %}
 					<div class="row-fluid">
-						{% trans "Event Type" %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }} 
+						{% trans "Event Type" %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }}
 					</div>
 {% endcomment %}
 					<div class="row-fluid">
-						{% trans "Quantity" %}: {{ form.quantity }} {% trans "Unit" %}: {{ form.unit_of_quantity }} 
+						{% trans "Quantity" %}: {{ form.quantity }} {% trans "Unit" %}: {{ form.unit_of_quantity }}
 					</div>
 					<div class="row-fluid formset-bottom">
-						{% trans "Description" %}: {{ form.description }} 
+						{% trans "Description" %}: {{ form.description }}
 					</div>
 				{% endfor %}
 			</div>
@@ -157,7 +160,7 @@
 
 
         $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
-        $( "#id_end_date" ).datepicker({ 
+        $( "#id_end_date" ).datepicker({
 			dateFormat: "yy-mm-dd",
     		onClose: function() {
       			$( this ).valid();
@@ -165,15 +168,15 @@
 		 });
 
 
-		jQuery.validator.addMethod("equalToOrGreaterThan", 
+		jQuery.validator.addMethod("equalToOrGreaterThan",
 		function(value, element, params) {
 
 			if (!/Invalid|NaN/.test(new Date(value))) {
 				return new Date(value) >= new Date($(params).val());
 			}
 
-			return isNaN(value) && isNaN($(params).val()) 
-				|| (Number(value) >= Number($(params).val())); 
+			return isNaN(value) && isNaN($(params).val())
+				|| (Number(value) >= Number($(params).val()));
 		},'Must be equal to or greater than start date.');
 
 		$( "#processForm" ).validate({
@@ -207,13 +210,13 @@
 		});
 
 		$("#processForm").submit(function(event) {
- 
+
 			event.preventDefault();
             var hasOutput = false;
 			$("#outputError").text("");
 			var errorMessage = "Must have at least one output";
 
-			$(".quantity").each(function() 
+			$(".quantity").each(function()
 			{
 				var id = this.id;
 

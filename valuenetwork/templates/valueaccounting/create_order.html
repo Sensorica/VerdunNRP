@@ -2,6 +2,9 @@
 
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_exchange_type as t_exhange_type %}
 
 {% block head_title %}{% trans "Create Order" %}{% endblock %}
 
@@ -11,7 +14,7 @@
 
 <style>
 
-	tr.even td 
+	tr.even td
 	{
 		color:#000000;
 		background-color:#EAF2D3;
@@ -66,7 +69,7 @@
 					{{ order_form.due_date }}
 				</div>
                 <div class="span3 control-group">
-                    <div class="heading" >{% trans "Type" %}:</div>
+                    <div class="heading" >{% trans "{{ type_exchange_type|title }}" %}:</div>
                     {{ order_form.exchange_type }}
                 </div>
 			</div>
@@ -88,14 +91,14 @@
 					<th>{% trans "Unit" %}</th>
 					<th>{% trans "Notes" %}</th>
 				</thead>
-				<tbody>	
+				<tbody>
 					{% for form in item_forms %}
 						{{ form.resource_type_id }}
 						<tr class="{% cycle 'odd' 'even' %}">
 							<td>{{ form.resource_type.name }}</td>
 							<td>
 								{% for feature in form.features %}
-									{{ feature.feature.name }} {{ feature.options }} 
+									{{ feature.feature.name }} {{ feature.options }}
 								{% endfor %}
 							</td>
 							<td>{{ form.quantity }}</td>
@@ -103,7 +106,7 @@
 							<td>{{ form.description }}</td>
 						</tr>
 					{% endfor %}
-				<tbody>	
+				<tbody>
 			</table>
 			<div class="form-actions">
 		       	<button class="btn btn-primary" type="submit"  name="submit2" >{% trans "Submit Order" %}</button>
@@ -142,15 +145,15 @@
         $("#id_receiver").empty();
         $.get(jsonUrl,
         function(data){
-            //$("#id_receiver").append('<option value="">' + '--------' + '</option>'); 
+            //$("#id_receiver").append('<option value="">' + '--------' + '</option>');
             for(var i=0 ; i<data.length ; i++)
             {
                 var id = data[i]['pk'];
-                var name = data[i].fields['nick']; 
+                var name = data[i].fields['nick'];
                 if (selectedCustomer == id) {
                     $("#id_receiver").append('<option value="' + id + '" selected>' + name + '</option>');
                 } else {
-                    $("#id_receiver").append('<option value="' + id + '">' + name + '</option>'); 
+                    $("#id_receiver").append('<option value="' + id + '">' + name + '</option>');
                 }
             }
             $(".chzn-select").trigger("liszt:updated");
@@ -159,4 +162,3 @@
     </script>
 
 {% endblock %}
-

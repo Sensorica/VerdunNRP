@@ -2,8 +2,11 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
 
-{% block head_title %}{% trans "Cleanup Unvalued Work ResourceTypes" %}{% endblock %}
+{% type_resource_type as t_resource_type %}
+
+{% block head_title %}{% trans "Cleanup Unvalued Work {{ t_resource_type|title }}s" %}{% endblock %}
 
 {% block extra_head %}
 
@@ -19,9 +22,9 @@
         {% include "_messages.html" %}
     <div>
 
-    <h2>Work ResourceTypes without value</h2>
+    <h2>Work {{ t_resource_type|title }}s without value</h2>
     <p>
-        These resource types have work events but no value per unit.
+        These {{ t_resource_type }}s have work events but no value per unit.
     </p>
     <ul>
         {% for suspect in suspects %}
@@ -48,7 +51,7 @@
 
     }); // end document.ready
 
-     
+
     </script>
 
 {% endblock %}

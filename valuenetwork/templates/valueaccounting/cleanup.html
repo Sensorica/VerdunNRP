@@ -2,6 +2,9 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_resource_type %}
 
 {% block head_title %}{% trans "Cleanup" %}{% endblock %}
 
@@ -20,12 +23,12 @@
 	<div>
         <p><a href="{% url cleanup_processes %}">Orphan Processes</a></p>
         <p><a href="{% url cleanup_old_processes %}">Old Unfinished Processes</a></p>
-        <p><a href="{% url cleanup_resourcetypes %}">Orphan Resource Types</a></p>
+        <p><a href="{% url cleanup_resourcetypes %}">Orphan {{ t_resource_type|title }}s</a></p>
         <p><a href="{% url cleanup_resources %}">Orphan Resources</a></p>
-        <p><a href="{% url cleanup_work_resourcetypes %}">Work Resource Types without value</a></p>
+        <p><a href="{% url cleanup_work_resourcetypes %}">Work {{ t_resource_type|title }}s without value</a></p>
         <p><a href="{% url cleanup_unsourced_resources %}">Consumed but unsourced Resources</a></p>
         <p><a href="{% url cleanup_unvalued_resources %}">Used but unvalued Resources</a></p>
-    
+
 	</div>
     </div>
 {% endblock %}
@@ -43,7 +46,7 @@
 
 	}); // end document.ready
 
-     
+
     </script>
 
 {% endblock %}
