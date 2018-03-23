@@ -1,6 +1,9 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
+{% load types %}
+{% type_exchange as t_xchg %}
+{% type_exchange_type as t_xchg_type %}
 
 {% block head_title %}{% trans "Internal Exchanges" %}{% endblock %}
 
@@ -25,6 +28,9 @@
     font-size: 1.1em;
     font-weight: bold;
 }
+div.logical-only {
+  display: inline;
+}
 </style>
 
 {% endblock %}
@@ -34,30 +40,30 @@
 {% block body_base %}
     <div class="container">
         {% include "_messages.html" %}
-		<legend>{% trans "Internal Exchanges" %}
+		<legend>{% trans "Internal {{ t_xcgh|title }}s" %}
             {% if agent %} for {{ agent.agent_type }} {{ agent.name }} {% endif %}
         </legend>
 
         <div class="span8">
           <div class="totals">
-            <span class="total">Transfer total: {{ total_transfers }} </span> 
+            <span class="total">Transfer total: {{ total_transfers }} </span>
             <span class="total">Reciprocal transfer total: {{ total_rec_transfers }} </span>
             <br />
             * Note these totals are meaningful only if the events selected all use the same currency.
-          </div> 
+          </div>
           {% if exchanges %}
             <ul>
                 {% for x in exchanges %}
                     <li>
                         <a href="{% url exchange_logging exchange_type_id=0 exchange_id=x.id %}">{{ x }}</a>  {% trans "created by" %} {{ x.created_by }}
                         {% if user = x.created_by or user.is_superuser%}
-                            <a class="btn btn-info btn-mini" href="{% url exchange_logging exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a> 
+                            <a class="btn btn-info btn-mini" href="{% url exchange_logging exchange_type_id=0 exchange_id=x.id %}">{% trans "Change" %}</a>
                             {% if x.is_deletable %}
                                 <form
-                                    style="display: inline;" 
-                                    class="delete-form" 
-                                    id="deleteForm{{ exchange.id }}" 
-                                    action="{% url delete_exchange exchange_id=x.id %}" 
+                                    style="display: inline;"
+                                    class="delete-form"
+                                    id="deleteForm{{ exchange.id }}"
+                                    action="{% url delete_exchange exchange_id=x.id %}"
                                     method="POST" >
                                     {% csrf_token %}
                                     <input type="hidden" id="next" name="next" value="exchanges" />
@@ -93,28 +99,28 @@
             <h3>{% trans "Filter the List" %}</h3>
             <form id="filter-form" action="." method="POST">
 	            {% csrf_token %}
-                <div id="div_id_start_date" class="control-group" style="display: inline;" > 
+                <div id="div_id_start_date" class="control-group logical-only" >
                     <label for="id_start_date" class="control-label required-field" style="display: inline; vertical-align: text-bottom;" >
                         {% trans "Start date " %}
-                    </label>    
-                    <div class="controls" style="display: inline;" >
+                    </label>
+                    <div class="controls logical-only" >
                         {{ dt_selection_form.start_date }}
                     </div>
                 </div>
-                <div id="div_id_end_date" class="control-group" > 
+                <div id="div_id_end_date" class="control-group" >
                     <label for="id_end_date" class="control-label required-field" style="display: inline;  vertical-align: text-bottom; " >
                         {% trans "End date  " %}
-                    </label>    
-                    <div class="controls" style="display: inline;" >
+                    </label>
+                    <div class="controls logical-only" >
                         {{ dt_selection_form.end_date }}
                     </div>
                 </div>
 	            <p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All in the date range" %}</p>
-                <p class="title"> {% trans "Exchange Type" %} </p> 
+                <p class="title"> {% trans "{{ t_xchg_type|title }}" %} </p>
                 {% for et in ets %}
                     <p><input type="checkbox" class="category" id="E{{ et.id }}" name="E{{ et.id }}" value="E{{ et.id }}" /> {{ et.name }}</p>
                 {% endfor %}
-                <p class="title"> {% trans "Agent Involved" %} </p> 
+                <p class="title"> {% trans "Agent Involved" %} </p>
                 {% for agent in agents %}
                     <p><input type="checkbox" class="category" id="A{{ agent.id }}" name="A{{ agent.id }}" value="A{{ agent.id }}" /> {{ agent.name }}</p>
                 {% endfor %}
@@ -146,7 +152,7 @@
 	$(document).ready(function(){
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -166,7 +172,7 @@
 			}
 		});
 
-		$('.category').click(function() 
+		$('.category').click(function()
 		{
 			var checkedCats = [];
 			var checkedBox = $(this)[0];

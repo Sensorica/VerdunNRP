@@ -1,0 +1,15 @@
+{% load types %}
+{% load chair_tag %}
+{% type_resource_type as t_res_type %}
+
+{% field_as_div form.commitment_date "Commitment date" %}
+{% field_as_div form.due_date "Due date" %}
+{% if not slot.give_agent_is_context %}{% field_as_div form.from_agent "Transfer from" %}{% endif %}
+{% if not slot.receive_agent_is_context %}{% field_as_div form.to_agent "Transfer to" %}{% endif %}
+{% field_as_div form.quantity "Quantity" %}
+{% field_as_div form.resource_type "{{ t_resource_type|title }}" %}
+{% field_as_p form.description "Description" %}
+{% if not slot.is_currency %}
+    {% field_as_div form.value "Value (total, not per unit)" %}
+    {% field_as_div form.unit_of_value "Unit of value" %}
+{% endif %}

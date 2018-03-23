@@ -3,8 +3,13 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+{% type_exchange_type as t_xchg_type %}
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
+{% type_use_case as t_use %}
 
-{% block head_title %}{% trans "Maintain Exchange Types" %}{% endblock %}
+{% block head_title %}{% trans "Maintain {{ t_xchg_type|title }}s" %}{% endblock %}
 
 {% block extra_head %}
 
@@ -37,34 +42,34 @@ h3 {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans "Maintain Exchange Types / Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change Resource Type Facets" %}</a> 
+		        {% trans "Maintain {{ t_xchg_type|title }}s / Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change {{ t_res_type|title }} {{ t_facet|title }}s" %}</a>
 	        </legend>
 
             <div class="row-fluid">
-                <h3>{% trans "New Exchange Type" %}:</h3>
+                <h3>{% trans "New {{ t_xchg_type|title }}" %}:</h3>
                 <form id="etForm" action="." method="POST" >
                     {% csrf_token %}
-                    Use Case: <span style="display: inline; vertical-align: top;"> {{ new_form.use_case }}</span>
+                    {{ t_use|title }}: <span style="display: inline; vertical-align: top;"> {{ new_form.use_case }}</span>
                     Name: {{ new_form.name }}
                     <input type="submit" name="new-exchange-type" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Create exchange type' %}" />
-                    <div class="expl">(After creating your exchange type, please click on it below to finish defining it.)</div>
+                    <div class="expl">(After creating your {{ t_xchg_type }}, please click on it below to finish defining it.)</div>
                 </form>
-                  
+
             </div>
-	        
+
             <div class="row-fluid">
               <div class="span4">
-	            <h3>{% trans "Incoming / Supply Exchange Types" %}:</h3>
+	            <h3>{% trans "Incoming / Supply {{ t_xchg_type|title }}s" %}:</h3>
 	            <ul>
 	            {% for ext in supply_exchange_types %}
 	                <li>
 	                    <a href="{% url change_exchange_type exchange_type_id=ext.id %}">{{ ext }}</a>
 	                    {% if ext.is_deletable %}
                             <form
-                                style="display: inline;" 
-                                class="remove-form" 
-                                id="removeForm{{ ext.id }}" 
-                                action="{% url delete_exchange_type exchange_type_id=ext.id %}" 
+                                style="display: inline;"
+                                class="remove-form"
+                                id="removeForm{{ ext.id }}"
+                                action="{% url delete_exchange_type exchange_type_id=ext.id %}"
                                 method="POST" >
                                 {% csrf_token %}
                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete this exchange type" >X</button>
@@ -75,17 +80,17 @@ h3 {
                 </ul>
               </div>
               <div class="span4">
-                <h3>{% trans "Internal Exchange Types" %}:</h3>
+                <h3>{% trans "Internal {{ t_xchg_type|title }}s" %}:</h3>
                 <ul>
                 {% for ext in internal_exchange_types %}
                     <li>
                         <a href="{% url change_exchange_type exchange_type_id=ext.id %}">{{ ext }}</a>
                         {% if ext.is_deletable %}
                             <form
-                                style="display: inline;" 
-                                class="remove-form" 
-                                id="removeForm{{ ext.id }}" 
-                                action="{% url delete_exchange_type exchange_type_id=ext.id %}" 
+                                style="display: inline;"
+                                class="remove-form"
+                                id="removeForm{{ ext.id }}"
+                                action="{% url delete_exchange_type exchange_type_id=ext.id %}"
                                 method="POST" >
                                 {% csrf_token %}
                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete this exchange type" >X</button>
@@ -96,17 +101,17 @@ h3 {
                 </ul>
               </div>
               <div class="span4">
-                <h3>{% trans "Outgoing / Demand Exchange Types" %}:</h3>
+                <h3>{% trans "Outgoing / Demand {{ t_xchg_type|title }}s" %}:</h3>
                 <ul>
                 {% for ext in demand_exchange_types %}
                     <li>
                         <a href="{% url change_exchange_type exchange_type_id=ext.id %}">{{ ext }}</a>
                         {% if ext.is_deletable %}
                             <form
-                                style="display: inline;" 
-                                class="remove-form" 
-                                id="removeForm{{ ext.id }}" 
-                                action="{% url delete_exchange_type exchange_type_id=ext.id %}" 
+                                style="display: inline;"
+                                class="remove-form"
+                                id="removeForm{{ ext.id }}"
+                                action="{% url delete_exchange_type exchange_type_id=ext.id %}"
                                 method="POST" >
                                 {% csrf_token %}
                                 <button style="display: inline;"  class="btn btn-warning btn-mini" title="Delete this exchange type" >X</button>
@@ -136,7 +141,7 @@ h3 {
 		$(".chzn-select").chosen();
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -144,7 +149,7 @@ h3 {
         })
 
 	}); // end document.ready
-	
+
     </script>
 
 {% endblock %}
