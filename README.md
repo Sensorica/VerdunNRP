@@ -1,5 +1,10 @@
 valuenetwork
 =====================
+This project is hard-forked from valnet/valueaccounting
+
+A final version of the Sensorica NRP that will feature improved stability and UI for use in the Verdun Project.
+
+Old readme.md follows:
 
 A prototype of Value Network Accounting, being developed in collaboration with http://www.sensorica.co/ , a pioneering value network.
 
