@@ -3,6 +3,10 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_res_type %}
+{% type_resource as t_res %}
 
 {% block head_title %}{% trans "Production" %}{% endblock %}
 
@@ -31,17 +35,17 @@
 		<form class="form-horizontal" id="processForm" method="POST" action=".">
 	        {% csrf_token %}
             {{ date_name_form|as_bootstrap }}
-            
+
             {% if resource_required %}
                 <div id="resources" class = "resources" >
-                    <p>This recipe needs a starting resource</p>
+                    <p>This recipe needs a starting {{ t_res }}</p>
                     {% for resource in resource_type.onhand %}
                         <p>
                             <input type="radio" id="resource-{{ resource.id }}" name="resource" value="{{ resource.id }}" />
                             {{ resource.identifier }}
                         </p>
                     {% empty %}
-                        <p>Sorry, no starting resources exist.</p>
+                        <p>Sorry, no starting {{ t_res }}s exist.</p>
                     {% endfor %}
                 </div>
             {% endif %}
@@ -58,7 +62,7 @@
 	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
 	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
 	<script src="{% static 'js/chosen.jquery.js' %}"></script>
-	
+
 {% endblock %}
 
 {% block extra_body %}
@@ -69,7 +73,7 @@
  	$(document).ready(function(){
 
 	    $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -85,7 +89,7 @@
         $("[type=radio]").click(function() {
             $("#submit").removeAttr("disabled");
         });
-		
+
 
 	}); // end document.ready
 

@@ -102,56 +102,56 @@ textarea {
         <legend>
             {% trans "Active Orders for " %}{{ agent }}
         </legend>
-        
+
         <div>
             {% for order in orders %}
                 <div>
                     <h3>
-                        {{ order.get_order_type_display }} {{ order.id }}: 
+                        {{ order.get_order_type_display }} {{ order.id }}:
                         {{ order.name }}
-                        <span class="process-dates" > {% trans "Due " %}: {{ order.due_date }} </span> 
+                        <span class="process-dates" > {% trans "Due " %}: {{ order.due_date }} </span>
                         &nbsp;&nbsp;
                         <span class="url">
                             <a href="{% url order_schedule order_id=order.id %}" target="_blank" >{% trans "Detailed schedule" %}</a>
                         </span>
                     </h3>
+                    <h4>Items</h4>
+                    <ul>
                     {% for item in order.items %}
-                        <div>
-                            <table class="table table-bordered" >
+                        <li> {{ item.resource_type }}
+                            <ul> Processes:
                                 {% with item.processes as processes %}
-                                <tbody>
-                                    <tr>
+
                                         {% for process in processes  %}
-                                            <td class="process-box">
+                                            <li class="process-box">
                                                 <a href="{{ process.get_absolute_url }}" target="_blank" >
                                                     {{ process.name }}
                                                 </a>
-                                                
-                                                <span class="info"> <a href="#" class="process-info" data-toggle="popover" data-trigger='hover' title="Process" 
+
+                                                <span class="info"> <a href="#" class="process-info" data-toggle="popover" data-trigger='hover' title="Process"
                                                     data-content="{{ process.notes|linebreaks }}">
                                                     <img src="{% static 'img/information-icon.png' %}" /></a>
                                                 </span>
-                                            </td>
+                                            </li>
                                         {% endfor %}
-                                            <td>
-                                                {% trans "Deliverable" %}: {{ item.resource_type }}
-                                                {% if item.description %}
-                                                    </br>
-                                                    <span class="description">
-                                                        {{ item.description|urlize|linebreaks }}
-                                                    </span>
-                                                {% endif %}
-                                            </td>
-                                    </tr>
-                                </tbody>
+                          </ul>
+                          <div>{% trans "Deliverable" %}: {{ item.resource_type }}</div>
+                            {% if item.description %}
+                              <div>
+                                <span class="description">
+                                    {{ item.description|urlize|linebreaks }}
+                                </span>
+                              </div>
+                            {% endif %}
+
                                 {% endwith %}
-                            </table>
-                        </div>
+                      </li>
                     {% endfor %}
+                  </ul>
                 </div>
             {% endfor %}
         </div>
-        
+
     </div>
 </div>
 
@@ -172,17 +172,17 @@ textarea {
         $('#projects').addClass('active');
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
-        
+
         $('.process-info').popover();
-        
+
     }); // end document.ready
-    
+
     </script>
-    
+
 {% endblock %}

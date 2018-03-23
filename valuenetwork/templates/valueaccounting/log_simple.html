@@ -28,11 +28,11 @@
 .section {
     color: firebrick;
 }
-#id_cite-resource 
+#id_cite-resource
 {
     width: 35em;
 }
-#citation-list li 
+#citation-list li
 {
     list-style-type: none;
     font-size: 1.3em;
@@ -58,7 +58,7 @@
     <form id="simpleForm" method="POST" action="">
 
 	    <legend>
-            {% trans "Log Contribution for " %} {{ member.name }} 
+            {% trans "Log Contribution for " %} {{ member.name }}
             <span class="select-pattern"></span>
         </legend>
 
@@ -72,7 +72,7 @@
                 <a href="#createResourceForm" role="button" class="add-another" data-toggle="modal">
                     <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img></a> </p>
                 <p>Name</p>
-                <p>{{ resource_form.identifier }}</p> 
+                <p>{{ resource_form.identifier }}</p>
                 <p>URL</p>
                 <p>{{ resource_form.url }}</p>
                 <p>Notes</p>
@@ -92,7 +92,7 @@
 
         <div class="row-fluid">
             <div class="span12 save">
-			    <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
+			    <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" />
 			</div>
 	   	</div>
 
@@ -125,12 +125,19 @@
 			<form class="resource-create-form" id="rtCreateForm" action="" enctype="multipart/form-data" method="POST" >
 				{% csrf_token %}
 				{{ rt_create_form|as_bootstrap }}
-                {{ rtf_create_formset.management_form }}
-                <table>
+        {{ rtf_create_formset.management_form }}
+				<ul>
+					{% for form in rtf_create_formset %}
+					<li><ul>{{ form.as_ul }}</ul></li>
+					{% endfor %}
+				</ul>
+								{% comment %}
+				        <table>
                     {% for form in rtf_create_formset %}
                         <tr><td class="facet-name"> {{ form.facet_name }} </td><td> {{ form.value }} {{ form.facet_id }} </td></tr>
                     {% endfor %}
                 </table>
+								{% endcomment %}
                 <input type="hidden" name="slot" value="out" />
                 <input type="hidden" name="pattern" value="{{ pattern.id }}" />
 			    <div class="modal-footer">
@@ -174,14 +181,14 @@
 
 
 	    $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
         })
 
         $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 		        label
 			        .text('').addClass('valid')
@@ -251,7 +258,7 @@
                         for(var i=0 ; i<data.length ; i++) //will be only one
                         {
                             var id = data[i]['pk'];
-                            var name = data[i].fields['name']; 
+                            var name = data[i].fields['name'];
                             var selx = $(selId);
                             selx.append('<option value="' + id + '" selected="selected">' + name + '</option>');
                             selx.trigger("liszt:updated");
@@ -260,8 +267,8 @@
                         $(modalId).modal('hide');
                         $form.trigger( "reset" );
 			        })
-			        .fail(function() 
-			        { 
+			        .fail(function()
+			        {
 				        alert("Check your name field.");
 			        }
 		        );
@@ -272,7 +279,7 @@
 
     function getResources()
 	{
-        var selectedRT = document.getElementById('id_cite-resource_type').value; 
+        var selectedRT = document.getElementById('id_cite-resource_type').value;
         var jsonUrl = encodeURI("/accounting/json-resourcetype-resources/" + selectedRT + "/");
         $("#id_cite-resource").empty();
 	    $.get(jsonUrl,
@@ -280,8 +287,8 @@
                 for(var i=0 ; i<data.length ; i++)
                 {
                     var id = data[i]['pk'];
-                    var name = data[i].fields['identifier']; 
-                    $("#id_cite-resource").append('<option value="' + id + '">' + name + '</option>') 
+                    var name = data[i].fields['identifier'];
+                    $("#id_cite-resource").append('<option value="' + id + '">' + name + '</option>')
                 }
 		    });
 	}
@@ -291,12 +298,12 @@
         var selectedResource = document.getElementById('id_cite-resource');
         var resourceText = selectedResource.options[selectedResource.selectedIndex].text;
         var resourceID = selectedResource.options[selectedResource.selectedIndex].value;
-        $("#citation-list").append("<li id='li-" + resourceID + "'>" +  resourceText + 
-            "<input type='hidden' name='citation' value='" + resourceID + "' />&nbsp;&nbsp;<button id='cite-remove-" + resourceID + 
+        $("#citation-list").append("<li id='li-" + resourceID + "'>" +  resourceText +
+            "<input type='hidden' name='citation' value='" + resourceID + "' />&nbsp;&nbsp;<button id='cite-remove-" + resourceID +
             "' class='btn btn-warning btn-mini' title='remove' onclick='$(this).parent().remove(); return false;'>{% trans 'Remove' %}</button></li>");
         $('#addCiteModal').modal('hide');
     }
 
     </script>
-    
+
 {% endblock %}

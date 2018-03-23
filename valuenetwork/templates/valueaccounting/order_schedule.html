@@ -84,6 +84,9 @@ textarea {
     color:     #008A2E;
     font-weight: normal;
 }
+div.logical-only {
+  display: inline;
+}
 </style>
 
 {% endblock %}
@@ -99,7 +102,7 @@ textarea {
                 <a href="{% url exchange_logging exchange_type_id=0 exchange_id=order.exchange.id %}" style="display: inline;"  class="btn btn-info indent" title="Exchange for this order" >Go to Exchange</a>
             {% endif %}
         </legend>
-		
+
             {% if order.description %}
                 <div class="req-description">{{ order.description|urlize|linebreaks }}</div>
             {% endif %}
@@ -118,7 +121,7 @@ textarea {
                     {% endif %}
                 </h3>
             {% endif %}
-        
+
 			<ul>
 			    {% for item in order_items %}
 					<li>
@@ -130,9 +133,9 @@ textarea {
                         </a> {{ item.quantity }} {{ item.unit_of_quantity }}
                         {% if agent %}
                           {% if item.stage %}
-                            <div style="display: inline;" >
+                            <div class="logical-only">
                                 <a href="#resourceQuantity-{{ item.id }}" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Change Quantity" %}</a>
-                                {% trans "Project" %}: {{ item.context_agent }} 
+                                {% trans "Project" %}: {{ item.context_agent }}
                                 <a href="#changeProject-{{ item.id }}" role="button" class="btn btn-primary btn-mini indent" data-toggle="modal">{% trans "Change Project" %}</a>
                             </div>
                             <div class="modal hide fade" id="resourceQuantity-{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="resource-qty-label" aria-hidden="true">
@@ -165,7 +168,7 @@ textarea {
                                 <div class="modal-body">
                                     <form class="wf-project-form validateMe" enctype="multipart/form-data" action="{% url change_workflow_project order_item_id=item.id %}" method="POST" >
                                         {% csrf_token %}
-                                        {{ item.project_form }}
+                                        {{ item.project_form.as_p }}
                                         <p>This will change the project on all processes for this order item.</p>
                                         <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
                                         <div class="modal-footer">
@@ -203,7 +206,7 @@ textarea {
                     </div>
               </div>
 			{% endif %}
-			
+
 			<div class="row-fluid">
 
 				<div class="span12">
@@ -211,11 +214,11 @@ textarea {
 					    {% trans "Production Schedule" %}:
 					    {% if order.all_processes %}
                             <a class="indent" href="{% url processes_graph object_type='O' object_id=order.id %}">Process graph diagram</a>
-                            
+
                             <a class="indent" href="{% url order_timeline order_id=order.id %}">Timeline</a>
 					    {% endif %}
-				    </h3> 
-					
+				    </h3>
+
                     {% for item in order_items %}
                       <div id="item-{{ item.id }}" class="resource-type space-down">
                             <span class="oi">{% trans 'Order Item' %}:</span>
@@ -231,7 +234,7 @@ textarea {
                               {% endif %}
                             {% endif %}
                       </div>
-                      
+
                       {% if agent %}
                         <div class="modal hide fade productionProcessModal" id="productionProcessModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="productionProcess-label" aria-hidden="true">
                             <div class="modal-header">
@@ -251,14 +254,14 @@ textarea {
                             </div>
                         </div>
                       {% endif %}
-                      
+
                       {% for oh in item.onhand %}
                             <div class "onhand">
                                 {% trans 'Onhand' %}: <a href="{{ oh.get_absolute_url }}"> {{ oh }} {{ oh.formatted_quantity }}</a>
                             </div>
                       {% endfor %}
                       {% for process in item.processes %}
-					
+
 					    {% if agent %}
                           {% if process.to_be_changed_requirements %}
                             <div class="row-fluid indent">
@@ -267,7 +270,7 @@ textarea {
                                     {% blocktrans %}Insert a process here {% endblocktrans %}
                                     </a>
                                 </div>
-                                
+
                                 <div class="modal hide fade processForm" id="insertProcessForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-insert-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -276,8 +279,10 @@ textarea {
                                     <div class="modal-body">
                                     <form class="process-form validateMe" action="{% url insert_process_for_streaming order_item_id=item.id process_id=process.id %}" method="POST">
                                             {% csrf_token %}
-                                            
+
                                             {% with process.insert_process_form as processForm %}
+                                            {{ processForm|as_bootstrap }}
+                                            {% comment %}
                                                 <table>
                                                     <tr><td>{{ processForm.name.label }}</td></tr>
                                                     <tr><td>{{ processForm.name }}</td></tr>
@@ -296,8 +301,9 @@ textarea {
                                                     <tr><td>{{ processForm.notes.label }}</td></tr>
                                                     <tr><td>{{ processForm.notes }}</td></tr>
                                                 </table>
+                                            {% endcomment %}
                                             {% endwith %}
-                                            
+
                                             <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
                                             <div class="modal-footer">
                                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -305,20 +311,20 @@ textarea {
                                             </div>
                                         </form>
                                     </div>
-                                </div>            
+                                </div>
                             </div>
                           {% endif %}
 					    {% endif %}
-					
+
                         <div class="row-fluid indent">
                             <div class="span9">
                                 <div class="process" >{% include  "valueaccounting/_process_for_order.html" %}</div>
                             </div>
-                            
+
                             <div class="span3">
                               {% if agent %}
                               <a href="#processChangeForm{{ process.id }}" role="button" class="btn btn-primary btn-mini process-btn" data-toggle="modal">{% trans "Change process plan" %}</a>
-                                
+
                                 <div class="modal hide fade processForm" id="processChangeForm{{ process.id }}" tabindex="-1" role="dialog" aria-labelledby="process-change-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -335,18 +341,18 @@ textarea {
                                             </div>
                                         </form>
                                     </div>
-                                </div>  
-                                
+                                </div>
+
                                 {% if item.is_workflow_order_item %}
                                  {% if process.is_deletable %}
                                   <form
-                                    id="deleteProcessForm{{ process.id }}" 
-                                    action="{% url delete_workflow_process order_item_id=item.id process_id=process.id %}" 
+                                    id="deleteProcessForm{{ process.id }}"
+                                    action="{% url delete_workflow_process order_item_id=item.id process_id=process.id %}"
                                     method="POST" >
                                     {% csrf_token %}
                                     <input type="hidden" id="next" name="next" value="{% url order_schedule order_id=order.id %}" />
                                     <button class="btn btn-warning btn-mini" title="Delete this process" >Delete process</button>
-                                  </form>    
+                                  </form>
                                 {% endif %}
                                {% endif %}
                               {% endif %}
@@ -354,7 +360,7 @@ textarea {
 						 </div>
 
 					{% endfor %}
-					
+
 					{% if agent %}
                         {% if item.is_workflow_order_item %}
                             <div class="row-fluid indent">
@@ -363,7 +369,7 @@ textarea {
                                     {% blocktrans %}Add a process here {% endblocktrans %}
                                     </a>
                                 </div>
-                                
+
                                 <div class="modal hide fade processForm" id="addProcessForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="process-add-label" aria-hidden="true">
                                     <div class="modal-header">
                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -372,7 +378,9 @@ textarea {
                                     <div class="modal-body">
                                     <form class="process-form validateMe" action="{% url create_process_for_streaming order_item_id=item.id %}" method="POST">
                                             {% csrf_token %}
+                                            {{ item.add_process_form|as_bootstrap }}
 
+                                            {% comment %} No way was this necessary
                                             <table>
                                                 <tr><td>{{ item.add_process_form.name.label }}</td></tr>
                                                 <tr><td>{{ item.add_process_form.name }}</td></tr>
@@ -391,7 +399,7 @@ textarea {
                                                 <tr><td>{{ item.add_process_form.notes.label }}</td></tr>
                                                 <tr><td>{{ item.add_process_form.notes }}</td></tr>
                                             </table>
-                                            
+                                            {% endcomment %}
                                             <input type="hidden" name="next" value="{% url order_schedule order_id=order.id %}" />
                                             <div class="modal-footer">
                                                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -399,7 +407,7 @@ textarea {
                                             </div>
                                         </form>
                                     </div>
-                                </div>            
+                                </div>
                             </div>
                         {% endif %}
 					{% endif %}
@@ -423,21 +431,21 @@ textarea {
 <script type="text/javascript">
 
 $(document).ready(function(){
-    
+
     //$('#demand').addClass('active');
-    
+
     $( "#help" ).toggle( function(){
-        $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+        $('#help-content').show("slide", { direction: "right" }, "slow" );
         $( "#help" ).text("Hide Help");
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
     })
-      
+
     //couldn't get this to work for project dropdown in change project for workflow order item
     //$(".chzn-select").chosen();
     //$(".chzn-select").trigger("liszt:updated");
-    
+
     $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
     $('.validateMe').each( function(){
@@ -449,14 +457,14 @@ $(document).ready(function(){
         });
     });
 
-    jQuery.validator.setDefaults({ 
+    jQuery.validator.setDefaults({
         success: function(label) {
             label
             .text('').addClass('valid')
             .closest('.control-group').addClass('success');
         }
     });
-    
+
     jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -464,7 +472,7 @@ $(document).ready(function(){
             },
             "Please enter a number less than 1000000 with no more than 2 decimal places"
         );
-        
+
 
    jQuery.validator.addMethod("require_from_group", function(value, element, options) {
         var selector = options[1];
@@ -479,21 +487,21 @@ $(document).ready(function(){
             fields.data('being_validated', false);
         }
         return validOrNot;
-    }, jQuery.format("Please fill at least {0} of these fields."));     
+    }, jQuery.format("Please fill at least {0} of these fields."));
 
-        
-    $.validator.addClassRules("quantity", { 
-            required: true, 
+
+    $.validator.addClassRules("quantity", {
+            required: true,
             quantity: true,
         });
-    
+
     $.validator.addClassRules("date-entry", { required: true, date: true, });
     $.validator.addClassRules("resourceType", { required: true});
     $.validator.addClassRules("name", { required: true, });
-    
+
     $.validator.addClassRules("process-type", {require_from_group: [1,".process-info"]});
     $.validator.addClassRules("new-pt-name", {require_from_group: [1,".process-info"]});
-        
+
 
 });
 </script>

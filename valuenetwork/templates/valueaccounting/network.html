@@ -2,6 +2,8 @@
 
 {% load i18n %}
 {% load thumbnail %}
+{% load types %}
+{% type_resource_type as t_res_type %}
 
 {% block head_title %}{% trans "Project-level Value Network" %}{% endblock %}
 
@@ -30,7 +32,7 @@
 			</div>
 			<div style="float: right;">
 				<span style="color:blue;">{% trans "Blue oval = Project" %}</span></br>
-				<span style="color:red;">{% trans "Red rectangle = Resource Type" %}</span>
+				<span style="color:red;">{% trans "Red rectangle = {{ t_res_type|title }}" %}</span>
 {% comment %}
 				</br>
 				<span style="color:green;">{% trans "Green rectangle = Agent" %}</span>
