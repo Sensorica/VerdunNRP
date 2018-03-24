@@ -3,6 +3,10 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
+{% load types %}
+{% load chair_tag %}
+
+{% type_resource_type as t_res_type %}
 
 {% block head_title %}{% trans "Resource Flow" %} {% endblock %}
 
@@ -24,7 +28,7 @@
 }
 #id_notes, #id_access_rules {
   width: 400px;
-  height: 60px;    
+  height: 60px;
 }
 .modal {
     width: 600px;
@@ -51,10 +55,16 @@ th {
 		<legend>
 			{% trans "Record New Resource Flow" %}
 		</legend>
-		
+
 		<div class="row-fluid">
-                
-                <h3 class="hdg">Resource</h3>		
+
+                <h3 class="hdg">Resource</h3>
+              {% field_as_p resource_form.context_agent {% trans "Network" %} %}
+              {% field_as_p resource_form.resource_type {% trans "{{ t_res_type|title }}" %} %}
+              {% field_as_p resource_form.identifier {% trans "Lot identifier" %} %}
+              {% field_as_p resource_form.current_location %}
+              {% field_as_p resource_form.from_agent {% trans "Owner" %} %}
+              {% comment %}
 	            <table>
                     <tr>
                         <th>{% trans "Network" %}</th>
@@ -77,11 +87,18 @@ th {
                         <td>{{ resource_form.from_agent }}</td>
                     </tr>
 	            </table>
+              {% endcomment %}
         </div>
 
         <div class="row-fluid">
             <div class="span6">
                 <h3 class="hdg">Harvest</h3>
+                {% field_as_p resource_form.event_date {% trans "Date" %} %}
+                {% field_as_p resource_form.from_agent {% trans "Farm" %} %}
+                {% field_as_p resource_form.to_agent {% trans "Harvester" %} %}
+                {% field_as_p resource_form.quantity %}
+                {% field_as_p resource_form.notes %}
+                {% comment %}
                 <table>
                     <tr>
                         <th>{% trans "Date" %}</th>
@@ -104,9 +121,19 @@ th {
                         <td>{{ resource_form.notes }}</td>
                     </tr>
                 </table>
+                {% endcomment %}
             </div>
             <div class="span6">
                 <h3 class="hdg">or Receipt</h3>
+                {% field_as_p resource_form.event_date {% trans "Date" %} %}
+                {% field_as_p resource_form.from_agent {% trans "Farm" %} %}
+                {% field_as_p resource_form.quantity %}
+                <p>
+                    {% field_as_div resource_form.value {% trans "If paid, $" %} %}
+                    {% field_as_div resource_form.to_agent {% trans "Paid by" %} %}
+                </p>
+                {% field_as_p resource_form.notes %}
+                {% comment %}
                 <table>
                     <tr>
                         <th>{% trans "Date" %}</th>
@@ -129,12 +156,18 @@ th {
                         <td>{{ resource_form.notes }}</td>
                     </tr>
                 </table>
+                {% endcomment %}
             </div>
         </div>
 
         <div class="row-fluid">
-                
+
                 <h3 class="hdg">Dry</h3>
+                {% field_as_p resource_form.event_date {% trans "Date" %} %}
+                {% field_as_p resource_form.from_agent {% trans "Facility" %} %}
+                {% field_as_p resource_form.quantity {% trans "Quantity (LB)" %} %}
+                {% field_as_p resource_form.notes %}
+                {% comment %}
                 <table>
                     <tr>
                         <th>{% trans "Date" %}</th>
@@ -153,6 +186,7 @@ th {
                         <td>{{ resource_form.notes }}</td>
                     </tr>
                 </table>
+                {% endcomment %}
 		</div>
 
     </div>
@@ -172,19 +206,19 @@ th {
     $(document).ready(function(){
 
 		$('#inventory').addClass('active');
-		
+
 		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
-        $('td.td-role > select').addClass('select-role');   
-        $('td.td-agent > select').addClass('select-agent');  
+        $('td.td-role > select').addClass('select-role');
+        $('td.td-agent > select').addClass('select-agent');
 
         $.validator.addMethod("agentRequired", function (value, element) {
             alert("value " + value + " element " + element);
@@ -207,7 +241,7 @@ th {
 
 		});
 	});
-/*    
+/*
     $("tr.role-row").each(function(i, tr) {
         var role = $(tr).children().get(0);
         alert("role " + role );
@@ -216,5 +250,5 @@ th {
     });
 */
     </script>
-    
+
 {% endblock %}

@@ -2,6 +2,9 @@
 
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource as t_res %}
 
 {% block head_title %}{% trans "Process" %}: {{ process }}{% endblock %}
 
@@ -32,11 +35,11 @@ textarea {
     height: 50px;
 }
 body .modal {
-  width: 50%; 
+  width: 50%;
   left: 25%; /* (100%-width)/2 */
   /* place center */
   margin-left:auto;
-  margin-right:auto; 
+  margin-right:auto;
 }
 .heading {
     margin-bottom: 4px;
@@ -62,10 +65,10 @@ body .modal {
         {% include "_messages.html" %}
 	<div>
 		<legend>
-			{% trans "Process" %}: {{ process }} {% if process.started %} - {% trans "Started" %} {{ process.started }}{% endif %} 
+			{% trans "Process" %}: {{ process }} {% if process.started %} - {% trans "Started" %} {{ process.started }}{% endif %}
 			{% if agent %}
 	            &nbsp;<a class="btn btn-info" href="{% url change_process process_id=process.id %}">{% trans "Change Process Plan" %}</a>
-	           
+
                 <a class="btn btn-primary" href="{% url process_finished process_id=process.id %}">
                     {% if process.finished %}
                         {% trans "Unfinish" %}
@@ -99,7 +102,7 @@ body .modal {
 		<div class="row-fluid">
 
 				<div class="span6">
-				
+
 					<h4 class="prevnext">{% trans "Previous processes" %}</h4>
 					{% for proc in process.previous_processes %}
 						<p><a href="{{ proc.get_absolute_url }}">{{ proc }}</a></p>
@@ -120,15 +123,15 @@ body .modal {
 		<h3 class="heading" >{% trans "Outputs" %}:</h3>
 		{% for item in process.outgoing_commitments %}
 			<p>
-				<b>{% trans "Scheduled" %}: {{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }} {% trans "due" %} {{ item.due_date }} 
+				<b>{% trans "Scheduled" %}: {{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }} {% trans "due" %} {{ item.due_date }}
 				{% if agent %}
                     &nbsp;&nbsp;
 		            <a href="#resourceModal" role="button" class="btn btn-info btn-mini" data-toggle="modal">{% trans "Log Resource" %}</a>
-    
+
                     <div class="modal hide fade resourceModal" id="resourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
 	                    <div class="modal-header">
 		                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-		                    <h3 id="resource-label">{% trans "Create" %} {{ item.resource_type.name }} {% trans "Resource" %}</h3>
+		                    <h3 id="resource-label">{% trans "Create" %} {{ item.resource_type.name }} {% trans "{{ t_res|title }}" %}</h3>
 	                    </div>
 	                    <div class="modal-body">
 		                    <form class="resource-form" id="resourceForm" enctype="multipart/form-data" action="{% url log_resource_for_commitment commitment_id=item.id %}" method="POST" >
@@ -148,10 +151,10 @@ body .modal {
 				{% if item.description %}
 			       <div class="notes"> {{ item.description|urlize|linebreaks }}</div>
 		        {% endif %}
-			
+
 			{% for event in item.fulfilling_events %}
 				<p style="margin-left: 2em;">
-					<b>{% trans "Completed" %}:</b> {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }} 
+					<b>{% trans "Completed" %}:</b> {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }}
 					{% trans "Resource" %}: <a href="{% url resource resource_id=event.resource.id  %}">{{ event.resource }}</a>
 				</p>
 			{% endfor %}
@@ -173,14 +176,14 @@ body .modal {
 				{% if item.onhand %}
 					{% for resource in item.onhand %}
 						<li>
-							<b>{% trans "Onhand" %}:</b> <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a> 
+							<b>{% trans "Onhand" %}:</b> <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a>
 							{% if resource.id in cited_ids %}
 							    <span style="color: green; font-weight: bold;">{% trans "Cited" %}</span>
 							{% endif %}
 						</li>
 					{% endfor %}
 				{% endif %}
-				
+
 				</ul>
 			</ul>
 			{% endfor %}
@@ -190,8 +193,8 @@ body .modal {
 				    <b>{% trans "Cited" %}: {{ event.resource_type.name }}</b> {{ event.quantity }} {{ event.unit_of_quantity }} {{ event.event_date }}
 			    </p>
 		    {% endfor %}
-			
-						
+
+
 		{% endif %}
 
         {% if process.consumed_input_requirements or process.uncommitted_consumption_events %}
@@ -206,7 +209,7 @@ body .modal {
                 {% if item.resource_type.onhand %}
                 	{% for resource in item.resource_type.onhand %}
 					    <p style="margin-left: 2em;">
-						    <b>{% trans "Onhand" %}:</b> {{ resource.label }} {{ resource.quantity }} {{ resource.unit_ofFtake_quantity }}
+						    <b>{% trans "Onhand" %}:</b> {{ resource.label }} {{ resource.quantity }} {{ resource.unit_of_quantity }}{# {{ resource.unit_ofFtake_quantity }} #}
                             {% for event in resource.consuming_events %}
                                 {% if event.commitment = item %}
 							        <p class="use" >
@@ -226,7 +229,7 @@ body .modal {
 			    {% elif item.associated_producing_commitments %}
                 	{% for ct in item.associated_producing_commitments %}
 					    <p style="margin-left: 2em;">
-						    <b>{% trans "Scheduled" %}:</b> 
+						    <b>{% trans "Scheduled" %}:</b>
 						    <a href="{{ ct.process.get_absolute_url }}" target="_blank" >{{ ct.quantity }} {{ ct.unit_of_quantity }}  {{ ct.due_date }}</a>
 					    </p>
 				    {% endfor %}
@@ -290,7 +293,7 @@ body .modal {
 			    {% elif item.associated_producing_commitments %}
                 	{% for ct in item.associated_producing_commitments %}
 					    <p style="margin-left: 2em;">
-						    <b>{% trans "Scheduled" %}:</b> 
+						    <b>{% trans "Scheduled" %}:</b>
 						    <a href="{{ ct.process.get_absolute_url }}" target="_blank" >{{ ct.quantity }} {{ ct.unit_of_quantity }}  {{ ct.due_date }}</a>
 					    </p>
 				    {% endfor %}
@@ -320,7 +323,7 @@ body .modal {
 					    <span class="taken">{% trans "Taken by" %} {{ item.from_agent.nick }}</span>
 				    </p>
 			    {% else %}
-					    {% trans "Unassigned" %} 
+					    {% trans "Unassigned" %}
 					    {% if agent %}
 						    <span>&nbsp;&nbsp;
 							    <a href="#commitmentForm{{ item.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
@@ -388,7 +391,7 @@ body .modal {
 
 		$.validator.addClassRules("quantity", { required: true, number: true });
 
-                jQuery.validator.setDefaults({ 
+                jQuery.validator.setDefaults({
                     success: function(label) {
 				        label
 					        .text('').addClass('valid')
@@ -409,9 +412,9 @@ body .modal {
 		});
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
         })
 
 

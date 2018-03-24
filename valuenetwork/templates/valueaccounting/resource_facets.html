@@ -2,8 +2,14 @@
 
 {% load staticfiles %}
 {% load i18n %}
+{% load types %}
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
 
-{% block head_title %}{% trans "Resource Type Facets" %}{% endblock %}
+{# I don't like this, but I can see the appeal after thinking about how to arrange the options for a few minutes #}
+{# Do we need this at all?  We have other ways to alter resource types' facets and values #}
+
+{% block head_title %}{% trans "{{ t_res_type|title }} {{ t_facet|title }}s" %}{% endblock %}
 
 {% block extra_head %}
 
@@ -18,9 +24,9 @@
     <div class="container">
         {% include "_messages.html" %}
 	    <div>
-		    <legend>{% trans "Resource Type Facets" %}</legend>
+		    <legend>{% trans "{{ t_res_type|title }} {{ t_facet|title }}s" %}</legend>
 
-		    <p>Click on a heading to sort. Double-click on a cell to change.</p>
+        <p>Click on a heading to sort. Double-click on a cell to change.</p>
 
 		    <div id="resourceFacetsTable" style="height: 600px; overflow: scroll;">
 		    </div>
@@ -40,7 +46,7 @@
     <script type="text/javascript">
 
 	$(document).ready(function(){
-	
+
         var headings = [];
         var rows = [];
         var columns = [];
@@ -55,7 +61,7 @@
 		        {% for fv in heading.values.all %}
 		            sources.push("{{ fv.value|safe }}");
 	            {% endfor %}
-	            columns.push({ 
+	            columns.push({
 	                type: 'autocomplete',
                     source: sources,
                     strict: true,
@@ -116,14 +122,14 @@
                 var facet = headings[prop];
                 var rt = this.getDataAtCell(row, 0);
                 var jqxhr = $.post("{% url change_resource_facet_value  %}",  { facet: facet, resourceType: rt, facetValue: newVal },
-			        function( data ) 
+			        function( data )
 			        {
 				        //notifySaved();
 				        facetSaved = true;
 			        })
-			        .fail(function() 
-			        { 
-				        //notifyProblem(); 
+			        .fail(function()
+			        {
+				        //notifyProblem();
 				        facetSaved = false;
 			        }
 		        );
@@ -132,19 +138,19 @@
 
 	}); // end document.ready
 
-	$(document).ajaxSend(function(event, xhr, settings) 
+	$(document).ajaxSend(function(event, xhr, settings)
 	{
-		function getCookie(name) 
+		function getCookie(name)
 		{
 		    var cookieValue = null;
-		    if (document.cookie && document.cookie != '') 
+		    if (document.cookie && document.cookie != '')
 			{
 		        var cookies = document.cookie.split(';');
-		        for (var i = 0; i < cookies.length; i++) 
+		        for (var i = 0; i < cookies.length; i++)
 				{
 		            var cookie = jQuery.trim(cookies[i]);
 		            // Does this cookie string begin with the name we want?
-		            if (cookie.substring(0, name.length + 1) == (name + '=')) 
+		            if (cookie.substring(0, name.length + 1) == (name + '='))
 					{
 		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
 		                break;
@@ -154,7 +160,7 @@
 		    return cookieValue;
     	}
 
-		function sameOrigin(url) 
+		function sameOrigin(url)
 		{
 		    // url could be relative or scheme relative or absolute
 		    var host = document.location.host; // host + port
@@ -168,17 +174,17 @@
 		        !(/^(\/\/|http:|https:).*/.test(url));
 		}
 
-		function safeMethod(method) 
+		function safeMethod(method)
 		{
 		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 		}
 
-		if (!safeMethod(settings.type) && sameOrigin(settings.url)) 
+		if (!safeMethod(settings.type) && sameOrigin(settings.url))
 		{
 		    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
 		}
 	});
-	
+
 
     </script>
 {% endblock %}

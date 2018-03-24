@@ -4,8 +4,11 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
+{% load types %}
 
-{% block head_title %}{% trans "Resource Type" %}:  {{ resource_type.name }}{% endblock %}
+{% type_resource_type as t_res_type %}
+
+{% block head_title %}{% trans "{{ t_res_type|title }}" %}:  {{ resource_type.name }}{% endblock %}
 
 {% block extra_head %}
 
@@ -48,7 +51,9 @@ container li {
   width: 500px;
   height: 100px;
 }
-
+div.logical-only {
+	display: inline;
+}
 
 </style>
 {% endblock %}
@@ -58,25 +63,25 @@ container li {
 {% block body_base %}
     <div class="container">
         {% include "_messages.html" %}
-		
+
 		<legend>
-		    {% trans "Resource Type" %}:  {{ resource_type.name }}
+		    {% trans "{{ t_res_type|title }}" %}:  {{ resource_type.name }}
 		    {% if agent %}
-		        <div style="display: inline;" >
+		      <div class="logical-only">
 				    <a href="#resourceChangeForm{{ resource_type.id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
 			    </div>
 			    {% if resource_type.is_deletable %}
-			        <div style="display: inline;" >
+			        <div class="logical-only">
 				        <a href="{% url delete_resource_type_confirmation resource_type_id=resource_type.id %}" role="button" class="btn btn-warning" >{% trans "Delete" %}</a>
 			        </div>
 		        {% endif %}
-		        
-		        <div style="display: inline;" >
+
+		        <div class="logical-only">
 			        <a href="#resourceModal" role="button" class="btn btn-info" data-toggle="modal">{% trans "Create Resource" %}</a>
 		        </div>
 
 		    {% endif %}
-	   
+
             {% if resource_type.own_recipes %}
                 {% if resource_type.recipe_is_staged %}
                     <a href="{% url view_stream_recipe resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
@@ -90,30 +95,30 @@ container li {
                 {% else %}
                     <a href="{% url edit_extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >
                 {% endif %}
-                
+
                 {% if resource_type.producing_process_type_relationships %}
                     {% trans "Change Recipe" %}
                 {% else %}
                     {% trans "Create Manufacturing Recipe" %}
                 {% endif %}
                 </a>
-                
+
                 {% if not resource_type.producing_process_type_relationships %}
                     <a href="{% url edit_stream_recipe resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >
                     {% trans "Create Workflow Recipe" %}
                     </a>
                 {% endif %}
-                
+
 		        <a href="{% url plan_from_rt resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "Plan" %}</a>
-                {% if resource_type.producing_process_type_relationships %} 
+                {% if resource_type.producing_process_type_relationships %}
                     <a href="{% url plan_from_rt_recipe resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "Plan using recipe" %}</a>
                 {% endif %}
 	        {% endif %}
-	        
-	        <a href="{% url resource_types %}">{% trans "All Resource Types" %}</a>
+
+	        <a href="{% url resource_types %}">{% trans "All {{ t_res_type|title }}s" %}</a>
 
 		</legend>
-		
+
 
          {% if agent %}
             <div class="modal hide fade resourceModal" id="resourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
@@ -125,7 +130,13 @@ container li {
 		            <form class="resource-form" id="resourceForm" enctype="multipart/form-data" action="." method="POST" >
 			            {% csrf_token %}
 			            {{ create_form|as_bootstrap }}
-                        {{ create_role_formset.management_form }}
+                  {{ create_role_formset.management_form }}
+									<ul>
+									{% for form in create_role_formset %}
+										<li><ul>{{ form.as_ul }}</ul></li>
+									{% endfor %}
+									</ul>
+									{% comment %}
                         <table>
                             <tr>
                                 <td>Resource access role</td>
@@ -133,7 +144,7 @@ container li {
                                 <td>Is contact &nbsp;</td>
                             </tr>
                             {% for form in create_role_formset %}
-                                {{ form.id }}  
+                                {{ form.id }}
                                 <tr class="role-row">
                                     <td class="td-role">{{ form.role }}</td>
                                     <td class="td-agent">{{ form.agent }}</td>
@@ -141,6 +152,7 @@ container li {
                                 </tr>
                             {% endfor %}
                         </table>
+									{% endcomment %}
 		              <div class="modal-footer">
 			            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
 			            <button class="btn btn-primary">{% trans "Save" %}</button>
@@ -151,7 +163,7 @@ container li {
                 </div>
             </div>
         {% endif %}
-        
+
         <div class="facets" >{{ resource_type.facet_list }}</div>
 
         <div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
@@ -171,8 +183,8 @@ container li {
                 </div>
             {% endif %}
         {% endwith %}
-        
-        
+
+
         {% if resource_type.direct_children %}
             <div class="children" >
                 <h3>{% trans "Children" %}: </h3>
@@ -185,7 +197,7 @@ container li {
                 </ul>
             </div>
         {% endif %}
-        
+
 
 	    {% if resource_type.photo %}
             <img src="{% thumbnail resource_type.photo photo_size %}" />
@@ -300,10 +312,10 @@ container li {
         $(".chzn-select").chosen();
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
@@ -318,7 +330,7 @@ container li {
             }
         });
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
                 label
                     .text('').addClass('valid')
@@ -339,7 +351,7 @@ container li {
                 $(fieldId).addClass("unique-name");
             }
         }
-        
+
         jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -354,15 +366,15 @@ container li {
 
         $.validator.addClassRules("url", { url: true });
         $.validator.addClassRules("unique-name", { required: true, unique: nameArray });
-        $.validator.addClassRules("quantity", { 
-            required: true, 
+        $.validator.addClassRules("quantity", {
+            required: true,
             quantity: true,
         });
         $.validator.addClassRules("price", {
             quantity: true,
         });
 
-        $('.category').click(function() 
+        $('.category').click(function()
         {
             var checkedVals = [];
             var checkedBox = $(this)[0];
@@ -398,7 +410,7 @@ container li {
             }
 
         });
-        
+
         $('.resource-change-form').each( function(){
             var form = $(this);
             form.validate({
@@ -408,7 +420,7 @@ container li {
 
             });
         });
-        
+
         jQuery.validator.addMethod("agentRequired", function (value, element) {
             var parent = element.parentElement;
             var parentSib = parent.nextElementSibling;
@@ -421,7 +433,7 @@ container li {
             }
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
-        
+
         jQuery.validator.addMethod("roleRequired", function (value, element) {
             var parent = element.parentElement;
             var parentSib = parent.previousElementSibling;
@@ -434,7 +446,7 @@ container li {
             }
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
-        
+
         $.validator.addClassRules("select-role", { agentRequired: true });
         $.validator.addClassRules("select-agent", { roleRequired: true });
 

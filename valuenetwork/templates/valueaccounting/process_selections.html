@@ -3,7 +3,10 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
 
+{% type_resource_type as t_res_type %
+}
 {% block head_title %}{% trans "Production" %}{% endblock %}
 
 {% block extra_head %}
@@ -62,16 +65,16 @@
                 {% if selected_pattern %}
                     <p class="selected">
                     <i>Chosen:</i>&nbsp;&nbsp;
-                    {% trans "Pattern " %} 
+                    {% trans "Pattern " %}
 	                <input type="text" name="selected-pattern~{{ selected_pattern.id }}" value="{{ selected_pattern }}"
-                        readonly="readonly" />&nbsp;&nbsp; 
-                    {% trans "Project " %} 
+                        readonly="readonly" />&nbsp;&nbsp;
+                    {% trans "Project " %}
 	                <input type="text" name="selected-context-agent~{{ selected_context_agent.id }}" value="{{ selected_context_agent }}"
-                        readonly="readonly" /> 
+                        readonly="readonly" />
                     </p>
                 {% else %}
-                    {% trans "Choose a pattern " %} {{ pattern_form.pattern }} &nbsp; 
-                    {% trans "Choose a project " %} {{ ca_form.context_agent }} &nbsp;&nbsp; 
+                    {% trans "Choose a pattern " %} {{ pattern_form.pattern }} &nbsp;
+                    {% trans "Choose a project " %} {{ ca_form.context_agent }} &nbsp;&nbsp;
 	                <input type="submit" name="get-related" value="{% trans 'Get resource types' %}" class="btn btn-primary" />
                 {% endif %}
             </div>
@@ -105,16 +108,16 @@
 
 
                     {% if rand %}
-                        {{ demand_form|as_bootstrap }}  
-                        (If a work order is not selected, a new work order will be created automatically.) 
+                        {{ demand_form|as_bootstrap }}
+                        (If a work order is not selected, a new work order will be created automatically.)
                     {% endif %}
-                    <hr />                
-                    
+                    <hr />
+
                     <div class="select-buttons">
                         {% if rand %}
                             <p>
                                 <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
-                                </br>Create planned work using the selected resource types.
+                              </br>Create planned work using the selected {{ t_res_type }}s.
                             </p>
                             <p>
                                 <input type="submit" name="add-another" value="{% trans 'Save process & add another' %}" class="btn btn-primary" />
@@ -127,7 +130,7 @@
                         {% else %}
                             <p>
                                 <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
-                                </br>Create a process using the selected resource types, where you can log your work.
+                              </br>Create a process using the selected {{ t_res_types }}s, where you can log your work.
                             </p>
                             <p>
                                 <input id="startNow" type="submit" name="labnotes" value="{% trans 'Work now' %}" class="btn btn-primary" disabled />
@@ -140,7 +143,7 @@
 
                </div>
             </div>
-   
+
 	      {% endif %}
 
 		</form>
@@ -151,7 +154,7 @@
 	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
 	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
 	<script src="{% static 'js/chosen.jquery.js' %}"></script>
-	
+
 {% endblock %}
 
 {% block extra_body %}
@@ -162,7 +165,7 @@
  	$(document).ready(function(){
 
 	    $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -172,22 +175,22 @@
         //$(".chzn-select").chosen();
 
         $( "#id_start_date" ).datepicker({ dateFormat: "yy-mm-dd" });
-        $( "#id_end_date" ).datepicker({ 
+        $( "#id_end_date" ).datepicker({
 			dateFormat: "yy-mm-dd",
     		onClose: function() {
       			$( this ).valid();
 			}
 		 });
 
-		jQuery.validator.addMethod("equalToOrGreaterThan", 
+		jQuery.validator.addMethod("equalToOrGreaterThan",
 		function(value, element, params) {
 
 			if (!/Invalid|NaN/.test(new Date(value))) {
 				return new Date(value) >= new Date($(params).val());
 			}
 
-			return isNaN(value) && isNaN($(params).val()) 
-				|| (Number(value) >= Number($(params).val())); 
+			return isNaN(value) && isNaN($(params).val())
+				|| (Number(value) >= Number($(params).val()));
 		},'Must be equal to or greater than start date.');
 
 		$( "#processForm" ).validate({
@@ -206,7 +209,7 @@
 			},
 		});
 
-        $(".work").click(function() { 
+        $(".work").click(function() {
             var numberChecked = 0;
             var works = $('.work');
             var gotWork = false;
@@ -241,10 +244,10 @@
         else
         {
             $('#startNow').attr("disabled", "disabled");
-            $('#pastWork').attr("disabled", "disabled"); 
+            $('#pastWork').attr("disabled", "disabled");
         }
     }
-	
+
     </script>
 
 {% endblock %}
