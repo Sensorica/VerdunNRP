@@ -2,6 +2,10 @@
 
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_exchange as t_xchg %}
+{% type_exchange_type as t_xchg_type %}
 
 {% block head_title %}{% trans "Supply" %}{% endblock %}
 
@@ -27,7 +31,7 @@
     border: 1px solid gainsboro;
 }
 .btn {
-    margin-left: 10px; 
+    margin-left: 10px;
     margin-top: 1px;
     margin-bottom: 1px;
 }
@@ -75,21 +79,21 @@ h3 {
                 </div>
             {% endif %}
 {% endcomment %}
-            <a class="report" href="{% url exchanges %}">{% trans "Exchange List" %}</a>
+            <a class="report" href="{% url exchanges %}">{% trans "{{ t_xchg|title }} List" %}</a>
         </legend>
 
         {% if agent %}
           <div>
             <form id="exchangeForm" method="POST" action="">
                 {% csrf_token %}
-                Choose which type to create a new exchange: {{ nav_form.exchange_type }}
-                <input style="display: inline; vertical-align: top;" type="submit" name="submit" value="{% trans 'Create Exchange' %}" class="btn btn-primary" /> 
+                Choose which type to create a new {{ t_xchg }}: {{ nav_form.exchange_type }}
+                <input style="display: inline; vertical-align: top;" type="submit" name="submit" value="{% trans 'Create {{ t_xchg|title }}' %}" class="btn btn-primary" />
             </form>
           </div>
         {% endif %}
-        
+
         <div class="row-fluid">
-        
+
             <div class="span6 reqs-supplier">
                 <h3 style="margin-bottom: 4px;" >{% trans "Requirements by Supplier" %}:</h3>
 
@@ -101,13 +105,13 @@ h3 {
                         <ul>
                             {% for source, requirements in sources.items %}
                                 <li>
-                                    <b>{{ source.resource_type.name }}</b>  {% trans "Total required" %} {{ source.total_required }} 
+                                    <b>{{ source.resource_type.name }}</b>  {% trans "Total required" %} {{ source.total_required }}
                                     {% trans "Lead time" %}: {{ source.lead_time }} {% trans "days" %} {% trans "Score" %}: {{ source.score }}
                                 </li>
                                 <ul>
                                     {% for item in requirements %}
                                         <li>
-                                            <b>{{ item.resource_type.name }}:</b> {{ item.quantity_to_buy }} {{ item.unit_of_quantity }} {% trans "due" %} {{ item.due_date }} 
+                                            <b>{{ item.resource_type.name }}:</b> {{ item.quantity_to_buy }} {{ item.unit_of_quantity }} {% trans "due" %} {{ item.due_date }}
                                             {% trans "for demand" %}: {{ item.independent_demand }}
                                         </li>
                                     {% endfor %}
@@ -117,9 +121,9 @@ h3 {
                     {% endfor %}
                 </ul>
             </div>
-		
 
-		
+
+
 
 			{% if mreqs %}
 			    <div class="span6 matl-reqs">
@@ -147,7 +151,7 @@ h3 {
 					    </ul>
 				    </div>
 			{% endif %}
-			
+
 	    	{% if treqs %}
     	        <div class="span6 tool-reqs">
 
@@ -175,8 +179,8 @@ h3 {
 					        </ul>
 	                 </div>
 			    {% endif %}
-			    
- 
+
+
 		</div>
 
 	</div>
@@ -198,16 +202,16 @@ h3 {
 		$('#supply').addClass('active');
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow"); 
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
         $.validator.addClassRules("required-field", { required: true});
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 		        label
 			        .text('').addClass('valid')
@@ -235,4 +239,3 @@ h3 {
     </script>
 
 {% endblock %}
-

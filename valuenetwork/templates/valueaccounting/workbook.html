@@ -3,6 +3,9 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_res_type %}
 
 {% block head_title %}{% trans "Work Notes for " %} {{ commitment.from_agent.name }} doing {{ commitment.resource_type.name }} on {{ process.name }}{% endblock %}
 
@@ -99,8 +102,8 @@
 	<div>
 		<legend>
 			{% trans "Work Notes for " %} <i>{{ commitment.from_agent.name }}</i>
-			<span style="font-size: 60%;" > 
-			    {% trans "doing" %}: <i>{{ commitment.resource_type.name }}</i> {% trans "on Process" %}:  <i>{{ process.name }}</i> {% trans "due" %}:  <i>{{ process.end_date }}</i> 
+			<span style="font-size: 60%;" >
+			    {% trans "doing" %}: <i>{{ commitment.resource_type.name }}</i> {% trans "on Process" %}:  <i>{{ process.name }}</i> {% trans "due" %}:  <i>{{ process.end_date }}</i>
 				{% trans "Estimated duration" %}: <i>{{ commitment.quantity }} {{ commitment.unit_of_quantity.abbrev }}</i>
 				{% trans "Project" %}: <i>{{ process.project }}</i>
                 &nbsp;&nbsp;&nbsp;&nbsp;
@@ -145,7 +148,7 @@
 					    </p>
 				    </div>
 				    <div class="span2">
-				        <a href="{% url labnote commitment_id=commitment.id %}" class="btn btn-primary btn-mini" 
+				        <a href="{% url labnote commitment_id=commitment.id %}" class="btn btn-primary btn-mini"
 				            title="Close page" >
 				            {% trans "Close" %}
 			            </a>
@@ -155,7 +158,7 @@
 			        <div class="span10">
 				        <button role="button" id="startButton" name="start" class="btn btn-info" >{% trans "Start" %}</button>
 				        <button role="button" id="stop" name="stop"  class="btn btn-info" disabled="disabled" >{% trans "Stop" %}</button>
-				        
+
 				        <div class="control-group">
 					        <label><b>{% trans "Time spent today" %}:</b></label>
 					        {{ wb_form.quantity }}&nbsp;&nbsp;&nbsp;&nbsp;
@@ -164,9 +167,9 @@
 				        </div>
 				    </div>
 				    </form>
-                    
+
 			    </div>
-            
+
                 <div class="row-fluid">
 			        <div class="span12">
 			            <a href="#addOutputModal" role="button" class="btn" data-toggle="modal"
@@ -193,23 +196,23 @@
 			                title="Invite a collaborator to this process." >
 			                {% trans "+ work" %}
 		                </a>
-			            
+
 			            <div class="modal hide fade" id="addOutputModal" tabindex="-1" role="dialog" aria-labelledby="output-label" aria-hidden="true">
 				            <div class="modal-header">
 					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
 				                <h3 id="output-label">{% trans "Add an output" %}</h3>
-				                
+
 				            </div>
 				            <div class="modal-body">
 					            <form class="output-form" enctype="multipart/form-data" id="addOutputForm" action="{% url new_process_output commitment_id=commitment.id %}" method="POST" >
 						            {% csrf_token %}
 
-					                    <p class="modal-line">{% trans "Resource Type" %} </p>
-                                        <p>{{ add_output_form.resource_type }} 
+					                    <p class="modal-line">{% trans "{{ t_res_type|title }}" %} </p>
+                                        <p>{{ add_output_form.resource_type }}
 				                        <a href="#createResourceModal" role="button" class="add-another" data-toggle="modal">
 					                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
-				                        </a> </p>                   
+				                        </a> </p>
 		                                <p class="modal-line">{% trans "Quantity" %} </p>
                                         <p>{{ add_output_form.quantity }} </p>
                                         <p class="modal-line">{% trans "Unit of Quantity" %} </p>
@@ -233,22 +236,29 @@
                         <div class="modal hide fade rtmodal" id="createResourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label" aria-hidden="true">
 		                    <div class="modal-header">
 			                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			                    <h3 id="resource-consumable-create-label">{% trans "Create a new Resource Type" %}</h3>
+			                    <h3 id="resource-consumable-create-label">{% trans "Create a new {{ t_res_type|title }}" %}</h3>
 		                    </div>
 		                    <div class="modal-body">
 			                    <form class="resource-create-form" id="resource-create-form" enctype="multipart/form-data" action="." method="POST" >
 				                    {% csrf_token %}
 				                    {{ resource_type_form|as_bootstrap }}
-                                    {{ facet_formset.management_form }}
+                            {{ facet_formset.management_form }}
+                            <ul>
+                              {% for form in facet_formset %}
+                                <li><ul>{{ form.as_ul }}</ul></li>
+                              {% endfor %}
+                            </ul>
+                            {% comment %}
                                     <table>
                                         {% for form in facet_formset %}
                                             <tr><td class="facet-name"> {{ form.facet_name }} </td><td> {{ form.value }} {{ form.facet_id }} </td></tr>
                                         {% endfor %}
                                     </table>
+                            {% endcomment %}
 
 			                      <div class="modal-footer">
 				                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-				                    <input type="submit" name="submit" id="save-resource-type" value="{% trans 'Save' %}" class="btn btn-primary save-resource-type" /> 
+				                    <input type="submit" name="submit" id="save-resource-type" value="{% trans 'Save' %}" class="btn btn-primary save-resource-type" />
                                     <input type="hidden" name="slot" value="out" />
                                     <input type="hidden" name="pattern" value="{{ process.process_pattern.id }}" />
 			                      </div>
@@ -263,7 +273,7 @@
 					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
 				                <h3 id="cite-label">{% trans "Add a citation" %}</h3>
-				                
+
 				            </div>
 				            <div class="modal-body">
 					            <form class="cite-form" enctype="multipart/form-data" id="addCitationForm" action="{% url new_process_citation commitment_id=commitment.id %}" method="POST" >
@@ -289,10 +299,10 @@
 					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
 				                <h3 id="output-label">{% trans "Add a consumable input" %}</h3>
-				                
+
 				            </div>
 				            <div class="modal-body">
-					            <form class="consumable-form" enctype="multipart/form-data" id="addConsumableForm" 
+					            <form class="consumable-form" enctype="multipart/form-data" id="addConsumableForm"
 					                action="{% url new_process_input commitment_id=commitment.id slot='c' %}" method="POST" >
 						            {% csrf_token %}
 
@@ -316,10 +326,10 @@
 					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
 				                <h3 id="output-label">{% trans "Add a usable input" %}</h3>
-				                
+
 				            </div>
 				            <div class="modal-body">
-					            <form class="usable-form" enctype="multipart/form-data" id="addUsableForm" 
+					            <form class="usable-form" enctype="multipart/form-data" id="addUsableForm"
 					                action="{% url new_process_input commitment_id=commitment.id  slot='u' %}" method="POST" >
 						            {% csrf_token %}
 
@@ -343,7 +353,7 @@
 					            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
 				                <h3 id="work-label">{% trans "Invite a helper" %}</h3>
-				                
+
 				            </div>
 				            <div class="modal-body">
 					            <form class="work-form" id="addWorkForm" action="{% url new_process_worker commitment_id=commitment.id %}" method="POST" >
@@ -373,12 +383,12 @@
 						{% for item in process.outgoing_commitments %}
 						    {% with item.output_resource as resource %}
 							<li>
-								<b>{{ item.resource_type.name }}:</b> {% trans "Planned" %}: {{ item.quantity }} {{ item.unit_of_quantity }} 
+								<b>{{ item.resource_type.name }}:</b> {% trans "Planned" %}: {{ item.quantity }} {{ item.unit_of_quantity }}
 								{% if item.is_deletable %}
-								    <form style="display: inline;" 
-								        class="delete-form" 
-								        id="deleteForm{{ item.id }}" 
-								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								    <form style="display: inline;"
+								        class="delete-form"
+								        id="deleteForm{{ item.id }}"
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}"
 								        method="POST" >
 					                    {% csrf_token %}
                                     	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
@@ -392,31 +402,31 @@
 								{% if item.creates_resources %}
 								    <div style="display: inline;" >
 								        <span id="label{{ item.id }}">{{ resource.label }}</span>
-									    &nbsp;&nbsp; 
+									    &nbsp;&nbsp;
 									    <a href="#detailModal{{ item.id }}" role="button" class="btn btn-info" data-toggle="modal">{% trans "Details" %}</a>
 								    </div>
 								{% endif %}
 								<div style="" >
 									<a href="#failureForm{{ item.id }}" role="button" class="btn btn-warning" data-toggle="modal">{% trans "Failed" %}</a>
 								</div>
-								
+
 								{% if item.failed_outputs %}
 									<div id="failDiv{{ item.id }}" style="margin-left: 1em;" >
 								{% else %}
 									<div id="failDiv{{ item.id }}" style="margin-left: 1em; display: none;" >
 								{% endif %}
 								{% trans "Failures" %}: <span id="failures{{ item.id }}">{{ item.failed_output_qty }}</span></div>
-								
+
 
 							</li>
 
-							
+
 							    <div class="modal hide fade detailModal" id="detailModal{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="detail-label" aria-hidden="true">
 						            <div class="modal-header">
 							            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
 
 						                <h3 id="detail-label">{% trans "Details for " %} {{ item.resource_type.name }}</h3>
-						                
+
 						            </div>
 						            <div class="modal-body">
 							            <form class="detail-form" enctype="multipart/form-data" id="detailForm{{ item.id }}" action="{% url resource_event_for_commitment commitment_id=item.id %}" method="POST" >
@@ -428,8 +438,8 @@
 						                    {% else %}
 							                    {{ item.resource_create_form|as_bootstrap }}
 						                    {% endif %}
-						                    
-                                        	<input type="hidden" name="itemId" value="{{ item.id }}" />					            
+
+                                        	<input type="hidden" name="itemId" value="{{ item.id }}" />
 								            <input type="hidden" name="next" value="{% url work_commitment commitment_id=commitment.id %}" />
 							              <div class="modal-footer">
 								            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -440,7 +450,7 @@
 							            </form>
                                     </div>
                                 </div>
-                            
+
 
                             <div class="modal hide fade failureModal" id="failureForm{{ item.id }}" tabindex="-1" role="dialog" aria-labelledby="failure-label" aria-hidden="true">
 						        <div class="modal-header">
@@ -462,7 +472,7 @@
                                 </div>
                             </div>
                             {% endwith %}
-                    
+
 						{% endfor %}
 					</ul>
 
@@ -474,10 +484,10 @@
 						<ul>
 						    <li><b>{{ item.resource_type }}</b>
 								{% if item.is_deletable %}
-							        <form style="display: inline;" 
-								        class="delete-form" 
-								        id="deleteForm{{ item.id }}" 
-								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+							        <form style="display: inline;"
+								        class="delete-form"
+								        id="deleteForm{{ item.id }}"
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}"
 								        method="POST" >
 					                    {% csrf_token %}
                                     	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
@@ -491,8 +501,8 @@
 							{% if item.onhand %}
 								{% for resource in item.onhand %}
 									<li>
-										<b>{% trans "Onhand" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b> 
-										{% trans "Cite" %}: <input class="input-mini cited" id="{{ resource.id }}" name="{{ item.id }}" type="checkbox" 
+										<b>{% trans "Onhand" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b>
+										{% trans "Cite" %}: <input class="input-mini cited" id="{{ resource.id }}" name="{{ item.id }}" type="checkbox"
 										    {% if resource.id in cited_ids %} checked="checked" {% endif %} /></br>
 									</li>
 								{% endfor %}
@@ -504,25 +514,25 @@
 									</li>
 								{% endfor %}
 							{% endif %}
-							
+
 							</ul>
 						</ul>
 						{% endfor %}
-						
+
 					</div>
 				{% endif %}
-							  
+
 				{% if process.consumed_input_requirements %}
 					<div>
 						<h4>{% trans "Consumed inputs" %}:</h4>
 						{% for item in process.consumed_input_requirements %}
 						<ul>
-						    <li><b>{{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }} 
+						    <li><b>{{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }}
 								{% if item.is_deletable %}
-							        <form style="display: inline;" 
-								        class="delete-form" 
-								        id="deleteForm{{ item.id }}" 
-								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+							        <form style="display: inline;"
+								        class="delete-form"
+								        id="deleteForm{{ item.id }}"
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}"
 								        method="POST" >
 					                    {% csrf_token %}
                                     	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
@@ -536,7 +546,7 @@
 							{% if item.onhand %}
 								{% for resource in item.onhand_with_fulfilled_quantity %}
 									<li>
-										<b>{% trans "Onhand" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b> 
+										<b>{% trans "Onhand" %}: <a href="{% url resource resource_id=resource.id %}" target="_blank" >{{ resource.label }}</a></b>
 										<span id="onhand-{{resource.id}}">{{ resource.quantity }}</span> {{ resource.unit_of_quantity }}</br>
 										{% trans "Used" %}: <input class="input-mini used-quantity" id="{{ item.id }}" name="{{ resource.id }}" type="text" size="6" value="{{ resource.fulfilled_quantity }}" /></br>
 									</li>
@@ -560,11 +570,11 @@
 									{% endfor %}
 								</ul>
 							{% endif %}
-							
+
 							</ul>
 						</ul>
 						{% endfor %}
-						
+
 					</div>
 				{% endif %}
 
@@ -574,12 +584,12 @@
 						<h4>{% trans "Used inputs" %}:</h4>
 						{% for item in process.used_input_requirements %}
 		                    <ul>
-				                <li><b>{{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }} 
+				                <li><b>{{ item.resource_type.name }}</b> {{ item.quantity }} {{ item.unit_of_quantity }}
 				                    {% if item.is_deletable %}
-								        <form style="display: inline;" 
-								            class="delete-form" 
-								            id="deleteForm{{ item.id }}" 
-								            action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								        <form style="display: inline;"
+								            class="delete-form"
+								            id="deleteForm{{ item.id }}"
+								            action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}"
 								            method="POST" >
 					                        {% csrf_token %}
                                         	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
@@ -629,12 +639,12 @@
 					<ul>
 						{% for item in other_work_reqs %}
 							<li>
-								<b>{{ item.resource_type }}</b> {{ item.quantity }} {{ item.unit_of_quantity.abbrev }} 
+								<b>{{ item.resource_type }}</b> {{ item.quantity }} {{ item.unit_of_quantity.abbrev }}
 								{% if item.is_deletable %}
-								    <form style="display: inline;" 
-								        class="delete-form" 
-								        id="deleteForm{{ item.id }}" 
-								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}" 
+								    <form style="display: inline;"
+								        class="delete-form"
+								        id="deleteForm{{ item.id }}"
+								        action="{% url delete_commitment commitment_id=item.id labnotes_id=commitment.id %}"
 								        method="POST" >
 					                    {% csrf_token %}
                                     	<input type='hidden' id='deleteRunning{{ item.id }}' name='wasRunning' value='' />
@@ -691,6 +701,7 @@
     var processDoneSaved = true;
     var wasRunning = false;
     var wasRetrying = false;
+    // Really?!
     if ({{ was_running }})
     {
         wasRunning = {{ was_running }};
@@ -704,49 +715,49 @@
 	$(document).ready(function(){
 
 	    $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
-        $("#id_work_done").click(function(event) 
+        $("#id_work_done").click(function(event)
 		{
             var cb = event.target;
             var cb = $('#' + cb.id);
             setTimeout(function() {
                 var done = cb.prop('checked');
-                if (done) 
-                { 
+                if (done)
+                {
                     done = 1;
                 }
                 else
-                { 
+                {
                     done = 0;
                 }
                 saveWorkDone(done);
               }, 0);
         });
-        
-        $("#id_process_done").click(function(event) 
+
+        $("#id_process_done").click(function(event)
 		{
             var cb = event.target;
             var cb = $('#' + cb.id);
             setTimeout(function() {
                 var done = cb.prop('checked');
-                if (done) 
-                { 
+                if (done)
+                {
                     done = 1;
                 }
                 else
-                { 
+                {
                     done = 0;
                 }
                 saveProcessDone(done);
               }, 0);
         });
-            
+
         $(".chzn-select").chosen();
         $("textarea").resizable();
 
@@ -783,7 +794,7 @@
 	    }
 
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 		        label
 			        .text('').addClass('valid')
@@ -801,10 +812,10 @@
             startTimer();
         }
 
-		$("#id_description").blur(function() 
+		$("#id_description").blur(function()
 		{
 			var newDescription = this.value;
-            
+
             if (description != newDescription)
 			{
                 description = newDescription;
@@ -812,7 +823,7 @@
 			}
 		});
 
-		$("#id_quantity_0").blur(function() 
+		$("#id_quantity_0").blur(function()
 		{
             var newHours = parseInt(this.value);
             if (hoursValue != newHours)
@@ -823,7 +834,7 @@
 			}
 		});
 
-		$("#id_quantity_1").blur(function() 
+		$("#id_quantity_1").blur(function()
 		{
             var newMinutes = parseInt(this.value);
             if (minutesValue != newMinutes)
@@ -907,7 +918,7 @@
 
         {% for item in process.outgoing_commitments %}
 		    $("#detailForm{{ item.id }}").submit(function(event) {
-		
+
 		        event.preventDefault();
                 var itemId = {{ item.id }};
 			    var $form = $( this ),
@@ -916,7 +927,7 @@
 				    url = $form.attr( 'action' );
 
 			    var formData = $form.serialize();
-			    saveResource(url, itemId, qtyInputId, identifier, formData); 
+			    saveResource(url, itemId, qtyInputId, identifier, formData);
 
 		    });
 
@@ -926,9 +937,9 @@
 				    $(label).closest('.control-group').addClass('error');
 			    }
 		    });
-		    
+
 		    $("#failForm{{ item.id }}").submit(function(event) {
-		
+
 		        event.preventDefault();
                 var itemId = {{ item.id }};
 			    var $form = $( this ),
@@ -938,12 +949,12 @@
 			    var formData = $form.serialize();
 			    saveFail(qty, itemId, url, formData);
 		    });
-		    
+
 		    $('#failForm{{ item.id }}').validate(
 		    {
 			    rules: {
 				    quantity: {
-                        required: true, 
+                        required: true,
 					    number: true,
 					    min: .01
 				    },
@@ -955,12 +966,12 @@
 				    $(label).closest('.control-group').addClass('error');
 			    }
 		    });
-		    
+
         {% endfor %}
 
 		$("#startButton").click(function(event) {
 		    event.preventDefault();
-            startTimer();  
+            startTimer();
 		});
 
 		$("#stop").click(function(event) {
@@ -969,7 +980,7 @@
             running = false;
 			clearInterval(runTimer);
 			$("#stop").attr("disabled", "disabled");
-			$("#startButton").removeAttr("disabled"); 
+			$("#startButton").removeAttr("disabled");
 			saveContribution();
 		});
 
@@ -1058,16 +1069,17 @@
             {
                 $('#workRunning').prop('value', 0);
             }
+            // This is why we don't write JS like this.
             if (retrying)
             {
                 $('#workRetrying').prop('value', 1);
             }
-            {
+            else {
                 $('#workRetrying').prop('value', 0);
             }
             return true;
 		});
-		
+
         {% for item in process.non_work_requirements %}
 		    $("#deleteForm{{ item.id }}").submit(function(event) {
                 if(running)
@@ -1082,7 +1094,7 @@
                 {
                     $('#deleteRetrying{{ item.id }}').prop('value', 1);
                 }
-                {
+                else {
                     $('#deleteRetrying{{ item.id }}').prop('value', 0);
                 }
                 return true;
@@ -1093,8 +1105,9 @@
             event.preventDefault();
 		});
 
-		$(".output-quantity").blur(function() 
+		$(".output-quantity").blur(function()
 		{
+      // There is never a reason to do this.
 			var quantity = this.value;
 			var id = this.id;
 			var resourceId = this.name;
@@ -1106,7 +1119,7 @@
 				wholeNbrs = qtySplit[0];
 				decimals = qtySplit[1];
 			}
-			
+
 			if ($.isNumeric(quantity))
 			{
 				var combined = wholeNbrs.length + decimals.length;
@@ -1128,7 +1141,7 @@
 			}
 		});
 
-		$(".cited").click(function(event) 
+		$(".cited").click(function(event)
 		{
             var resourceId = this.id;
             var id = this.name;
@@ -1136,12 +1149,12 @@
             var cb = $('#' + cb.id);
             setTimeout(function() {
                 var cited = cb.prop('checked');
-                if (cited) 
-                { 
+                if (cited)
+                {
                     cited = 1;
                 }
                 else
-                { 
+                {
                     cited = 0;
                 }
                 saveCitation(id, resourceId, cited);
@@ -1149,8 +1162,8 @@
 
         });
 
-        
-		$(".used-quantity").blur(function() 
+
+		$(".used-quantity").blur(function()
 		{
 			var quantity = this.value;
             var id = this.id;
@@ -1167,7 +1180,7 @@
 				wholeNbrs = qtySplit[0];
 				decimals = qtySplit[1];
 			}
-			
+
 			if ($.isNumeric(quantity))
 			{
 				var combined = wholeNbrs.length + decimals.length;
@@ -1198,7 +1211,7 @@
 		});
 
 
-		$(".time-used").blur(function() 
+		$(".time-used").blur(function()
 		{
 			var quantity = this.value;
 			var wholeNbrs = quantity;
@@ -1209,7 +1222,7 @@
 				wholeNbrs = qtySplit[0];
 				decimals = qtySplit[1];
 			}
-			
+
 			if ($.isNumeric(quantity))
 			{
 				var combined = wholeNbrs.length + decimals.length;
@@ -1231,7 +1244,7 @@
 				this.value = quantity;
 			}
 		});
-		
+
 
 	    function startTimer()
         {
@@ -1284,7 +1297,7 @@
                         for(var i=0 ; i<data.length ; i++) //will be only one
                         {
                             var id = data[i]['pk'];
-                            var name = data[i].fields['name']; 
+                            var name = data[i].fields['name'];
                             var selx = $(selId);
                             selx.append('<option value="' + id + '" selected="selected">' + name + '</option>');
                             selx.trigger("liszt:updated");
@@ -1293,8 +1306,8 @@
                         $(modalId).modal('hide');
                         $form.trigger( "reset" );
 			        })
-			        .fail(function() 
-			        { 
+			        .fail(function()
+			        {
 				        alert("Check your name field.");
 			        }
 		        );
@@ -1337,9 +1350,9 @@
 				notifySaved();
 				contributionSaved = true;
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				contributionSaved = false;
 				startRetrying();
 			}
@@ -1350,8 +1363,8 @@
 	function updateTime()
 	{
         setHoursMins();
-		saveContribution();	
-		retrySaving();		
+		saveContribution();
+		retrySaving();
 	}
 
 	function startRetrying()
@@ -1401,12 +1414,12 @@
 				var cb = event.target
                 var cb = $('#' + cb.id)
                 var cited = cb.prop('checked');
-                if (cited) 
-                { 
+                if (cited)
+                {
                     cited = 1;
                 }
                 else
-                { 
+                {
                     cited = 0;
                 }
 			    saveCitation(id, resourceId, cited);
@@ -1416,12 +1429,12 @@
 		if (!workDoneSaved)
 		{
             var done = $("#id_work_done").prop('checked');
-            if (done) 
-            { 
+            if (done)
+            {
                 done = 1;
             }
             else
-            { 
+            {
                 done = 0;
             }
 	        saveWorkDone(done);
@@ -1430,12 +1443,12 @@
 		if (!processDoneSaved)
 		{
             var done = $("#id_process_done").prop('checked');
-            if (done) 
-            { 
+            if (done)
+            {
                 done = 1;
             }
             else
-            { 
+            {
                 done = 0;
             }
 	        saveProcessDone(done);
@@ -1455,7 +1468,7 @@
 		if (!failSaved)
 		{
 		    {% for item in process.outgoing_commitments %}
-		        var itemId = {{ item.id }};	
+		        var itemId = {{ item.id }};
 			    var $form = $("#failForm{{ item.id }}");
 			    var qty = $form.find( 'input[name="quantity"]' ).val();
 			    var url = $form.attr( 'action' );
@@ -1467,7 +1480,7 @@
 
 		if (!resourceSaved)
 		{
-		    {% for item in process.outgoing_commitments %}	
+		    {% for item in process.outgoing_commitments %}
 	            var $form = $("#detailForm{{ item.id }}");
                 var itemId = {{ item.id }};
 		        var qtyInputId = $form.find( 'input[name="itemId"]' ).val();
@@ -1475,14 +1488,14 @@
 			    var url = $form.attr( 'action' );
 
 		        var formData = $form.serialize();
-		        saveResource(url, itemId, qtyInputId, identifier, formData); 
+		        saveResource(url, itemId, qtyInputId, identifier, formData);
             {% endfor %}
 		}
 
-		if (contributionSaved 
-		        && outputsSaved 
-	            && inputsSaved 
-	            && failSaved 
+		if (contributionSaved
+		        && outputsSaved
+	            && inputsSaved
+	            && failSaved
 	            && resourceSaved
 	        )
 		{
@@ -1496,19 +1509,19 @@
 
 	function notifySaving()
 	{
-		$("#saving").css("color","green"); 
+		$("#saving").css("color","green");
 		$("#saving").text("Saving...");
 	}
 
 	function notifySaved()
 	{
-		$("#saving").css("color","green"); 
+		$("#saving").css("color","green");
 		$("#saving").text("Saved");
 	}
 
 	function notifyProblem()
 	{
-		$("#saving").css("color","red"); 
+		$("#saving").css("color","red");
 		$("#saving").text("Problem saving");
 	}
 
@@ -1528,10 +1541,10 @@
                 $(formID).trigger( "reset" );
 				failSaved = true;
 			})
-			.fail(function() 
-			{ 
+			.fail(function()
+			{
 				$(modalID).modal('hide');
-				notifyProblem(); 
+				notifyProblem();
 				failSaved = false;
 				startRetrying();
 			}
@@ -1553,10 +1566,10 @@
 				$(qtyInputId)[0].value = data;
 				$(labelID).text(identifier);
 			})
-			.fail(function() 
-			{ 
+			.fail(function()
+			{
 				$(modalID).modal('hide');
-				notifyProblem(); 
+				notifyProblem();
 				resourceSaved = false;
 				startRetrying();
 			}
@@ -1572,15 +1585,15 @@
 		var detailQtyId = $form.find( 'input[name*="quantity"]' ).attr('id');
 		detailQtyId = "#" + detailQtyId;
 		var jqxhr = $.post("{% url production_event_for_commitment %}",  { id: id, quantity: quantity },
-			function( data ) 
+			function( data )
 			{
 				notifySaved();
 				outputsSaved = true;
 				$(detailQtyId)[0].value = quantity;
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				outputsSaved = false;
 				startRetrying();
 			}
@@ -1591,7 +1604,7 @@
 	{
 		notifySaving();
 		var jqxhr = $.post("{% url consumption_event_for_commitment  %}",  { id: id, resourceId: resourceId, quantity: quantity },
-			function( data ) 
+			function( data )
 			{
 				notifySaved();
 				inputsSaved = true;
@@ -1603,9 +1616,9 @@
 				used[resourceId] = quantity;
 				$(onhandId).text(newOnhand);
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				inputsSaved = false;
 				startRetrying();
 			}
@@ -1616,14 +1629,14 @@
 	{
 		notifySaving();
 		var jqxhr = $.post("{% url citation_event_for_commitment  %}",  { id: id, resourceId: resourceId, cited: cited },
-			function( data ) 
+			function( data )
 			{
 				notifySaved();
 				citationsSaved = true;
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				citationsSaved = false;
 				startRetrying();
 			}
@@ -1635,14 +1648,14 @@
 	    var commitmentId = {{ commitment.id }};
 		notifySaving();
 		var jqxhr = $.post("{% url work_done  %}",  { commitmentId: commitmentId, done: done },
-			function( data ) 
+			function( data )
 			{
 				notifySaved();
 				workDoneSaved = true;
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				workDoneSaved = false;
 				startRetrying();
 			}
@@ -1655,14 +1668,14 @@
 	    var commitmentId = {{ commitment.id }};
 		notifySaving();
 		var jqxhr = $.post("{% url process_done  %}",  { processId: processId, commitmentId: commitmentId, done: done },
-			function( data ) 
+			function( data )
 			{
 				notifySaved();
 				processDoneSaved = true;
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				processDoneSaved = false;
 				startRetrying();
 			}
@@ -1674,33 +1687,33 @@
 	{
 		notifySaving();
 		var jqxhr = $.post("{% url time_use_event_for_commitment  %}",  { id: id, resourceId: resourceId, quantity: quantity },
-			function( data ) 
+			function( data )
 			{
 				notifySaved();
 				timeInputsSaved = true;
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 				timeInputsSaved = false;
 				startRetrying();
 			}
 		);
 	}
 
-	$(document).ajaxSend(function(event, xhr, settings) 
+	$(document).ajaxSend(function(event, xhr, settings)
 	{
-		function getCookie(name) 
+		function getCookie(name)
 		{
 		    var cookieValue = null;
-		    if (document.cookie && document.cookie != '') 
+		    if (document.cookie && document.cookie != '')
 			{
 		        var cookies = document.cookie.split(';');
-		        for (var i = 0; i < cookies.length; i++) 
+		        for (var i = 0; i < cookies.length; i++)
 				{
 		            var cookie = jQuery.trim(cookies[i]);
 		            // Does this cookie string begin with the name we want?
-		            if (cookie.substring(0, name.length + 1) == (name + '=')) 
+		            if (cookie.substring(0, name.length + 1) == (name + '='))
 					{
 		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
 		                break;
@@ -1710,7 +1723,7 @@
 		    return cookieValue;
     	}
 
-		function sameOrigin(url) 
+		function sameOrigin(url)
 		{
 		    // url could be relative or scheme relative or absolute
 		    var host = document.location.host; // host + port
@@ -1724,12 +1737,12 @@
 		        !(/^(\/\/|http:|https:).*/.test(url));
 		}
 
-		function safeMethod(method) 
+		function safeMethod(method)
 		{
 		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 		}
 
-		if (!safeMethod(settings.type) && sameOrigin(settings.url)) 
+		if (!safeMethod(settings.type) && sameOrigin(settings.url))
 		{
 		    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
 		}

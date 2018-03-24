@@ -3,6 +3,10 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
 
 {% block head_title %}{% trans "Test Patterns" %}{% endblock %}
 
@@ -157,7 +161,7 @@ th, td {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans "Test Process Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change Resource Type Facets" %}</a>
+		        {% trans "Test Process Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change {{ t_res_type|title }} {{ t_facet|title }}s" %}</a>
 	        </legend>
 
 	        <form id="patternForm" action="." method="POST" >
@@ -175,13 +179,13 @@ th, td {
                     <div class="span8">
                         <div class="row-fluid">
                             <div class="span8 resourcesHeader">
-                                <h4>{{ slot.label }} {% trans "Resource Types" %}</h4>
+                                <h4>{{ slot.label }} {% trans "{{ t_res_type|title }}s" %}</h4>
                             </div>
                             <div class="span4 facetsHeader">
-                                <h4>{% trans "Resource Type Facets" %}</h4>
+                                <h4>{% trans "{{ t_res_type|title }} {{ t_facet|title }}s" %}</h4>
                             </div>
                         </div>
-                        
+
                         {% for item in slot.resource_types %}
                             <div class="row-fluid {% cycle 'odd' 'even' %}">
                                 <div class="span8 resources">
@@ -198,17 +202,17 @@ th, td {
                         {% endfor %}
                     </div>
                     <div class="span4">
-                        <h4 class="patternFacetHeader" >{% trans "Pattern Facets" %}</h4>
+                        <h4 class="patternFacetHeader" >{% trans "Pattern {{ t_facet|title }}s" %}</h4>
                         {% for facet in slot.facets %}
                             <p>{{ facet.facet_value }}</p>
                         {% endfor %}
                     </div>
-                    
+
                 </div>
 
                 {% endfor %}
 
-                
+
 	        {% endif %}
 
 	    </div>
@@ -237,7 +241,7 @@ th, td {
         })
 
 	}); // end document.ready
-	
+
     </script>
 
 {% endblock %}

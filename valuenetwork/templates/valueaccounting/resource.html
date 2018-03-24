@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
+{% load chair_tag %}
 
 {% block head_title %}{% trans "Resource" %}: {{ resource }}{% endblock %}
 
@@ -29,7 +30,7 @@
 }
 #id_notes, #id_access_rules {
   width: 500px;
-  height: 100px;    
+  height: 100px;
 }
 .modal {
     width: 600px;
@@ -56,7 +57,7 @@
 	        <a href="{% url event_history resource_id=resource.id %}">{% trans "Event history" %}</a>&nbsp;&nbsp;
             <a href="{% url incoming_value_flows resource_id=resource.id %}">{% trans "Incoming Value Flow" %}</a>
 		</legend>
-		
+
         {% if agent %}
 		    <div class="modal hide fade" id="resourceChangeForm" tabindex="-1" role="dialog" aria-labelledby="resource-change-label" aria-hidden="true">
 			    <div class="modal-header">
@@ -67,7 +68,13 @@
 				    <form id="resource-change-form" action="{% url change_resource resource_id=resource.id %}" method="POST" >
 					    {% csrf_token %}
 					    {{ resource.change_form|as_bootstrap }}
-                        {{ role_formset.management_form }}
+              {{ role_formset.management_form }}
+              <ul>
+                {% for form in role_formset %}
+                  <li><ul>{{ form.as_ul }}</ul></li>
+                {% endfor %}
+              </ul>
+              {% comment %}
                         <table>
                             <tr>
                                 <td>Resource access role</td>
@@ -76,7 +83,7 @@
                                 <td>Delete</td>
                             </tr>
 	                        {% for form in role_formset %}
-                                {{ form.id }}  
+                                {{ form.id }}
 	                            <tr class="role-row">
 	                                <td class="td-role">{{ form.role }}</td>
 	                                <td class="td-agent">{{ form.agent }}</td>
@@ -85,6 +92,7 @@
 	                            </tr>
                            	{% endfor %}
                         </table>
+                {% endcomment %}
 				        <div class="modal-footer">
 					      <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
 					      <button class="btn btn-primary">{% trans "Save changes" %}</button>
@@ -92,7 +100,7 @@
 				    </form>
                 </div>
             </div>
-		      
+
 		      <div class="modal hide fade" id="resourceOrderForm" tabindex="-1" role="dialog" aria-labelledby="resource-order-label" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -113,84 +121,56 @@
 	    {% endif %}
 
 		<div class="row-fluid">
-		
+
 		    <div class="span6 resource">
-		
-	            <table class="table table-bordered" >
-	                <tr>
-                        <th style="text-align: right;">{% trans "Quantity" %}</th>
-                        <td>{{ resource.quantity }} {{ resource.unit_of_quantity }}</td>
-                    </tr>
-{% comment %}
-                    <tr>
-                        <th style="text-align: right;">{% trans "Quality" %}</th>
-                        <td>{{ resource.quality }}</td>
-                    </tr>
-{% endcomment %}
-                    {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Value per" %} {{ resource.resource_type.unit_of_use.abbrev }} {% trans "of use" %}</th>
-	                        <td>{{ resource.value_per_unit_of_use }}</td>
-                        </tr>
-                    {% endif %}
+
+	            <div>
+	                {% chair {% trans "Quantity" %} "{{ resource.quantity }} {{ resource.unit_of_quantity }}" %}
+
+                  {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
+                    {% chair "{% trans "Value per" %} {{ resource.resource_type.unit_of_use.abbrev }} {% trans "of use" %}" "{{ resource.value_per_unit_of_use }}" %}
+                  {% endif %}
 
 	                {% if resource.url %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "URL" %}</th>
-	                        <td>{{ resource.url|urlize }}</td>
-                        </tr>
-                    {% endif %}
-	                {% if resource.current_location %}
-	                    <tr>
-	                        <th style="text-align: right;">{% trans "Current Location" %}</th>
-	                        <td>{{ resource.current_location }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.notes %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Notes" %}</th>
-	                        <td>{{ resource.notes|urlize|linebreaks }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.access_rules %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Access Rules" %}</th>
-	                        <td>{{ resource.access_rules|urlize|linebreaks }}</td>
-                        </tr>
-                    {% endif %}
-                    {% if resource.photo %}
-	                	<tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
-	                        <td><img src="{% thumbnail resource.photo photo_size %}" /></td>
-                        </tr>
-                	{% elif resource.photo_url %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Photo" %}</th>
-	                        <td><img src="{{ resource.photo_url }}" width="128" height="96" /></td>
-                        </tr>
-	                {% endif %}
-                    {% if resource.agent_resource_roles.all %}
-                        <tr>
-	                        <th style="text-align: right; vertical-align: top; ">{% trans "Assignments" %}</th>
-	                        <td>
-                                {% for item in resource.agent_resource_roles.all %}
-                                    {{ item.role.name }} : {{ item.agent.nick }} 
-                                    {% if item.is_contact %} (Contact) {% endif %} <br />
-                                {% endfor %}
-                            </td>
-                        </tr>
-                    {% endif %}
-                    <tr>
-                        <th style="text-align: right;">{% trans "Record created date" %}</th>
-                        <td>{{ resource.created_date }}</td>
-                    </tr>
-                    <tr>
-                        <th style="text-align: right;">{% trans "Record created by" %}</th>
-                        <td>{{ resource.created_by }}</td>
-                    </tr>
+	                    {% chair {% trans "URL" %} "{{ resource.url|urlize }}" %}
+                  {% endif %}
 
-	            </table>
-	        
+                  {% if resource.current_location %}
+	                    {% chair {% trans "Current Location" %} "{{ resource.current_location }}" %}
+                  {% endif %}
+
+                  {% if resource.notes %}
+                    {% chair {% trans "Notes" %} "{{ resource.notes|urlize|linebreaks }}" %}
+                  {% endif %}
+
+                  {% if resource.access_rules %}
+                    {% chair {% trans "Access Rules" %} "{{ resource.access_rules|urlize|linebreaks }}" %}
+                  {% endif %}
+
+                  {% if resource.photo %}
+	                	{% chair {% trans "Photo" %} '<img src="{% thumbnail resource.photo photo_size %}" />'|safe %}
+                	{% elif resource.photo_url %}
+                    {% chair {% trans "Photo" %} '<img src="{{ resource.photo_url }}" width="128" height="96" />'|safe %}
+	                {% endif %}
+
+                    {% if resource.agent_resource_roles.all %}
+                      <p>
+                        <b>{% trans "Assignments" %}</b>
+	                        {% for item in resource.agent_resource_roles.all %}
+                            <div>
+                                    {{ item.role.name }} : {{ item.agent.nick }}
+                                    {% if item.is_contact %} (Contact) {% endif %}
+                            </div>
+                          {% endfor %}
+                      </p>
+                    {% endif %}
+
+                    {% chair {% trans "Record created date" %} "{{ resource.created_date }}" %}
+                    {% chair {% trans "Record created by" %} "{{ resource.created_by }}" %}
+
+
+	            </div>
+
 	        </div>
 
 	        <div class="span6 info">
@@ -209,8 +189,8 @@
 		</div>
 
         <div class="row-fluid" tyle="margin-top: 1em;">
-            <div class="span6">           
-                <h3 class="hdg">{% trans "Where from" %}:</h3>  
+            <div class="span6">
+                <h3 class="hdg">{% trans "Where from" %}:</h3>
                 {% if resource.where_from_events %}
                     <ul>
                         {% for event in resource.where_from_events %}
@@ -236,8 +216,8 @@
                                                     {% for source in exchange.payment_sources_with_contributions %}
                                                         {% for contribution in source.cash_contribution_events %}
                                                             <li>
-                                                                <b>{{ contribution.event_type }}:</b> 
-                                                                {{ contribution.event_date }} 
+                                                                <b>{{ contribution.event_type }}:</b>
+                                                                {{ contribution.event_date }}
                                                                 {{ contribution.distribution_quantity_formatted }}
                                                                 {% trans "from" %}: {{ contribution.from_agent }}
                                                             </li>
@@ -250,9 +230,9 @@
                                 {% endif %}
                             {% endif %}
                         {% endfor %}
-	                            
-              
-	                </ul> 
+
+
+	                </ul>
 
                 {% else %}
                     {% if agent %}
@@ -268,8 +248,8 @@
 	                      <div class="modal-body">
 			                    <form class="process-add-form" action="" method="POST" >
 				                    {% csrf_token %}
-				                    {{ process_add_form }}
-				
+				                    {{ process_add_form|as_bootstrap }}
+
 			                      <div class="modal-footer">
 				                    <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
 				                    <button class="btn btn-primary" name="process-save" value="process">{% trans "Save" %}</button>
@@ -353,19 +333,19 @@
     $(document).ready(function(){
 
 		$('#inventory').addClass('active');
-		
+
 		$('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
 		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
-        //$('td.td-role > select').addClass('select-role');   
-        //$('td.td-agent > select').addClass('select-agent');  
+        //$('td.td-role > select').addClass('select-role');
+        //$('td.td-agent > select').addClass('select-agent');
 
         $.validator.addMethod("agentRequired", function (value, element) {
             var parent = element.parentElement;
@@ -379,7 +359,7 @@
             }
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
-        
+
         $.validator.addMethod("roleRequired", function (value, element) {
             var parent = element.parentElement;
             var parentSib = parent.previousElementSibling;
@@ -392,10 +372,10 @@
             }
             return this.optional(element) || sibValue;
         }, "Both role and agent must be selected.");
-        
+
         $.validator.addClassRules("select-role", { agentRequired: true });
         $.validator.addClassRules("select-agent", { roleRequired: true });
-        
+
         jQuery.validator.addMethod("quantity",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -406,7 +386,7 @@
 
         $.validator.addClassRules("quantity", { quantity: true });
 
-            
+
         $('#resource-change-form').validate(
         {
             highlight: function(label) {
@@ -414,9 +394,9 @@
             }
 
         });
-    
+
     }); // end document.ready
 
     </script>
-    
+
 {% endblock %}
