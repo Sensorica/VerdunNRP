@@ -55,6 +55,10 @@ def type_agent_association_type():
     return "agent relationship"
 
 @register.assignment_tag
+def type_agent_association():
+    return "agent association"
+
+@register.assignment_tag
 def type_use_case():
     return "usage"
 
