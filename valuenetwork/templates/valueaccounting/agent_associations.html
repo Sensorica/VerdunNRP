@@ -4,7 +4,13 @@
 {% load i18n %}
 {% load url from future %}
 {% load bootstrap_tags %}
+{% load form_dialog %}
+{% load types %}
 
+{% type_agent as t_agent %}
+{% type_agent_type as t_agent_type %}
+{% type_agent_association as t_agent_assoc %}
+{% type_agent_association_type as t_agent_assoc_type %}
 
 {% block head_title %}{% trans "Maintain Associations for" %} {{ agent }}{% endblock %}
 
@@ -40,26 +46,28 @@
 {% block body_base %}
 <div class="container">
     <legend>{% trans "Maintain Associations for" %} {{ agent.name }} </legend>
-    
+
 
     <form method="POST" action=".">
         {% csrf_token %}
-        
+
         <div class="row-fluid">
             <div class="span9">
             </div>
             <div class="span3" >
-                <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
+                <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" />
                 <input type="submit" name="keep-going" value="{% trans 'Save and add more' %}" class="btn btn-primary" />
             </div>
         </div>
-        
+
         <h3 class="hdg">{{ agent.nick }} {% trans "has these associates" %}: </h3>
         {{ has_associates_formset.management_form }}
+        {# changing the form fields to the corresponding field values, adding a column of edit buttons #}
         <table class="table table-bordered table-condensed table-hover">
             <thead>
                 <tr class="headings">
-                    <th>{% trans "Association Type" %}</th>
+                    <th>{% trans "Edit" %}</th>
+                    <th>{% trans "{{ t_agent_assoc_type|title }}" %}</th>
                     <th>{% trans "Associated Agent" %}</th>
                     <th>{% trans "Description of association" %}</th>
                     <th>{% trans "Active?" %}</th>
@@ -68,18 +76,22 @@
             </thead>
             <tbody>
             {% for form in has_associates_formset %}
-                {{ form.id }}
-                <tr>
-                    <td>{{ form.association_type }}</td>
-                    <td>{{ form.is_associate }}</td>
-                    <td>{{ form.description }}</td>
-                    <td>{{ form.state }}</td>
+
+
+                <tr id="row-for-{{ form.id }}">
+                  {{ form.id }}
+                    <td><a href="#edit-modal-{{form.id}}" role="button" class="btn" data-toggle="modal">Edit</a></td>
+                    <td class="association-type-name">{{ form.instance.association_type.name }}</td>
+                    <td class="associate-nick">{{ form.instance.is_associate.nick }}</td>
+                    <td class="description">{{ form.instance.description|urlize|linebreaks }}</td>
+                    <td class="state">{{ form.instance.state }}</td>
                     <td>{{ form.DELETE }}</td>
+                    {% dialog_form dialog_id="edit-modal-{{ form.id }}" method="dialog" action="#" form=form title="Edit Association" %}
                 </tr>
             {% endfor %}
             </tbody>
         </table>
-        
+
         <h3 class="hdg">{{ agent.nick }} {% trans "is associated with" %}: </h3>
         {{ is_associates_formset.management_form }}
         <table class="table table-bordered table-condensed table-hover">
@@ -105,12 +117,12 @@
             {% endfor %}
             </tbody>
         </table>
-        
+
         <div class="row-fluid">
             <div class="span9">
             </div>
             <div class="span3" >
-                <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" /> 
+                <input type="submit" name="save" value="{% trans 'Save' %}" class="btn btn-primary" />
                 <input type="submit" name="keep-going" value="{% trans 'Save and add more' %}" class="btn btn-primary" />
             </div>
         </div>
@@ -133,18 +145,35 @@
     $(document).ready(function(){
 
         $(".chzn-select").chosen();
-        
+
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
+        /* New JS to bind the table data to the edit dialogs */
+        $("tr.has-associate form").submit(function () {
+          const me = $(this),
+            row = me.closest("tr"),
+            dlgType = $(this.association_type),
+            dlgAgent = $(this.is_associate),
+            dlgDesc = $(this.description),
+            dlgState = $(this.state),
+            rowType = row.find(".association-type-name"),
+            rowAgent = row.find(".associate-nick"),
+            rowDesc = row.find(".description"),
+            rowState - row.find(".state");
+          rowType.text(dlgType.find("[selected]").text());
+          rowAgent.text(dlgType.find("[selected]").text());
+          rowDesc.text(dlgDesc.val());
+          rowState.text(dlgState.val());
+        })
 
     }); // end document.ready
 
     </script>
-    
+
 {% endblock %}
