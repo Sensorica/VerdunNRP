@@ -1,13 +1,15 @@
 {% extends "site_base.html" %}
 
 {% load i18n %}
+{% load types %}
+{% type_resource_type as t_res_type %}
 
 {% block head_title %}{% trans "All Contributions" %}{% endblock %}
 
 {% block extra_head %}
 <style>
 
-	tr.even td 
+	tr.even td
 	{
 		color:#000000;
 		background-color:#EAF2D3;
@@ -35,15 +37,15 @@
 				<th>{% trans "Type" %}</th>
 				<th>{% trans "From" %}</th>
 				<th>{% trans "Project" %}</th>
-				<th>{% trans "Resource Type" %}</th>
+				<th>{% trans "{{ t_res_type|title }}" %}</th>
 				<th>{% trans "Qty" %}</th>
 				<th>{% trans "URL" %}</th>
 				<th>{% trans "Description" %}</th>
 				<th>{% trans "Process" %}</th>
 				<th>{% trans "Deliverables" %}</th>
-				
+
 			</thead>
-			<tbody>	
+			<tbody>
 				{% for event in events %}
 					<tr class="{% cycle 'odd' 'even' %}">
 						<td>{{ event.event_date }}</td>
@@ -72,7 +74,7 @@
 					    </td>
 					</tr>
 				{% endfor %}
-			</tbody>	
+			</tbody>
 		</table>
 <div class="pagination">
     <span class="step-links">

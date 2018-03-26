@@ -4,6 +4,10 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 
+{% load types %}
+{% type_event_type as t_evt_type %}
+{% type_event as t_evt %}
+
 {% block head_title %}{% trans "Filter demo" %}{% endblock %}
 
 {% block extra_head %}
@@ -34,22 +38,22 @@
                 <a href="{% url bucket_filter_header %}">{% trans "Start over" %}</a>
             </legend>
             <p>
-                Filter set: {{ filter_set }}, Context: {{ context_agent }}, Event type: {{ event_type }}, Pattern: {{ pattern }}
+                Filter set: {{ filter_set }}, Context: {{ context_agent }}, {{ t_evt_type|capfirst }}: {{ event_type }}, Pattern: {{ pattern }}
             </p>
-            
+
             <form id="filterForm" action="." method="POST" >
                 {% csrf_token %}
                 {{ filter_form|as_bootstrap }}
                 <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'Submit' %}" />
             </form>
-            
+
             {% if events %}
-                <h3>{{count }} {% trans "Events" %}</h3>
+                <h3>{{ count }} {% trans "{{ t_evt|title }}s" %}</h3>
                 <div>
                     <table class="event-table">
                         <thead>
                             <th>{% trans "Date" %}</th>
-                            <th>{% trans "Event Type" %}</th>
+                            <th>{% trans "{{ t_evt_type|title }}" %}</th>
                             <th>{% trans "From" %}</th>
                             <th>{% trans "To" %}</th>
                             <th>{% trans "What" %}</th>
@@ -72,8 +76,8 @@
                                         {{ event.to_agent }}
                                     </td>
                                     <td>
-                                        {{ event.quantity }} {{ event.unit_of_quantity.abbrev }} 
-                                        {% trans "of" %} {{ event.resource_type }} 
+                                        {{ event.quantity }} {{ event.unit_of_quantity.abbrev }}
+                                        {% trans "of" %} {{ event.resource_type }}
                                     </td>
                                     <td>
                                         {% if event.process %}
@@ -106,7 +110,7 @@
         $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
 
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
@@ -114,7 +118,7 @@
         })
 
     }); // end document.ready
-    
+
     </script>
 
 {% endblock %}

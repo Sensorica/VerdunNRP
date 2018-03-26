@@ -224,6 +224,16 @@ th, td {
                     <div class="span6">
                         <div class="row-fluid">
                             <div class="span8">
+                              <ul>{% trans "Pattern {{ t_facet|title }}" %}
+                                {{ slot.formset.management_form }}
+                                {% for form in slot.formset %}
+                                  <li> {{ form.id }}
+                                     <span>{{ form.facet_value }}</span>
+                                     <span class="pull-right">{{ form.DELETE }}</span>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                              {% comment %}
                                 <table>
                                     <thead>
 				                        <th>{% trans "Pattern {{ t_facet|title }}s" %}</th>
@@ -244,6 +254,7 @@ th, td {
 				                        {% endfor %}
 			                        </tbody>
 				                </table>
+                        {% endcomment %}
 			                </div>
 			                <div class="span4">
             			        <input type="submit" name="submit" class="btn btn-info" style="display: inline; vertical-align: top;"
