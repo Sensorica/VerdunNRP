@@ -3439,6 +3439,14 @@ class DistributionValueEquationForm(forms.Form):
             self.fields["resource"].choices = [('', '----------')] + [(res.id, res.identifier) for res in resources]
         #import pdb; pdb.set_trace()
 
+    def clean(self, *args, **kwargs):
+
+        data = self.cleaned_data
+        if not data["events_to_distribute"] and not data["resource"]:
+            raise ValidationError(_("Must select at least one event or a resource account"), code="invalid")
+
+        return super(DistributionValueEquationForm, self).clean(*args, **kwargs)
+
 class ResourceFlowForm(forms.ModelForm):
     context_agent = forms.ModelChoiceField(
         queryset=EconomicAgent.objects.context_agents(),
