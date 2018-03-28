@@ -1885,7 +1885,25 @@ hr {
             $( "#help" ).text("Show Help");
         })
 
+    {# new code for #461, filling the work description based on work type selected #}
+    {
+      const formElement = $("#addWorkModal form").get(),
+        choiceElement = $(formElement.resource_type),
+        descriptionElement = $(formElement.description),
+        pkToDescription = new Map([
+            {% for rt in add_work_form.resource_type.queryset %}
+              [{{ rt.id }}, {{ rt.description }}],
+            {% endfor %}
+        ]);
 
+      choiceElement.change(function () {
+        var choice = $(this).val(),
+          description = pkToDescription.get(choice);
+
+        descriptionElement.val(description);
+      });
+
+    }
 	}); // end document.ready
 
     function getResources(event)

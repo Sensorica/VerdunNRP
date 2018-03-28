@@ -3,6 +3,7 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load chair_tag %}
 
 {% block head_title %}{% trans "Distribution" %}{% endblock %}
 
@@ -86,7 +87,7 @@ td {
 #distributions {
     margin-top: 20px;
 }
-tr.even td 
+tr.even td
 {
     color:#000000;
     background-color:#EAF2D3;
@@ -109,7 +110,7 @@ th
 	{% if context_agent %}
         <legend>{% trans "Create Distribution for " %} {{ context_agent }}
             <a class="indent" href="{% url value_equation_sandbox value_equation_id=ve.id %}">Value Equation Sandbox</a>
-            <a class="indent" href="{% url edit_value_equation value_equation_id=ve.id %}">Edit Value Equation</a> 
+            <a class="indent" href="{% url edit_value_equation value_equation_id=ve.id %}">Edit Value Equation</a>
             <a class="indent" href="{% url value_equations %}">Value Equations List</a>
         </legend>
 
@@ -118,6 +119,15 @@ th
             {% csrf_token %}
             <p>Value Equation</p>
             <p>{{ header_form.value_equation }}</p>
+            <div id="selection">
+              <p>{% trans "Select one or more sources to be distributed OR enter amount to distribute" %}</p>
+              <p><span id="cashRcpt">{{ header_form.events_to_distribute }}</span></p>
+              {% field_as_p header_form.money_to_distribute %}
+              {% field_as_p header_form.resource {% trans "And source Cash Resource Account" %} %}
+              <p>{% trans "If you selected one cash receipt, you may distribute any part of it" %}</p>
+              <p id="partialDist">{{ header_form.partial_distribution }}</p>
+            </div>
+            {% comment %}
             <table id="selection">
               <tr><td>Select one or more sources to be distributed</td><td class="or">OR</td><td>Enter amount to distribute</td></tr>
               <tr>
@@ -131,12 +141,13 @@ th
                 <span class="spc">{{ header_form.resource }}</span></td>
               </tr>
               <tr>
-                    <td id="partialDist" > 
+                    <td id="partialDist" >
                         {% trans "if you selected one cash receipt, you may distribute any part of it" %}</br>
                         {{ header_form.partial_distribution }}
                     </td>
               </tr>
             </table>
+            {% endcomment %}
             <p>Distribution date</p>
             <p>{{ header_form.start_date }}</p>
             <p>Comments</p>
@@ -153,9 +164,9 @@ th
                             <div id="div-start_date" class="control-group  " style="display:inline;" >
 
                                 <div class="controls" style="display:inline;">
-                                    {{ bucket.form.start_date }} 
+                                    {{ bucket.form.start_date }}
                                 </div>
-                            </div>                                    
+                            </div>
                             through
                             <div id="div-end_date" class="control-group  " style="display:inline;">
 
@@ -170,7 +181,7 @@ th
                                 </div>
                             </div>
                         {% else %}
-                            {{ bucket.form|as_bootstrap }} 
+                            {{ bucket.form|as_bootstrap }}
                         {% endif %}
                         </div>
                     {% endif %}
@@ -178,39 +189,39 @@ th
             </div>
             <input id="calculate" type="submit" name="submit" class="btn btn-primary" style="display: inline; vertical-align: top;" value="{% trans 'Distribute Income' %}" />
             <span class="warning"><b>WARNING</b>: This operation cannot be undone. Please test your data entry below first!</span>
-            <span id="loading" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></span> 
-            
+            <span id="loading" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></span>
+
             <div id="distributions">
                 <input id="test" type="submit" name="test-only" class="btn btn-info" style="display: inline; vertical-align: top;" value="{% trans 'TEST Distribution Here First !' %}" />
-                <span id="loadingTest" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></span> 
-   
-                {% if agent_totals %} 
+                <span id="loadingTest" style="display: none;" >Calculating, please be patient... <img src="http://i.stack.imgur.com/FhHRx.gif"></img></span>
+
+                {% if agent_totals %}
                     <div class="hdg">TEST ONLY - Agent Totals:</div>
                     <table class="table table-bordered table-condensed" >
                         <thead>
                             <th>{% trans "Agent" %}</th>
                             <th style="text-align: right;">{% trans "Distribution Amount" %}</th>
                         </thead>
-                        <tbody> 
+                        <tbody>
                             {% for at in agent_totals %}
                                 <tr class="{% cycle 'odd' 'even' %}">
                                     <td>{{ at.to_agent.name }}</td>
                                     <td style="text-align: right;" >{{ at.quantity }}</td>
                                 </tr>
                             {% endfor %}
-                        <tbody> 
+                        <tbody>
                     </table>
                 {% elif no_totals %}
                    <div><b>{{ no_totals }}</b></div>
                 {% endif %}
             </div>
-        </form>            
+        </form>
     {% else %}
         <h2>You need a {{ context_types }}.</h2>
         <p>
-            Read the 
+            Read the
             <a href="https://docs.google.com/presentation/d/1ztnDX-Cf-PmQPUNxAfntNBBpLH9mhsQ2lrJ77Ty8Plw/edit?usp=sharing" target= "_blank">
-                Network Setup tutorial</a> 
+                Network Setup tutorial</a>
             and create one.
         </p>
     {% endif %}
@@ -227,26 +238,26 @@ th
 	{{ block.super }}
 
     <script type="text/javascript">
-    
+
     var cashReceipts = {{ events_to_distribute }};
     var crAmount = 0;
 
 	$(document).ready(function(){
-	
+
         $('#distribution').addClass('active');
-	
+
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
-        
+
         $(".chzn-select").chosen();
-        
+
         $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
-        
+
         jQuery.validator.addMethod("money",
             function(value, element) {
                 var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
@@ -254,8 +265,8 @@ th
             },
             "Please enter a number less than 1000000 with no more than 2 decimal places"
         );
-        
-        jQuery.validator.setDefaults({ 
+
+        jQuery.validator.setDefaults({
             success: function(label) {
                 label
                     .text('').addClass('valid')
@@ -269,7 +280,7 @@ th
         $.validator.addClassRules("date-required", { required: true });
         $.validator.addClassRules("order", { required: true });
         $.validator.addClassRules("shipment-event", { required: true });
-       
+
         $('.validateMe').each( function(){
             var form = $(this);
             form.validate({
@@ -285,21 +296,21 @@ th
 		$("#id_events_to_distribute").change(adjustDist);
 		//$("#id_input_distributions").change(inputDistributionChanged);
 		//$("#id_20-shipments").change(shipmentsChanged);
- 
+
 	}); // end document.ready
 
-	
+
 	function showLoading()
 	{
         $("#loading").show();
         $(".warning").hide();
-    } 
-    
+    }
+
     function showLoadingTest()
     {
         $("#loadingTest").show();
     }
-    
+
     function reloadPage()
     {
         var selectedVE = document.getElementById('id_value_equation').value;
@@ -307,7 +318,7 @@ th
         var url = '/accounting/create-distribution-using-value-equation/' + agentId + '/' + selectedVE + '/'
         window.location.replace(url);
     }
-    
+
     function inputDistributionChanged(event)
     {
         var selectedDists = $("#id_input_distributions").val();
@@ -322,12 +333,12 @@ th
         {
             getOrders(selectedDists, orderSelectors);
         }
-        
+
     }
-    
+
     function getOrders(selectedDists, orderSelectors)
     {
-        
+
 
         if (selectedDists)
         {
@@ -345,7 +356,7 @@ th
                         $(selId)
                             .append($("<option></option>")
                             .attr("value",orderId)
-                            .text(orderDesc)); 
+                            .text(orderDesc));
                         $(selId).val(orderId);
                         $(selId).trigger("liszt:updated");
                     }
@@ -363,10 +374,10 @@ th
         }
 
     }
-    
+
     function getShipments(selectedDists, shipmentSelectors)
     {
-        
+
         if (selectedDists)
         {
             distId = selectedDists[0];
@@ -384,7 +395,7 @@ th
                         $(selId)
                             .append($("<option></option>")
                             .attr("value",shipId)
-                            .text(shipDesc)); 
+                            .text(shipDesc));
                         $(selId).val(shipId);
                         $(selId).trigger("liszt:updated");
                     }
@@ -402,7 +413,7 @@ th
         }
 
     }
-    
+
     function adjustDist()
     {
         var selectedCrs = $("#id_events_to_distribute :selected");
