@@ -10,7 +10,7 @@ django-forms-bootstrap==2.0.3.post1
 metron==1.0
 webtest
 django-webtest==1.8.0
-django-notification==0.8
+django-notification==0.2.0
 toposort
 django-cors-headers
 rdflib
