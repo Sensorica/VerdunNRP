@@ -3,14 +3,14 @@
 
 Django==1.4.22
 South
-django-extensions
+django-extensions==1.6.7
 pinax-theme-bootstrap==2.0.4
 pinax-theme-bootstrap-account==1.0b2
 django-forms-bootstrap==2.0.3.post1
 metron==1.0
 webtest
-django-webtest
-django-notification
+django-webtest==1.8.0
+django-notification==0.8
 toposort
 django-cors-headers
 rdflib
