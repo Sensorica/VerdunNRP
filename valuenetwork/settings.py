@@ -15,8 +15,8 @@ MANAGERS = ADMINS
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "valuenetwork.sqlite",
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'verdunnrp_sql',
     }
 }
 
@@ -59,8 +59,9 @@ MEDIA_URL = "/site_media/media/"
 # Don"t put anything in this directory yourself; store your static files
 # in apps" "static/" subdirectories and in STATICFILES_DIRS.
 # Example: "/home/media/media.lawrence.com/static/"
-STATIC_ROOT = os.path.join(PACKAGE_ROOT, "site_media", "static")
+#STATIC_ROOT = os.path.join(PACKAGE_ROOT, "site_media", "static")
 #STATIC_ROOT = os.path.join(PACKAGE_ROOT, "static")
+STATIC_ROOT = "/home/verdun/webapps/verdunnrp_static/"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
@@ -130,12 +131,12 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
-    
+
     # theme
     "pinax_theme_bootstrap_account",
     "pinax_theme_bootstrap",
     "django_forms_bootstrap",
-    
+
     # external
     #"account",
     "metron",
@@ -148,7 +149,7 @@ INSTALLED_APPS = [
     'corsheaders',
     #'django_filters',
     'rest_framework',
-    
+
     # project
     'valuenetwork.valueaccounting',
     'valuenetwork.equipment',
@@ -247,8 +248,11 @@ IGNORABLE_404_URLS = (
 
 ALL_WORK_PAGE = "/accounting/work/"
 
+ALLOWED_HOSTS = [
+    r'verdun.valnet.webfactional.com'
+]
+
 try:
     from local_settings import *
 except ImportError:
     pass
-
