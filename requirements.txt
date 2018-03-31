@@ -12,7 +12,7 @@ webtest
 django-webtest==1.8.0
 django-notification==0.2.0
 toposort
-django-cors-headers
+django-cors-headers==1.1.0
 rdflib
 rdflib-jsonld
 djangorestframework==2.4.8
