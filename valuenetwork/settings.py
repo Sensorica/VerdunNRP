@@ -220,6 +220,7 @@ FIXTURE_DIRS = [
     os.path.join(PROJECT_ROOT, "fixtures"),
 ]
 
+AUTH_USER_MODEL = 'auth.User'
 
 ACCOUNT_OPEN_SIGNUP = False
 ACCOUNT_USE_OPENID = False
