@@ -10280,7 +10280,7 @@ def exchanges(request, agent_id=None):
         "selected_values": selected_values,
         #"references": references,
         "ets": ets,
-        "event_ids": ','.join([str(ev.id) for ev in event_list.distinct()])#event_ids,
+        "event_ids": ','.join([str(ev.id) for ev in event_list.distinct()]),#event_ids,
         "agent": agent,
     }, context_instance=RequestContext(request))
 
