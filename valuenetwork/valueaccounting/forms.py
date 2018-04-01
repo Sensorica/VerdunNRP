@@ -2714,7 +2714,7 @@ class OrderItemForm(forms.ModelForm):
     quantity = forms.DecimalField(
         default="1.0",
         widget=forms.TextInput(attrs={'class': 'input-small',}),
-        validators=[MinValueValidator(0.00001, "Can't order zero items")]
+        validators=[MinValueValidator(0.00001)]
         )
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
