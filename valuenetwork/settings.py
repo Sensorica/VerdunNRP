@@ -61,7 +61,7 @@ MEDIA_URL = "/site_media/media/"
 # Example: "/home/media/media.lawrence.com/static/"
 #STATIC_ROOT = os.path.join(PACKAGE_ROOT, "site_media", "static")
 #STATIC_ROOT = os.path.join(PACKAGE_ROOT, "static")
-STATIC_ROOT = "/home/verdun/webapps/verdunnrp_static/"
+STATIC_ROOT = "/home/valnet/webapps/verdunnrp_static/"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
