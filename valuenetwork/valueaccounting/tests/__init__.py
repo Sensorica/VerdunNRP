@@ -8,4 +8,4 @@ from valuenetwork.valueaccounting.tests.test_event_saving import *
 from valuenetwork.valueaccounting.tests.test_stages import *
 from valuenetwork.valueaccounting.tests.test_value_equations import *
 from valuenetwork.valueaccounting.tests.test_transfers import *
-from valuenetwork.valueaccounting.tests.test_resource_type import *
+from valuenetwork.valueaccounting.tests.test_resource_types import *
