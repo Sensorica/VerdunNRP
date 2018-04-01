@@ -2712,7 +2712,7 @@ class ResourceTypeFacetValueForm(forms.Form):
 class OrderItemForm(forms.ModelForm):
     resource_type_id = forms.CharField(widget=forms.HiddenInput)
     quantity = forms.DecimalField(
-        default="1.0",
+        default=Decimal("1.0"),
         widget=forms.TextInput(attrs={'class': 'input-small',}),
         validators=[MinValueValidator(0.00001)]
         )
