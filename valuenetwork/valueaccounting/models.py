@@ -1528,7 +1528,7 @@ class EconomicResourceType(models.Model):
         verbose_name=_('parent'), related_name='children')
     resource_class = models.ForeignKey(ResourceClass, blank=True, null=True,
         verbose_name=_('resource class'), related_name='resource_types')
-    unit = models.ForeignKey(Unit, default=Unit.default_unit().id
+    unit = models.ForeignKey(Unit, default=Unit.default_unit().id,
         verbose_name=_('unit'), related_name="resource_units",
         help_text=_('if this resource has different units of use and inventory, this is the unit of inventory'))
     unit_of_use = models.ForeignKey(Unit, blank=True, null=True,
