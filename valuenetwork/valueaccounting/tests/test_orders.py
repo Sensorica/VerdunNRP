@@ -4,7 +4,7 @@ from decimal import *
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.test import Client
-
+from django.utils.translation import ugettext_lazy as _
 from webtest import AppError, TestApp
 
 from django_webtest import WebTest
@@ -20,7 +20,7 @@ class OrderTest(WebTest):
 
     """Testing customer orders
     """
-    
+
     # Hopefully this still gets through
     fixtures = ['verdun']
     def setUp(self):
