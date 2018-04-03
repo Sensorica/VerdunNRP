@@ -6,7 +6,12 @@ from decimal import Decimal
 from exceptions import Exception, AssertionError
 
 class NoThrowTransferText(TestCase):
+    """
+    Tests fix for the issue wherein fetching a transfer's event text would throw
+    """
 
+    fixtures = ['verdun']
+    
     def setUp(self):
         self.transfer = Transfer(
             created_date=date.today(),
@@ -15,7 +20,7 @@ class NoThrowTransferText(TestCase):
         )
         self.transfer.save()
 
-        self.et_give = EventType(
+        self.et_give = EventType.objects.get(name='Give') or EventType(
             name='Give',
             label='do not care',
             resource_effect='=',    # don't care
@@ -23,7 +28,7 @@ class NoThrowTransferText(TestCase):
         )
         self.et_give.save()
 
-        self.et_recv = EventType(
+        self.et_recv = EventType.objects.get(name='Receive') or EventType(
             name='Receive',
             label='do not care',
             resource_effect='=',    # don't care
