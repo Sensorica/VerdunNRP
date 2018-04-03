@@ -9,17 +9,19 @@ from valuenetwork.valueaccounting.tests.objects_for_testing import *
 
 class FacetTest(TestCase):
 
-    """Testing Facets and ProcessPatterns 
+    """Testing Facets and ProcessPatterns
 
         and ResourceType-Pattern FacetValue matching.
 
     """
 
+    fixtures = ['verdun']
+
     def setUp(self):
 
         facets = Facets()
-        
-        self.domain = facets.domain        
+
+        self.domain = facets.domain
         self.source = facets.source
         self.optical_pattern = facets.optical_pattern
         self.electronic_pattern = facets.electronic_pattern
@@ -35,7 +37,7 @@ class FacetTest(TestCase):
         self.event_type_use = facets.event_type_use
         self.event_type_consume = facets.event_type_consume
         self.event_type_work = facets.event_type_work
-        
+
     def test_facet_values(self):
         value_list = self.source.value_list()
         self.assertEqual(value_list, u'Them, Us')
@@ -52,7 +54,7 @@ class FacetTest(TestCase):
                 Facet: Domain, Value: Electronic
             So the electronic and twofacet_products all match.
             The fact that the twofacet_product has another facet does not matter.
-            
+
         """
         rts = self.electronic_pattern.get_resource_types(self.event_type)
         self.assertEqual(rts.count(), 2)
@@ -63,7 +65,7 @@ class FacetTest(TestCase):
         """Pattern-ResourceType FacetValue matching rules for this test:
 
             If a Pattern has more than one FacetValue in the same Facet,
-            for a ResourceType to match, it must match one of the FacetValues 
+            for a ResourceType to match, it must match one of the FacetValues
             in that same Facet.
             So in this case:
             The electroptical_pattern has the following FacetValues:
@@ -71,7 +73,7 @@ class FacetTest(TestCase):
                 Domain: Optical
             So the electronic, optical and twofacet_products all match.
             The fact that the twofacet_product has another facet does not matter.
-            
+
         """
         rts = self.electroptical_pattern.get_resource_types(self.event_type)
         self.assertEqual(rts.count(), 3)
@@ -84,15 +86,15 @@ class FacetTest(TestCase):
 
             If a Pattern has FacetValues in more than one different Facet,
             for a ResourceType to match, it must have FacetValues
-            in each of the Facets in the Pattern, 
-            and its FacetValues must match one of the FacetValues 
+            in each of the Facets in the Pattern,
+            and its FacetValues must match one of the FacetValues
             in the same Facet in the Pattern.
             So in this case:
             The twofacet_pattern has the following FacetValues:
                 Domain: Electronic
                 Source: Us
             So only the twofacet_product matches.
-            
+
         """
         rts = self.twofacet_pattern.get_resource_types(self.event_type)
         self.assertEqual(rts.count(), 1)
@@ -103,7 +105,7 @@ class FacetTest(TestCase):
 
             produced, consumed, used, cited and work.
             The produced facets are the same as the twofacet_pattern.
-            
+
         """
         rts = self.full_pattern.get_resource_types(self.event_type)
         self.assertEqual(rts.count(), 1)
@@ -141,8 +143,3 @@ class FacetTest(TestCase):
             "out",
             self.other_product)
         self.assertEqual(et, self.event_type)
-
-        
-        
-        
-

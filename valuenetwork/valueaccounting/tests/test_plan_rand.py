@@ -21,6 +21,8 @@ class PlanRandTest(WebTest):
     """Testing planning R&D work
     """
 
+    fixtures = ['verdun']
+    
     def setUp(self):
 
         facets = Facets()
@@ -50,9 +52,9 @@ class PlanRandTest(WebTest):
         """Test process_selections view
 
             and subsequent dependent demand explosion
-            
+
         """
-       
+
         response = self.app.get('/accounting/process-selections/1/' , user='alice')
         form = response.form
         patterns = form["pattern"].options
@@ -94,6 +96,3 @@ class PlanRandTest(WebTest):
     def test_complete_recipe(self):
         """todo"""
         pass
-        
-        
-        

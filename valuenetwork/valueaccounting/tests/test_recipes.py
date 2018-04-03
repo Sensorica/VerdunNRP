@@ -21,6 +21,8 @@ class RecipeTest(WebTest):
     """Testing recipes
     """
 
+    fixtures = ['verdun']
+    
     def setUp(self):
 
         recipe = Recipe()
@@ -28,9 +30,9 @@ class RecipeTest(WebTest):
         self.child = recipe.child
         self.grandchild = recipe.grandchild
 
-        
+
     def test_view_recipe(self):
-        """Test extended_bill view            
+        """Test extended_bill view
         """
 
         url = ('/%s/%s/' % ('accounting/xbomfg', self.parent.id))
@@ -46,4 +48,3 @@ class RecipeTest(WebTest):
         node3 = nodes[3]
         assert node3.depth == 4
         assert node3.xbill_object() == self.grandchild
-

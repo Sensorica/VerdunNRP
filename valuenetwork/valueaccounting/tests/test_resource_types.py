@@ -7,7 +7,13 @@ from exceptions import Exception
 
 
 class NoQuantityTest(TestCase):
+    """
+    Tests fix for issue of new resource types accepting a quantity on their
+    form class (they shouldn't)
+    """
 
+    fixtures = ['verdun']
+    
     def setUp(self):
         self.rt = EconomicResourceType(
             name='Spam',

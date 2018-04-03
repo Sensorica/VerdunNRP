@@ -15,6 +15,7 @@ class EventSavingTest(TestCase):
         CachedEventSummary and AgentResourceType.
 
     """
+    fixtures = ['verdun']
 
     def setUp(self):
 
@@ -22,13 +23,13 @@ class EventSavingTest(TestCase):
             name="Active individual",
         )
         agent_type.save()
-        
+
         project_type = AgentType(
             name="Project",
-            party_type="team", 
+            party_type="team",
         )
         project_type.save()
-        
+
         self.agent1 = EconomicAgent(
             name="AOne",
             nick="AOne",
@@ -63,7 +64,7 @@ class EventSavingTest(TestCase):
             relationship="work",
             resource_effect="=",
         )
-        self.event_type_work.save() 
+        self.event_type_work.save()
 
         self.event_type_todo = EventType(
             name="Todo",
@@ -128,7 +129,7 @@ class EventSavingTest(TestCase):
             is_contribution=True,
         )
         event.save()
-        
+
         summary = CachedEventSummary.objects.get(
             agent=self.agent1,
             context_agent=self.project1,
@@ -154,7 +155,7 @@ class EventSavingTest(TestCase):
             is_contribution=True,
         )
         event.save()
-        
+
         #import pdb; pdb.set_trace()
         event.context_agent = self.project2
         event.save()
@@ -172,7 +173,7 @@ class EventSavingTest(TestCase):
 
     def test_changed_resourcetype(self):
         pass
-    
+
     def test_changed_eventtype(self):
         event = EconomicEvent(
             from_agent=self.agent1,
@@ -184,11 +185,11 @@ class EventSavingTest(TestCase):
             is_contribution=True,
         )
         event.save()
-        
+
         #import pdb; pdb.set_trace()
         event.event_type = self.event_type_todo
         event.save()
-           
+
         summaries = CachedEventSummary.objects.filter(
             agent=self.agent1,
             #project=self.project1,
@@ -216,7 +217,7 @@ class EventSavingTest(TestCase):
 
         event.quantity = Decimal("3")
         event.save()
-        
+
         summary = CachedEventSummary.objects.get(
             agent=self.agent1,
             context_agent=self.project1,

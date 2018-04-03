@@ -20,7 +20,9 @@ class OrderTest(WebTest):
 
     """Testing customer orders
     """
-
+    
+    # Hopefully this still gets through
+    fixtures = ['verdun']
     def setUp(self):
 
         self.user = User.objects.create_user('alice', 'alice@whatever.com', 'password')
