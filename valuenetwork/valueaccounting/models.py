@@ -330,6 +330,7 @@ class AgentTypeManager(models.Manager):
     def non_context_agent_types(self):
         return AgentType.objects.filter(is_context=False)
 
+
 class AgentType(models.Model):
     name = models.CharField(_('name'), max_length=128)
     parent = models.ForeignKey('self', blank=True, null=True,
@@ -1223,8 +1224,8 @@ class AgentAssociationType(models.Model):
 from south.signals import post_migrate
 
 def create_agent_types(app, **kwargs):
-    #if app != "valueaccounting":
-    #    return
+    if app != "valueaccounting":
+        return
     AgentType.create('Individual', 'individual', False)
     AgentType.create('Organization', 'org', False)
     AgentType.create('Network', 'network', True)
@@ -1233,8 +1234,8 @@ def create_agent_types(app, **kwargs):
 post_migrate.connect(create_agent_types)
 
 def create_agent_association_types(app, **kwargs):
-    #if app != "valueaccounting":
-    #    return
+    if app != "valueaccounting":
+        return
     AgentAssociationType.create('child', 'Child', 'Children', 'child', 'is child of', 'has child')
     AgentAssociationType.create('member', 'Member', 'Members', 'member', 'is member of', 'has member')
     AgentAssociationType.create('supplier', 'Supplier', 'Suppliers', 'supplier', 'is supplier of', 'has supplier')
@@ -2813,6 +2814,7 @@ class UseCaseManager(models.Manager):
     def exchange_use_cases(self):
         return UseCase.objects.filter(Q(identifier="supply_xfer")|Q(identifier="demand_xfer")|Q(identifier="intrnl_xfer"))
 
+
 class UseCase(models.Model):
     identifier = models.CharField(_('identifier'), max_length=12)
     name = models.CharField(_('name'), max_length=128)
@@ -2881,8 +2883,8 @@ class UseCase(models.Model):
 
 
 def create_use_cases(app, **kwargs):
-    #if app != "valueaccounting":
-    #    return
+    if app != "valueaccounting":
+        return
     UseCase.create('cash_contr', _('Cash Contribution'), True)
     UseCase.create('non_prod', _('Non-production Logging'), True)
     UseCase.create('rand', _('Manufacturing Recipes/Logging'))
@@ -2907,8 +2909,8 @@ def create_use_cases(app, **kwargs):
 post_migrate.connect(create_use_cases)
 
 def create_event_types(app, **kwargs):
-    #if app != "valueaccounting":
-    #    return
+    if app != "valueaccounting":
+        return
     #Keep the first column (name) as unique
     EventType.create('Citation', _('cites'), _('cited by'), 'cite', 'process', '=', '')
     EventType.create('Resource Consumption', _('consumes'), _('consumed by'), 'consume', 'process', '-', 'quantity')
@@ -2974,8 +2976,8 @@ class UseCaseEventType(models.Model):
             print "Created %s UseCaseEventType" % (use_case_identifier + " " + event_type_name)
 
 def create_usecase_eventtypes(app, **kwargs):
-    #if app != "valueaccounting":
-    #    return
+    if app != "valueaccounting":
+        return
     UseCaseEventType.create('cash_contr', 'Time Contribution')
     UseCaseEventType.create('cash_contr', 'Cash Contribution')
     UseCaseEventType.create('cash_contr', 'Donation')
