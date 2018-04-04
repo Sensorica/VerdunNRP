@@ -25,9 +25,8 @@ class NoQuantityTest(WebTest):
         Resource Type creation form should not take a quantity
         """
         resp = self.app.get(
-            '/accounting/resource-type/%s/' % self.rt.id,
-            follow=True
-        )
+            '/accounting/resource-type/%s/' % self.rt.id
+        ).follow()
         res_form = None
         field = None
         try:

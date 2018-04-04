@@ -182,7 +182,7 @@ class OrderTest(WebTest):
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
             for fieldName, field in form.fields.items():
-                if fieldName.endsWith('quantity'):
+                if str(fieldName).endsWith('quantity'):
                     form[fieldName] = 0
 
             response = form.submit("submit1").follow()
