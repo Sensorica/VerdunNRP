@@ -127,7 +127,7 @@ class OrderTest(WebTest):
     def rt_form_name(self, rt, field):
         """Hack to repair test code that hard-coded field names
         """
-        return 'RT-%d-%s' % (rt.pk, field)
+        return 'RT-%d-%s' % (rt.id, field)
 
     def rt_by_id(self, n):
         """Hack to repair field names that hard-coded primary keys

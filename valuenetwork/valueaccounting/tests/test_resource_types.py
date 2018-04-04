@@ -6,7 +6,7 @@ from django_webtest import WebTest
 from exceptions import Exception
 
 
-class NoQuantityTest(TestCase):
+class NoQuantityTest(WebTest):
 
     fixtures = ['verdun']
 
