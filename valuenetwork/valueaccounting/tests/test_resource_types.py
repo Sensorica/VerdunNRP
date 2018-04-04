@@ -2,18 +2,14 @@
 
 from django.test import TestCase, Client
 from valuenetwork.valueaccounting.models import EconomicResourceType
-from xml.etree import ElementTree
+from django_webtest import WebTest
 from exceptions import Exception
 
 
 class NoQuantityTest(TestCase):
-    """
-    Tests fix for issue of new resource types accepting a quantity on their
-    form class (they shouldn't)
-    """
 
     fixtures = ['verdun']
-    
+
     def setUp(self):
         self.rt = EconomicResourceType(
             name='Spam',
@@ -25,22 +21,24 @@ class NoQuantityTest(TestCase):
         self.rt.delete()
 
     def test_no_quantity(self):
-        client = Client()
-        resp = client.get(
+        """
+        Resource Type creation form should not take a quantity
+        """
+        resp = self.app.get(
             '/accounting/resource-type/%s/' % self.rt.id,
             follow=True
         )
-        doc = ElementTree.fromstring(resp.content)
-
         res_form = None
-        for form in doc.iter('form'):
-            node_id = form.get('id')
-            if node_id == 'resourceForm':
-                res_form = form
-                break
+        field = None
+        try:
+            res_form = resp.forms['resourceForm']
+        except:
+            pass
+        self.assertIsNotNone(res_form, msg='form#resourceForm not found')
 
-        if not res_form:
-            raise Exception((_('Could not find resource form in resource type form'),))
+        try:
+            field = res_form.fields['quantity']
+        except:
+            pass
 
-        for inp in res_form.iter('input'):
-            assert inp.get('name') != 'quantity'
+        self.assertIsNone(field, msg='found (form#resourceForm).quantity')

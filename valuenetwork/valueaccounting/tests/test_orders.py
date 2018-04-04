@@ -124,6 +124,26 @@ class OrderTest(WebTest):
         )
         rtfv.save()
 
+    def rt_form_name(self, rt, field):
+        """Hack to repair test code that hard-coded field names
+        """
+        return 'RT-%d-%s' % (rt.pk, field)
+
+    def rt_by_id(self, n):
+        """Hack to repair field names that hard-coded primary keys
+        """
+        rt = None
+        # CAUTION: WILD GUESS
+        if n == 6:
+            rt = self.parent
+        elif n == 9:
+            rt = self.child
+        elif n == 10:
+            rt = self.grandchild
+
+        self.assertIsNotNone(rt, msg='unknown resource type id %d' % (n,))
+        return rt
+
     def test_create_order(self):
         """Test create_order view
 
@@ -136,7 +156,7 @@ class OrderTest(WebTest):
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
-        form["RT-6-quantity"] = 3
+        form[self.rt_form_name(self.rt_by_id(6), 'quantity')] = 3
         response = form.submit("submit1").follow()
         process = self.parent.producing_commitments()[0].process
         incoming = process.incoming_commitments()
@@ -150,24 +170,31 @@ class OrderTest(WebTest):
 
 
     def test_order_validation(self):
-        """Test fix for #510 Create order blows up
-            at least one item must have quantity > 0
+        """Test fix for #510 Create order blows up: at least one item must have quantity > 0
         """
         # probably don't need this, but it can't hurt
-        Commitment.objects.filter(resource_type=self.child).delete()
+        Commitment.objects.all().delete()
+        e = None
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
             form = response.form
             #import pdb; pdb.set_trace()
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
-            form["RT-6-quantity"] = 0
-            response = form.submit("submit1").follow()
-        except Exception as e:
-            raise AssertionError((_('an empty order should not throw, but threw %s' % str(e)),))
+            for fieldName, field in form.fields.items():
+                if fieldName.endsWith('quantity'):
+                    form[fieldName] = 0
 
-        coms = Commitment.objects.filter(resource_type=self.child)
-        self.assertFalse(coms)
+            response = form.submit("submit1").follow()
+        except ValidationError:
+            pass
+        except Exception as ex:
+            e = ex
+
+        self.assertIsNone(e, msg="setting form fields or submit threw %s" % (str(e),))
+
+        coms = Commitment.objects.all()
+        self.assertFalse(coms, msg="order with zero quantities produced commitments: %s" % (str(coms),))
 
     def test_create_workflow_order(self):
         """Test create_order for a workflow item
@@ -181,7 +208,8 @@ class OrderTest(WebTest):
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
-        form["RT-9-quantity"] = 2000
+        form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
+        #form["RT-9-quantity"] = 2000
         response = form.submit("submit1").follow()
         #import pdb; pdb.set_trace()
         pcs = self.changeable.producing_commitments()
@@ -215,8 +243,10 @@ class OrderTest(WebTest):
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
-        form["RT-9-quantity"] = 2000
-        form["RT-10-quantity"] = 4000
+        #form["RT-9-quantity"] = 2000
+        form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
+        #form["RT-10-quantity"] = 4000
+        form[self.rt_form_name(self.rt_by_id(10), 'quantity')] = 4000
         response = form.submit("submit1").follow()
         #import pdb; pdb.set_trace()
 
