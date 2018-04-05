@@ -3037,6 +3037,9 @@ def cleanup_unvalued_resources(request):
 
 @login_required
 def create_order(request):
+    from valueaccounting.tests.test_orders import does_order_work
+    if not does_order_work:
+        raise NotImplementedError(msg='This version does not support order ceate')
     #import pdb; pdb.set_trace()
     patterns = PatternUseCase.objects.filter(use_case__identifier='cust_orders')
     if patterns:
