@@ -60,9 +60,11 @@ class NoQuantityTest(WebTest):
         resp = self.app.get(
             '/accounting/resource-type/%s/' % (self.rt.id,)
         )#.follow()#again if resp requires a redirect some day.
-        self.assertIsNotNone(resp.user, msg='user did not come through response')
-        self.assertIsNotNone(resp.user.agent, msg='response user has no agent')
-        self.assertEqual(rep.user, self.the_best_user, msg='response user %s is not request user %s' % (rep.user, self.the_best_user))
+        self.assertIn('agent', resp.context, msg='agent is not in context')
+        self.assertEqual(self.the_best_user.agent.agent, self.secret_agent,
+            msg="This is not the agent we're looking for, it's %s" % (resp.context['agent'],)
+        )
+
         res_form = None
         field = None
         try:
