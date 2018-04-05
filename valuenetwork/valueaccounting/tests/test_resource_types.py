@@ -51,7 +51,7 @@ class NoQuantityTest(WebTest):
         self.secret_agent.delete()
         self.mi6.delete()
         self.the_best_user.delete()
-        self.set_user(None)
+        self.app.set_user(None)
 
     def test_no_quantity(self):
         """
@@ -60,6 +60,9 @@ class NoQuantityTest(WebTest):
         resp = self.app.get(
             '/accounting/resource-type/%s/' % (self.rt.id,)
         )#.follow()#again if resp requires a redirect some day.
+        self.assertIsNotNone(resp.user, msg='user did not come through response')
+        self.assertIsNotNone(resp.user.agent, msg='response user has no agent')
+        self.assertEqual(rep.user, self.the_best_user, msg='response user %s is not request user %s' % (rep.user, self.the_best_user))
         res_form = None
         field = None
         try:
