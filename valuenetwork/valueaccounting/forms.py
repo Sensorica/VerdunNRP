@@ -286,6 +286,7 @@ class CreateEconomicResourceForm(forms.ModelForm):
 class CreateUnquantifiedResourceForm(CreateEconomicResourceForm):
     quantity = None
     class Meta:
+        model = CreateEconomicResourceForm.Meta.model
         exclude = CreateEconomicResourceForm.Meta.exclude + ('quantity',)
 
 class TransformEconomicResourceForm(forms.ModelForm):
