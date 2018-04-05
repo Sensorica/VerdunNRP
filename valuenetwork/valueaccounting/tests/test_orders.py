@@ -16,6 +16,8 @@ from valuenetwork.valueaccounting.views import *
 from valuenetwork.valueaccounting.utils import *
 from valuenetwork.valueaccounting.tests.objects_for_testing import *
 
+does_order_work = False
+
 class OrderTest(WebTest):
 
     """Testing customer orders
@@ -134,11 +136,11 @@ class OrderTest(WebTest):
         """
         rt = None
         # CAUTION: WILD GUESS
-        if n == 6:
+        if n == 10:
             rt = self.parent
-        elif n == 9:
+        elif n == 6:
             rt = self.child
-        elif n == 10:
+        elif n == 9:
             rt = self.grandchild
 
         self.assertIsNotNone(rt, msg='unknown resource type id %d' % (n,))

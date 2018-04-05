@@ -26,7 +26,7 @@ class NoQuantityTest(WebTest):
         """
         resp = self.app.get(
             '/accounting/resource-type/%s/' % self.rt.id
-        ).follow()
+        )#.follow()#again if resp requires a redirect some day.
         res_form = None
         field = None
         try:
