@@ -54,7 +54,7 @@ class NoQuantityTest(WebTest):
         self.app.set_user(None)
 
     def test_form_fields(self):
-        form = CreateUnquantifiedResourceForm(init={})
+        form = CreateUnquantifiedResourceForm(initial={})
         bad_field = None
         all_fields = form.fields
         try:
