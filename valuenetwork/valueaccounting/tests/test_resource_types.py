@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from valuenetwork.valueaccounting.models import EconomicResourceType, EconomicAgent, AgentType, AgentUser
 from django_webtest import WebTest
 from exceptions import Exception
-
+from valuenetwork.valueaccounting.forms import CreateUnquantifiedResourceForm
 
 class NoQuantityTest(WebTest):
 
@@ -53,6 +53,17 @@ class NoQuantityTest(WebTest):
         self.the_best_user.delete()
         self.app.set_user(None)
 
+    def test_form_fields(self):
+        form = CreateUnquantifiedResourceForm(init={})
+        bad_field = None
+        all_fields = form.fields
+        try:
+            bad_field = all_fields['quantity']
+        except:
+            pass
+
+        self.assertIsNone(bad_field, msg="found quantity field in form object; fields: \n %s" % (all_fields,))
+
     def test_no_quantity(self):
         """Resource Type creation form should not take a quantity
         """
@@ -74,7 +85,7 @@ class NoQuantityTest(WebTest):
 
         try:
             field = res_form.fields['quantity']
-            
+
         except:
             pass
 
