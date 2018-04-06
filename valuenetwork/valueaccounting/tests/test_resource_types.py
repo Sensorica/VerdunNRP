@@ -74,7 +74,7 @@ class NoQuantityTest(WebTest):
 
         try:
             field = res_form.fields['quantity']
-            print resp.context
+            
         except:
             pass
 
