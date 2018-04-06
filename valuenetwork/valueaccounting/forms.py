@@ -283,9 +283,25 @@ class CreateEconomicResourceForm(forms.ModelForm):
         model = EconomicResource
         exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
 
-class CreateUnquantifiedResourceForm(CreateEconomicResourceForm):
-    #quantity = None#forms.DecimalField(widget=forms.HiddenInput, attrs={'value': '0.0'})
-    class Meta(CreateEconomicResourceForm.Meta):
+# Was subclass of CreateEconomicResourceForm, but kept failing tests
+class CreateUnquantifiedResourceForm(forms.modelForm):
+    from_agent = forms.ModelChoiceField(
+        required=False,
+        queryset=EconomicAgent.objects.all(),
+        label="Work done by",
+        help_text="Required only if not logging work inputs",
+        widget=forms.Select(
+            attrs={'class': 'chzn-select'}))
+    identifier = forms.CharField(
+        required=False,
+        label="Identifier",
+        help_text="For example, lot number or serial number.",
+        widget=forms.TextInput(attrs={'class': 'item-name',}))
+    url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+    photo_url = forms.CharField(required=False, widget=forms.TextInput(attrs={'class': 'url input-xxlarge',}))
+
+    class Meta:
+        model = EconomicResource
         fields = ('from_agent', 'identifier', 'url', 'photo_url')
         #exclude = CreateEconomicResourceForm.Meta.exclude + ('quantity',)
 
