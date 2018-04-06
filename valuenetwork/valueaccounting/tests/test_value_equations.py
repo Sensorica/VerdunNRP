@@ -180,10 +180,10 @@ class ValueEquationTest(TestCase):
             )
         community_use_event.save()
         #import pdb; pdb.set_trace()
-        child_input = process.consumed_input_requirements().get()
+        child_input = process.consumed_input_requirements().get(resource_type=self.child)
         child_output=child_input.associated_producing_commitments()[0]
         child_process=child_output.process
-        grandchild_input = child_process.consumed_input_requirements().get()
+        grandchild_input = child_process.consumed_input_requirements().get(resource_type=self.grandchild)
         used_commitment = process.used_input_requirements()[0]
         use_event = EconomicEvent(
             event_type=used_commitment.event_type,
