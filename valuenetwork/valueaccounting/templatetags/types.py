@@ -1,5 +1,5 @@
 from django import template
-print "templatetags.types included"
+
 register = template.Library()
 
 @register.assignment_tag
