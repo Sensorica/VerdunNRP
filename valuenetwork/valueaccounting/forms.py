@@ -284,7 +284,7 @@ class CreateEconomicResourceForm(forms.ModelForm):
         exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
 
 class CreateUnquantifiedResourceForm(CreateEconomicResourceForm):
-    #quantity = forms.DecimalField(widget=forms.HiddenInput, attrs={'value': '0.0'})
+    quantity = None#forms.DecimalField(widget=forms.HiddenInput, attrs={'value': '0.0'})
     class Meta(CreateEconomicResourceForm.Meta):
         exclude = CreateEconomicResourceForm.Meta.exclude + ('quantity',)
 
