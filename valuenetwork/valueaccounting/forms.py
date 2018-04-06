@@ -284,7 +284,7 @@ class CreateEconomicResourceForm(forms.ModelForm):
         exclude = ('resource_type', 'owner', 'author', 'custodian', 'quality', 'independent_demand', 'order_item', 'stage', 'state', 'value_per_unit_of_use', 'value_per_unit', 'exchange_stage')
 
 # Was subclass of CreateEconomicResourceForm, but kept failing tests
-class CreateUnquantifiedResourceForm(forms.modelForm):
+class CreateUnquantifiedResourceForm(forms.ModelForm):
     from_agent = forms.ModelChoiceField(
         required=False,
         queryset=EconomicAgent.objects.all(),
