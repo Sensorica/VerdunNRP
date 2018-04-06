@@ -277,10 +277,10 @@ class ValueEquationTest(TestCase):
         cts = self.order.order_items()
         commitment = cts[0]
         process = commitment.process
-        child_input = process.incoming_commitments()[0]
+        child_input = process.consumed_input_requirements().get(resource_type=self.child)
         child_output=child_input.associated_producing_commitments()[0]
         child_process=child_output.process
-        grandchild_input = child_process.incoming_commitments()[0]
+        grandchild_input = child_process.consumed_input_requirements().get(resource_type=self.grandchild)
         used = self.recipe.parent.main_producing_process_type().used_resource_type_relationships()[0]
         used_commitment = process.used_input_requirements()[0]
         self.assertEqual(used_commitment.resource_type, self.recipe.usable.resource_type)
