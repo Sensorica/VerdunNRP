@@ -54,8 +54,7 @@ class NoQuantityTest(WebTest):
         self.app.set_user(None)
 
     def test_no_quantity(self):
-        """
-        Resource Type creation form should not take a quantity
+        """Resource Type creation form should not take a quantity
         """
         resp = self.app.get(
             '/accounting/resource-type/%s/' % (self.rt.id,)
@@ -75,7 +74,7 @@ class NoQuantityTest(WebTest):
 
         try:
             field = res_form.fields['quantity']
-            print resp.content
+            print resp.context['t_res_type']
         except:
             pass
 
