@@ -287,7 +287,7 @@ class CreateUnquantifiedResourceForm(CreateEconomicResourceForm):
     #quantity = None#forms.DecimalField(widget=forms.HiddenInput, attrs={'value': '0.0'})
     class Meta(CreateEconomicResourceForm.Meta):
         fields = ('from_agent', 'identifier', 'url', 'photo_url')
-        exclude = CreateEconomicResourceForm.Meta.exclude + ('quantity',)
+        #exclude = CreateEconomicResourceForm.Meta.exclude + ('quantity',)
 
 class TransformEconomicResourceForm(forms.ModelForm):
     from_agent = forms.ModelChoiceField(
