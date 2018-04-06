@@ -179,11 +179,11 @@ class ValueEquationTest(TestCase):
             event_date=datetime.date.today(),
             )
         community_use_event.save()
-        import pdb; pdb.set_trace()
-        child_input = process.incoming_commitments()[0]
+        #import pdb; pdb.set_trace()
+        child_input = process.consumed_input_commitments().get()
         child_output=child_input.associated_producing_commitments()[0]
         child_process=child_output.process
-        grandchild_input = child_process.incoming_commitments()[0]
+        grandchild_input = child_process.consumed_input_commitments().get()
         used_commitment = process.used_input_requirements()[0]
         use_event = EconomicEvent(
             event_type=used_commitment.event_type,
