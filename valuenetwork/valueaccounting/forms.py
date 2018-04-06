@@ -285,8 +285,7 @@ class CreateEconomicResourceForm(forms.ModelForm):
 
 class CreateUnquantifiedResourceForm(CreateEconomicResourceForm):
     #quantity = forms.DecimalField(widget=forms.HiddenInput, attrs={'value': '0.0'})
-    class Meta:
-        model = CreateEconomicResourceForm.Meta.model
+    class Meta(CreateEconomicResourceForm.Meta):
         exclude = CreateEconomicResourceForm.Meta.exclude + ('quantity',)
 
 class TransformEconomicResourceForm(forms.ModelForm):
