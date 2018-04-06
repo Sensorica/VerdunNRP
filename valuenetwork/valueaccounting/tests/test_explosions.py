@@ -119,14 +119,14 @@ class ExplosionTest(TestCase):
         commitment = cts[0]
         visited = []
         process = commitment.generate_producing_process(self.user, visited, explode=True)
-        child_input = process.incoming_commitments()[0]
+        child_input = process.consumed_input_requirements().get(resource_type=self.child)
         self.assertEqual(child_input.quantity, Decimal("8"))
         child_output=child_input.associated_producing_commitments()[0]
         self.assertEqual(child_output.quantity, Decimal("5"))
         child_process=child_output.process
-        grandchild_input = child_process.incoming_commitments()[0]
+        grandchild_input = child_process.consumed_input_requirements().get(resource_type=self.grandchild)
         self.assertEqual(grandchild_input.quantity, Decimal("15"))
-        cyclic_input_commitment = child_process.incoming_commitments()[1]
+        cyclic_input_commitment = child_process.incoming_commitments().exclude(id=grandchild_input.id).get()
         self.assertEqual(cyclic_input_commitment.quantity, Decimal("5"))
         crt = cyclic_input_commitment.resource_type
         self.assertEqual(crt.producing_commitments().count(), 1)
