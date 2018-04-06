@@ -179,7 +179,7 @@ class ValueEquationTest(TestCase):
             event_date=datetime.date.today(),
             )
         community_use_event.save()
-
+        import pdb; pdb.set_trace()
         child_input = process.incoming_commitments()[0]
         child_output=child_input.associated_producing_commitments()[0]
         child_process=child_output.process
