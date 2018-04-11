@@ -9,7 +9,7 @@
 {% type_facet as t_facet %}
 {% type_use_case as t_use %}
 
-{% block head_title %}{% trans "Maintain {{ t_xchg_type|title }}s" %}{% endblock %}
+{% block head_title %}{% trans "Maintain "|add:t_xchg_type|title|add:"s" %}{% endblock %}
 
 {% block extra_head %}
 
@@ -42,11 +42,11 @@ h3 {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans "Maintain {{ t_xchg_type|title }}s / Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change {{ t_res_type|title }} {{ t_facet|title }}s" %}</a>
+		        {% trans "Maintain "|add:t_xchg_type|title|add:"s / Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% blocktrans %}Change {{ t_res_type|title }} {{ t_facet|title }}s{% endblocktrans %}</a>
 	        </legend>
 
             <div class="row-fluid">
-                <h3>{% trans "New {{ t_xchg_type|title }}" %}:</h3>
+                <h3>{% trans "New "|add:t_xchg_type|title %}:</h3>
                 <form id="etForm" action="." method="POST" >
                     {% csrf_token %}
                     {{ t_use|title }}: <span style="display: inline; vertical-align: top;"> {{ new_form.use_case }}</span>
@@ -59,7 +59,7 @@ h3 {
 
             <div class="row-fluid">
               <div class="span4">
-	            <h3>{% trans "Incoming / Supply {{ t_xchg_type|title }}s" %}:</h3>
+	            <h3>{% trans "Incoming / Supply "|add:t_xchg_type|title|add:"s" %}:</h3>
 	            <ul>
 	            {% for ext in supply_exchange_types %}
 	                <li>
@@ -80,7 +80,7 @@ h3 {
                 </ul>
               </div>
               <div class="span4">
-                <h3>{% trans "Internal {{ t_xchg_type|title }}s" %}:</h3>
+                <h3>{% trans "Internal "|add:t_xchg_type|title|add:"s" %}:</h3>
                 <ul>
                 {% for ext in internal_exchange_types %}
                     <li>
@@ -101,7 +101,7 @@ h3 {
                 </ul>
               </div>
               <div class="span4">
-                <h3>{% trans "Outgoing / Demand {{ t_xchg_type|title }}s" %}:</h3>
+                <h3>{% trans "Outgoing / Demand "|add:t_xchg_type|title|add:"s" %}:</h3>
                 <ul>
                 {% for ext in demand_exchange_types %}
                     <li>

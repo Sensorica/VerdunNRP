@@ -48,7 +48,7 @@ img {
 		<div class="span9">
 		    <legend>
 			    {% trans "Inventory" %}
-			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url resource_types %}">{% trans "{{ t_res_type|title }}s" %}</a>
+			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url resource_types %}">{% trans t_res_type|title|add:"s" %}</a>
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url locations %}">{% trans "Locations" %}</a>
 		    </legend>
             {% for rt in resource_types %}
@@ -65,22 +65,24 @@ img {
 	            	 {% elif resource.photo_url %}
 		            	<img src="{{ resource.photo_url }}" width="128" height="96" />
                     {% endif %}
+                    <ul>
                     {% if resource.stage %}
-                        ~ Stage: {{ resource.stage }}
+                        <li> Stage: {{ resource.stage }}</li>
                     {% endif %}
-                    ~ {{ resource.quantity }} {{ resource.unit_of_quantity }}
+                    <li> {{ resource.quantity }} {{ resource.unit_of_quantity }}</li>
                     {% if resource.current_location %}
-                        ~ Location: {{ resource.current_location }}
+                        <li> Location: {{ resource.current_location }}</li>
                     {% endif %}
                     {% if resource.agent_resource_roles.all %}
                         {% for item in resource.agent_resource_roles.all %}
-                            ~ {{ item.role.name }}: {{ item.agent.nick }}
+                            <li> {{ item.role.name }}: {{ item.agent.nick }}</li>
                         {% endfor %}
                     {% endif %}
 
                     {% if resource.url %}
-                        ~ <a href="{{ resource.url }}">Documentation</a>
+                        <li> <a href="{{ resource.url }}">Documentation</a></li>
                     {% endif %}
+                  </ul>
                     </div>
                     {% comment %}<div class="info">Quality: {{ resource.quality }} </div>{% endcomment %}
 
@@ -107,7 +109,7 @@ img {
 
 		$( "#help" ).toggle( function(){
             $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help"); 
+            $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");

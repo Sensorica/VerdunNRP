@@ -79,7 +79,7 @@
 			  <div class="span6">
 
                 <div id="rts">
-                    <h3>{% trans "Choose a {{ t_res_type|title }}..." %}</h3>
+                    <h3>{% trans "Choose a "|add:t_res_type|title|add:"..." %}</h3>
                     {% for item in resource_types %}
                         <p>
                             <input type="radio" id="rt-{{ item.id }}" name="rt"
@@ -116,7 +116,7 @@
 
                 {% if resource_type_lists %}
                     <div id="lists">
-                        <h3>{% trans "...or choose a {{ t_res_type|title }} List" %}</h3>
+                        <h3>{% trans "...or choose a "|add:t_res_type|title|add:" List" %}</h3>
                         {% for rtl in resource_type_lists %}
                             <div>
                                 <input type="radio" id="list-{{ rtl.id }}" name="rt" class="{{ rtl.recipe_class }}" value="list-{{ rtl.id }}" />
@@ -133,7 +133,7 @@
                                 {% endif %}
                                 {% if rtl.list_elements.all %}
                                     <div class="elements">
-                                        {% trans "{{ t_res_type|title }}s" %}: {{ rtl.resource_types_string }}
+                                        {{ t_res_type|title|add:"s"|tr }}: {{ rtl.resource_types_string }}
                                     </div>
                                 {% endif %}
 

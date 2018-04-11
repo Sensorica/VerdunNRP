@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load types %}
+
 {% type_exchange as t_xchg %}
 {% type_exchange_type as t_xchg_type %}
 
@@ -40,7 +41,7 @@ div.logical-only {
 {% block body_base %}
     <div class="container">
         {% include "_messages.html" %}
-		<legend>{% trans "Internal {{ t_xcgh|title }}s" %}
+		<legend>{% trans "Internal "|add:t_xchg|title|add:"s" %}
             {% if agent %} for {{ agent.agent_type }} {{ agent.name }} {% endif %}
         </legend>
 
@@ -116,7 +117,7 @@ div.logical-only {
                     </div>
                 </div>
 	            <p><input type="checkbox" class="category" id="all" name="all" value="all" {% if select_all %}checked="yes"{% endif %} /> {% trans "All in the date range" %}</p>
-                <p class="title"> {% trans "{{ t_xchg_type|title }}" %} </p>
+                <p class="title">{{ t_xchg_type|tr|title }}</p>
                 {% for et in ets %}
                     <p><input type="checkbox" class="category" id="E{{ et.id }}" name="E{{ et.id }}" value="E{{ et.id }}" /> {{ et.name }}</p>
                 {% endfor %}

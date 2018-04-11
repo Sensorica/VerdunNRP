@@ -182,7 +182,7 @@
 					            <form class="output-form" enctype="multipart/form-data" id="addOutputForm" action="{% url new_process_output commitment_id=commitment.id %}" method="POST" >
 						            {% csrf_token %}
 
-					                    <p class="modal-line">{% trans "{{ t_res_type|title }}" %} </p>
+					                    <p class="modal-line">{{ t_res_type|title|tr }} </p>
                                         <p>{{ add_output_form.resource_type }}
 				                        <a href="#createResourceModal" role="button" class="add-another" data-toggle="modal">
 					                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
@@ -210,7 +210,7 @@
                         <div class="modal hide fade rtmodal" id="createResourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-consumable-create-label" aria-hidden="true">
 		                    <div class="modal-header">
 			                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-			                    <h3 id="resource-consumable-create-label">{% trans "Create a new Resource Type" %}</h3>
+			                    <h3 id="resource-consumable-create-label">{% trans "Create a new "|add:t_res_type %}</h3>
 		                    </div>
 		                    <div class="modal-body">
 			                    <form class="resource-create-form" id="resource-create-form" enctype="multipart/form-data" action="." method="POST" >
@@ -632,7 +632,7 @@
 		                                <input type='hidden' id='deleteRetrying{{ item.id }}' name='wasRetrying' value='' />
 		                                <input type="hidden" id="eventDate{{ item.id }}" name="eventDate" value="{{ event_date|date:'Y-m-d' }}" />
 		                                <input type="hidden" name="reload" value="pastwork" />
-					                    <button class="btn btn-warning btn-mini" title="Delete" >{% trans "X" %}</button>
+					                    <button class="btn btn-warning btn-mini" title="Delete" >X</button>
 				                    </form>
 								{% endif %}
 							</li>

@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_exchange_type as t_exchange_type %}
 {% type_transfer_type as t_transfer_type %}
@@ -196,7 +197,7 @@ li {
                                     {% endif %}
                                     {% if slot.add_xfer_form %}
                                     <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
-                                        {% trans "New {{ t_transfer|title }}" %}
+                                        {% trans "New "|add:t_transfer|title %}
                                     </a>
                                     {% endif %}
                                 {% endif %}
@@ -433,7 +434,7 @@ li {
                                             <div class="notes"> {{ xfer.commit_description|urlize|linebreaks }} </div>
                                         {% endif %}
                                         {% if xfer.events.all %}
-                                            <div class="ce">&nbsp;<span class="event-label">{% trans "{{ t_transfer|title }}" %}: </span>{{ xfer.commit_event_text }}
+                                            <div class="ce">&nbsp;<span class="event-label">{{ t_transfer|title|tr }}: </span>{{ xfer.commit_event_text }}
                                                 {% if logger  %}
                                                     <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                         <i class="icon-edit"></i>
@@ -442,7 +443,7 @@ li {
                                                     <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                         <div class="modal-header">
                                                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                            <h3 id="xfer-label">{% trans "Change {{ t_transfer|title }}" %}</h3>
+                                                            <h3 id="xfer-label">{% trans "Change "|add:t_transfer|title %}</h3>
                                                         </div>
                                                         <div class="modal-body">
                                                             <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_events transfer_id=xfer.id %}" method="POST" >
@@ -491,7 +492,7 @@ li {
                                             </div>
                                         {% endif %}
                                     {% else %}
-                                        <span class="event-label">{% trans "{{ t_transfer|title }}" %}: </span>{{ xfer.event_text }}
+                                        <span class="event-label">{{ t_transfer|title|tr }}: </span>{{ xfer.event_text }}
                                         {% if logger  %}
                                             <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
@@ -499,11 +500,11 @@ li {
                                             <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                    <h3 id="xfer-label">{% trans "Change {{ t_transfer|title }}" %}</h3>
+                                                    <h3 id="xfer-label">{% trans "Change "|add:t_transfer|title %}</h3>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_events transfer_id=xfer.id %}" method="POST" >
-                                                        {% csrf_token %} {# target slots[].xfers[].change_events_form for span/br removal (best practice) #}
+                                                        {% csrf_token %} {# target slots[].xfers[].change_events_form target for span/br removal (best practice) #}
                                                         {% with xfer.change_events_form as cev_form %}
                                                         Event date:<br />{{ cev_form.event_date }}<br />
                                                         {% if not slot.give_agent_is_context %}Transferred from:<br />{{ cev_form.from_agent }}<br />{% endif %}
@@ -578,7 +579,7 @@ li {
                                         {% trans "New Commitment" %}
                                     </a>
                                     <a href="#addTransferModal{{ slot.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log a new transfer without a commitment or plan" >
-                                        {% trans "New {{ t_transfer|title }}" %}
+                                        {% trans "New "|add:t_transfer|title %}
                                     </a>
                                 {% endif %}
                                 <span class="total">Total: {{ slot.total }}</span>
@@ -697,7 +698,7 @@ li {
                                             <div class="modal hide fade" id="cmitModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="cmit-label" aria-hidden="true">
                                                 <div class="modal-header">
                                                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                    <h3 id="cmit-label">{% trans "Change {{ t_transfer|title }} Commitment" %}</h3>
+                                                    <h3 id="cmit-label">{% trans "Change "|add:t_transfer|title|add:" Commitment" %}</h3>
                                                 </div>
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_commitments transfer_id=xfer.id %}" method="POST" >
@@ -740,7 +741,7 @@ li {
                                                 <div class="modal hide fade" id="xferModal{{ xfer.id }}" tabindex="-1" role="dialog" aria-labelledby="xfer-label" aria-hidden="true">
                                                     <div class="modal-header">
                                                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                                                        <h3 id="xfer-label">{% trans "Make {{ t_transfer|title }} from Commitment" %}</h3>
+                                                        <h3 id="xfer-label">{% trans "Make "|add:t_transfer|title|add:" from Commitment" %}</h3>
                                                     </div>
                                                     <div class="modal-body">
                                                         <form class="validateMe" enctype="multipart/form-data" action="{% url transfer_from_commitment transfer_id=xfer.id %}" method="POST" >
@@ -799,7 +800,7 @@ li {
                                             {% endif %}
                                         {% endif %}
                                         {% if xfer.events.all %}
-                                            <div class="ce">&nbsp;<span class="event-label">{% trans "{{ t_transfer|title }}" %}: </span>{{ xfer.commit_event_text }}
+                                            <div class="ce">&nbsp;<span class="event-label">{{ t_transfer|title|tr }}: </span>{{ xfer.commit_event_text }}
                                                 {% if logger  %}
                                                     <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                         <i class="icon-edit"></i>
@@ -858,7 +859,7 @@ li {
                                             </div>
                                         {% endif %}
                                     {% else %}
-                                        <span class="event-label">{% trans "{{ t_transfer|title }}" %}: </span>{{ xfer.event_text }}
+                                        <span class="event-label">{{ t_transfer|title|tr }}: </span>{{ xfer.event_text }}
                                         {% if logger  %}
                                             <a href="#xferModal{{ xfer.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal">
                                                 <i class="icon-edit"></i>
