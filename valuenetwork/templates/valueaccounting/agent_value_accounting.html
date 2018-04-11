@@ -98,12 +98,18 @@ h4 {
         </div>
         <div class="span5 summary">
             <div>
-            {% chair {% trans "Contributions with no Value Equation" %} {{ no_bucket }} %}
-            {% chair {% trans "Contributions with Value Equations" %} {{ with_bucket }} %}
-            {% chair {% trans "Total Value of Contribution Claims" %} ${{ claim_value }} %}
-            {% chair {% trans "Income Distributions to Claims" %} ${{ claim_distributions }} %}
-            {% chair {% trans "Outstanding Claims" %} ${{ outstanding_claims }} %}
-            {% chair {% trans "Other Distributions" %} ${{ other_distributions }} %}
+              {% trans "Contributions with no Value Equation" as txt_no_bucket %}
+              {% trans "Contributions with Value Equations" as txt_with_bucket %}
+              {% trans "Total Value of Contribution Claims" as txt_claim_value %}
+              {% trans "Income Distributions to Claims" as txt_claim_distributions %}
+              {% trans "Outstanding Claims" as txt_outstanding_claims %}
+              {% trans "Other Distributions" as txt_other_distributions %}
+              {% chair txt_no_bucket no_bucket %}
+              {% chair txt_with_bucket with_bucket %}
+              {% chair txt_claim_value "${{ claim_value }}" %}
+              {% chair txt_claim_distributions "${{ claim_distributions }}" %}
+              {% chair txt_outstanding_claims "${{ outstanding_claims }}" %}
+              {% chair txt_other_distributions "${{ other_distributions }}" %}
             </div>
         </div>
 
