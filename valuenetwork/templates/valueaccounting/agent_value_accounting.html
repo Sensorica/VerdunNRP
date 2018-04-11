@@ -43,7 +43,7 @@ h4 {
     <div class="container">
         {% include "_messages.html" %}
     <div>
-        <legend>{% trans "Value Accounting for " %} {{ agent }}</legend>
+        <legend>{% trans "Value Accounting for " %} {{ agent.name }}</legend>
 
     <div class="row-fluid">
 
@@ -107,10 +107,10 @@ h4 {
               {% trans "Other Distributions" as txt_other_distributions %}
               {% chair txt_no_bucket no_bucket %}
               {% chair txt_with_bucket with_bucket %}
-              {% chair txt_claim_value "${{ claim_value }}" %}
-              {% chair txt_claim_distributions "${{ claim_distributions }}" %}
-              {% chair txt_outstanding_claims "${{ outstanding_claims }}" %}
-              {% chair txt_other_distributions "${{ other_distributions }}" %}
+              {% chair txt_claim_value "$"|add:claim_value %}
+              {% chair txt_claim_distributions "$"|add:claim_distributions %}
+              {% chair txt_outstanding_claims "$":outstanding_claims %}
+              {% chair txt_other_distributions "$"|add:other_distributions %}
             </div>
         </div>
 
