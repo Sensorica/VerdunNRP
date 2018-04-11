@@ -109,7 +109,7 @@ h4 {
               {% chair txt_with_bucket with_bucket %}
               {% chair txt_claim_value "$"|add:claim_value %}
               {% chair txt_claim_distributions "$"|add:claim_distributions %}
-              {% chair txt_outstanding_claims "$":outstanding_claims %}
+              {% chair txt_outstanding_claims "$"|add:outstanding_claims %}
               {% chair txt_other_distributions "$"|add:other_distributions %}
             </div>
         </div>
