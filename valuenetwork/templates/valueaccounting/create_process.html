@@ -6,6 +6,7 @@
 {% load types %}
 
 {% type_resource_type as t_resource_type %}
+{% type_event_type as t_event_type %}
 
 {% block head_title %}{% trans "Create Process" %}{% endblock %}
 
@@ -73,11 +74,11 @@
 				{{ output_formset.management_form }}
 				{% for form in output_formset %}
 					<div class="row-fluid formset-top">
-						{% trans "{{ t_resource_type|title }}" %}: {{ form.resource_type }}
+						{% trans t_resource_type|title %}: {{ form.resource_type }}
 					</div>
 {% comment %}
 					<div class="row-fluid">
-						{% trans "Event Type" %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }}
+						{% trans t_event_type|title %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }}
 					</div>
 {% endcomment %}
 					<div class="row-fluid">
@@ -95,7 +96,7 @@
 					</div>
 {% comment %}
 					<div class="row-fluid">
-						{% trans "Event Type" %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }}
+						{% trans t_event_type|title %}: {{ form.event_type }} {% trans "Relationship" %}: {{ form.relationship }}
 					</div>
 {% endcomment %}
 					<div class="row-fluid">

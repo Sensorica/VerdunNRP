@@ -123,7 +123,7 @@ th
               <p>{% trans "Select one or more sources to be distributed OR enter amount to distribute" %}</p>
               <p><span id="cashRcpt">{{ header_form.events_to_distribute }}</span></p>
               {% field_as_p header_form.money_to_distribute %}
-              {% field_as_p header_form.resource {% trans "And source Cash Resource Account" %} %}
+              {% field_as_p header_form.resource "And source Cash Resource Account"|tr %} %}
               <p>{% trans "If you selected one cash receipt, you may distribute any part of it" %}</p>
               <p id="partialDist">{{ header_form.partial_distribution }}</p>
             </div>

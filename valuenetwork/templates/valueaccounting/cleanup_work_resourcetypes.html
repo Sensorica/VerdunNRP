@@ -6,7 +6,7 @@
 
 {% type_resource_type as t_resource_type %}
 
-{% block head_title %}{% trans "Cleanup Unvalued Work {{ t_resource_type|title }}s" %}{% endblock %}
+{% block head_title %}{% trans "Cleanup Unvalued Work"|add:t_resource_type|title|add:"s" %}{% endblock %}
 
 {% block extra_head %}
 

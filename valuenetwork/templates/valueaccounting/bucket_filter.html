@@ -48,12 +48,12 @@
             </form>
 
             {% if events %}
-                <h3>{{ count }} {% trans "{{ t_evt|title }}s" %}</h3>
+                <h3>{{ count }} {% trans t_evt|title|add:"s" %}</h3>
                 <div>
                     <table class="event-table">
                         <thead>
                             <th>{% trans "Date" %}</th>
-                            <th>{% trans "{{ t_evt_type|title }}" %}</th>
+                            <th>{% trans t_evt_type|title %}</th>
                             <th>{% trans "From" %}</th>
                             <th>{% trans "To" %}</th>
                             <th>{% trans "What" %}</th>
