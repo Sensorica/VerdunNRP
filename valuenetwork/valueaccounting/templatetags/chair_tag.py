@@ -1,9 +1,13 @@
 from django import template
+from django.utils.translation import ugettext_lazy as _
 
 register = template.Library()
 
 @register.inclusion_tag('valueaccounting/chair.html')
-def chair(desc, field):
+def chair(desc, field, no_trans=False):
+    if not no_trans:
+        desc = _(desc)
+
     return {'desc': desc, 'field': field, 'linebreaks': ('\n' in field or '<br' in field)}
 
 @register.simple_tag
