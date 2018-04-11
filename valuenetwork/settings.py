@@ -33,7 +33,15 @@ TIME_ZONE = "UTC"
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = "en-us"
 
-SITE_ID = 1
+SITES = {
+    "primary": {
+        "domain": "verdun.valnet.webfactional.com",
+        "scheme": "https",
+        "name": "Verdun NRP"
+    }
+}
+
+SITE_ID = "primary"
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
