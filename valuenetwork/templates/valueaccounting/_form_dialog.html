@@ -1,10 +1,11 @@
 {# dialog_id, form_id, action, form, title, confirm_text, method, formset?, label_id #}
 {% load bootstrap_tags %}
+{% load chair_tag %}
 
 <div class="modal hide fade" id="{{ dialog_id }}" tabindex="-1" role="dialog" aria-labelledby="{{ label_id }}" aria-hidden="true">
     <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-        <h3 id="{{ label_id }}">{% trans "{{ title }}" %}{{ slot.name }}</h3>
+        <h3 id="{{ label_id }}">{{ title|tr }}{{ slot.name }}</h3>
     </div>
     <div class="modal-body">
         <form class="validateMe" id="{{ form_id }}" enctype="multipart/form-data" action="{{ action }}" method="{{ method }}" >
@@ -20,7 +21,7 @@
             {% endif %}
             <div class="modal-footer">
                 <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
-                <input type="submit" class="btn btn-primary" name="submit" value="{% trans {{ confirm_text }} %}" />
+                <input type="submit" class="btn btn-primary" name="submit" value="{{ confirm_text|tr }}" />
             </div>
         </form>
     </div>

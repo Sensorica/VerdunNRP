@@ -5,6 +5,7 @@
 {% load thumbnail %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_resource_type %}
 {% type_process_type as t_process_type %}
@@ -140,7 +141,7 @@ div.logical-only {
 
 
 			<div class="logical-only">
-				<a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change {{ t_resource_type|title }}" %}</a>
+				<a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change "|add:t_resource_type|title %}</a>
 			</div>
 
         </h4>
@@ -447,7 +448,7 @@ div.logical-only {
 								            <form class="consumable-form" action="{% url create_process_type_input process_type_id=ptype.id slot='c' %}" method="POST" >
 									            {% csrf_token %}
                                                 {% with iform=ptype.xbill_consumable_form %}
-					                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+					                                <p class="modal-line">{% trans t_resource_type|title %} </p>
                                                     <p>{{ iform.resource_type }}
 							                        <a href="#createResourceForm{{ xbill_consumable_prefix }}" role="button" class="add-another" data-toggle="modal">
 								                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
@@ -523,7 +524,7 @@ div.logical-only {
 								            <form class="usable-form" action="{% url create_process_type_input process_type_id=ptype.id slot='u' %}" method="POST" >
 									            {% csrf_token %}
                                                 {% with iform=ptype.xbill_usable_form %}
-					                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+					                                <p class="modal-line">{% trans t_resource_type|title %} </p>
                                                     <p>{{ iform.resource_type }}
 							                        <a href="#createResourceForm{{ xbill_usable_prefix }}" role="button" class="add-another" data-toggle="modal">
 								                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
@@ -549,7 +550,7 @@ div.logical-only {
 				                    <div class="modal hide fade rtmodal" id="createResourceForm{{ xbill_usable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-usable-create-label{{ xbill_usable_prefix }}" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-						                    <h3 id="resource-usable-create-label{{ xbill_usable_prefix }}">{% trans "Create a new Resource Type" %}</h3>
+						                    <h3 id="resource-usable-create-label{{ xbill_usable_prefix }}">{% trans "Create a new"|add:t_resource_type|title %}</h3>
 					                    </div>
 					                    <div class="modal-body">
 						                    <form class="resource-create-form" id="formuse{{ xbill_usable_prefix }}" enctype="multipart/form-data" action="." method="POST" >
@@ -597,7 +598,7 @@ div.logical-only {
 								            <form class="cite-form" action="{% url create_process_type_citable process_type_id=ptype.id %}" method="POST" >
 									            {% csrf_token %}
                                                 {% with cform=ptype.xbill_citable_form %}
-					                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+					                                <p class="modal-line">{% trans t_resource_type|title %} </p>
                                                     <p>{{ cform.resource_type }}
 							                        <a href="#createResourceForm{{ citable_prefix }}" role="button" class="add-another" data-toggle="modal">
 								                        <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
@@ -619,7 +620,7 @@ div.logical-only {
 				                    <div class="modal hide fade rtmodal" id="createResourceForm{{ citable_prefix }}" tabindex="-1" role="dialog" aria-labelledby="resource-citable-create-label{{ citable_prefix }}" aria-hidden="true">
 					                    <div class="modal-header">
 						                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-						                    <h3 id="resource-citable-create-label{{ ptype.node_id }}">{% trans "Create a new Resource Type" %}</h3>
+						                    <h3 id="resource-citable-create-label{{ ptype.node_id }}">{% trans "Create a new" %} {{ t_resource_type|tr|title }}</h3>
 					                    </div>
 					                    <div class="modal-body">
 						                    <form class="resource-create-form" id="formcite{{ citable_prefix }}" enctype="multipart/form-data" action="{% url create_resource_type %}" method="POST" >
@@ -689,7 +690,7 @@ div.logical-only {
 						          <div class="modal-body">
 								        <form class="feature-form" action="{% url create_process_type_feature process_type_id=ptype.id %}" method="POST" >
 									        {% csrf_token %}
-									        {{ feature_form }}
+									        {{ feature_form|as_bootstrap }}
 									        <input type="hidden" name="next" value="{% url edit_extended_bill resource_type_id=resource_type.id %}" />
 								          <div class="modal-footer">
 									        <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
@@ -786,7 +787,7 @@ div.logical-only {
 								  <div class="modal-body">
 										<form class="options-form" action="{% url create_options_for_feature feature_id=xbill_object.id %}" method="POST" >
 											{% csrf_token %}
-											{{ xbill_object.options_form }}
+											{{ xbill_object.options_form|as_bootstrap }}
 											<input type="hidden" name="next" value="{% url edit_extended_bill resource_type_id=resource_type.id %}" />
 										  <div class="modal-footer">
 											<button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>

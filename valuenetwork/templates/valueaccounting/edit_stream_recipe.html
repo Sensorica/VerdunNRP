@@ -5,6 +5,7 @@
 {% load thumbnail %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_process_type as t_process_type %}
 {% type_resource_type as t_resource_type %}
@@ -272,7 +273,7 @@ div.logical-only {
                         <form class="consumable-form" action="{% url create_process_type_input process_type_id=process_type.id slot='c' %}" method="POST" >
                             {% csrf_token %}
                             {% with iform=process_type.xbill_consumable_form %}
-                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                <p class="modal-line">{% trans t_resource_type|title %} </p>
                                 <p>{{ iform.resource_type }}
                                 {% comment %}
                                 <a href="#createResourceForm{{ process_type.id }}" role="button" class="add-another" data-toggle="modal">
@@ -314,7 +315,7 @@ div.logical-only {
                         <form class="uses-form" action="{% url create_process_type_input process_type_id=process_type.id slot='u' %}" method="POST" >
                             {% csrf_token %}
                             {% with iform=process_type.xbill_usable_form %}
-                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                <p class="modal-line">{{ t_resource_type|title|tr }}</p>
                                 <p>{{ iform.resource_type }}
                                 {% comment %}
                                 <a href="#createResourceForm{{ process_type.id }}" role="button" class="add-another" data-toggle="modal">
@@ -355,7 +356,7 @@ div.logical-only {
                         <form class="cites-form" action="{% url create_process_type_citable process_type_id=process_type.id %}" method="POST" >
                             {% csrf_token %}
                             {% with iform=process_type.stream_recipe_citable_form %}
-                                <p class="modal-line">{% trans "{{ t_resource_type|title }}" %} </p>
+                                <p class="modal-line">{{ t_resource_type|title|tr }} </p>
                                 <p>{{ iform.resource_type }}
                                 {% comment %}
                                 <a href="#createResourceForm{{ process_type.id }}" role="button" class="add-another" data-toggle="modal">

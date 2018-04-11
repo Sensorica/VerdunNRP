@@ -28,7 +28,7 @@
 	<div>
         <legend>{% trans "Demand" %}
             <a class="report" href="{% url closed_work_orders %}">{% trans "Closed Work Orders" %}</a>
-            <a class="report" href="{% url demand_exchanges %}">{% trans "{{ t_exchange|title }} List" %}</a>
+            <a class="report" href="{% url demand_exchanges %}">{{ t_exchange|title|add:"List"|tr }}</a>
 		</legend>
         {% if agent %}
             <p>

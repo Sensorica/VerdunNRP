@@ -9,16 +9,16 @@
 {% if not slot.give_agent_is_context %}{% field_as_div ax_form.from_agent "Transferred from" %}{% endif %}
 {% if not slot.receive_agent_is_context %}{% field_as_div ax_form.to_agent "Transferred to" %}{% endif %}
 {% field_as_div ax_form.quantity "Quantity transferred" %}
-{% field_as_div ax_form.resource_type "{{ t_res_type|capfirst }} transferred" %}
+{% field_as_div ax_form.resource_type t_res_type|capfirst|ta:" transferred" %}
 {% if not slot.can_create_resource %}
     {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
         {% field_as_div ax_form.from_resource "Account from (if virtual account)" %}
         {% field_as_div ax_form.resource "Account to (if virtual account)" %}
     {% else %}
-        {% field_as_div ax_form.resource "{{ t_res|capfirst }} transferred (no entry if not inventoried)" %}
+        {% field_as_div ax_form.resource t_res|capfirst|ta:" transferred (no entry if not inventoried)" %}
     {% endif %}
 {% else %}
-    {% field_as_div ax_form.from_resource "{{ t_res|capfirst }} transferred from (no entry if not inventoried)" %}
+    {% field_as_div ax_form.from_resource t_res|capfirst|ta:" transferred from (no entry if not inventoried)" %}
 {% endif %}
 {% field_as_p ax_form.description "Description" %}
 {% if not slot.is_currency %}
@@ -31,19 +31,19 @@
 {% if slot.can_create_resource %}
 
     <div><span class="modal-hdg">Incoming {{ t_res }}:</span></div>
-    {% field_as_p ax_form.resource "Add to an existing {{ t_res }}" %}
+    {% field_as_p ax_form.resource "Add to an existing "|ta:t_res %}
     <p><b>OR create a new {{ t_res }}:</b></p>
     {% field_as_div ax_form.identifier "Identifier (for example, lot number or serial number)" %}
     {% field_as_div ax_form.url "URL" %}
     {% field_as_div ax_form.photo_url "Photo URL" %}
-    {% field_as_p ax_form.current_location "Current {{ t_res|capfirst }} Location" %}
-    {% field_as_p ax_form.notes "{{ t_res|capfirst }} Notes" %}
-    {% field_as_p ax_form.access_rules "{{ t_res|capfirst }} Access Rules" %}
+    {% field_as_p ax_form.current_location "Current "|ta:t_res|capfirst|ta:" Location" %}
+    {% field_as_p ax_form.notes t_res|capfirst|ta:" Notes" %}
+    {% field_as_p ax_form.access_rules t_res|capfirst|ta:" Access Rules" %}
     {{ slot.create_role_formset.management_form }}
     <ul>
         {% for form in slot.create_role_formset %}
             <ul class="{% cycle odd even %} role-row">{{ form.id }}
-                <li class="td-role">{% field_as_div form.role "{{ t_res|title }} access role" %}</li>
+                <li class="td-role">{% field_as_div form.role t_res|title|ta:" access role" %}</li>
                 <li class="td-agent">{% field_as_div form.agent "Assignment" %}</li>
                 <li class="text-center">{% field_as_div form.is_contact "Is contact" %}</li>
             </ul>
