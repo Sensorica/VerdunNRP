@@ -7,7 +7,7 @@ register = template.Library()
 def chair(desc, field, no_trans=False):
     if not no_trans:
         desc = _(desc)
-
+    field = str(field)
     return {'desc': desc, 'field': field, 'linebreaks': ('\n' in field or '<br' in field)}
 
 @register.simple_tag
