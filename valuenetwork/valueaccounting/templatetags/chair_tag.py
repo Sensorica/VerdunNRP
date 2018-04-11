@@ -34,3 +34,11 @@ def field_as_div(ff, label=''):
 @register.simple_tag
 def field_as_li(ff, label=''):
     return '<li>' + field_as_div(ff, label) + '</li>'
+
+@register.filter
+def tr(txt):
+    return _(txt)
+
+@register.filter
+def ta(txt, arg):
+    return txt + _(arg)
