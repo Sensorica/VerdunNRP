@@ -5,7 +5,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_resource_type %}
+
 
 {% block head_title %}{% trans "Cleanup" %}{% endblock %}
 
@@ -19,6 +19,7 @@
 {% block body_class %}cleanup{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_resource_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

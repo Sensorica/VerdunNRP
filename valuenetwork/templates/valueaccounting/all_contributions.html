@@ -2,7 +2,7 @@
 
 {% load i18n %}
 {% load types %}
-{% type_resource_type as t_res_type %}
+
 
 {% block head_title %}{% trans "All Contributions" %}{% endblock %}
 
@@ -27,6 +27,7 @@
 {% block body_class %}projects{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

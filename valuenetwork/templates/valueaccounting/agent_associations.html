@@ -7,10 +7,7 @@
 {% load form_dialog %}
 {% load types %}
 
-{% type_agent as t_agent %}
-{% type_agent_type as t_agent_type %}
-{% type_agent_association as t_agent_assoc %}
-{% type_agent_association_type as t_agent_assoc_type %}
+
 
 {% block head_title %}{% trans "Maintain Associations for" %} {{ agent }}{% endblock %}
 
@@ -44,6 +41,10 @@
 {% block body_class %}log{% endblock %}
 
 {% block body_base %}
+{% type_agent as t_agent %}
+{% type_agent_type as t_agent_type %}
+{% type_agent_association as t_agent_assoc %}
+{% type_agent_association_type as t_agent_assoc_type %}
 <div class="container">
     <legend>{% trans "Maintain Associations for" %} {{ agent.name }} </legend>
 

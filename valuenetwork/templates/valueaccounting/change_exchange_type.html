@@ -6,12 +6,15 @@
 {% load types %}
 {% load chair_tag %}
 
+
+
+{% block head_title %}
 {% type_exchange_type as t_exchange_type %}
 {% type_resource_type as t_resource_type %}
 {% type_facet as t_facet %}
 {% type_transfer_type as t_transfer_type %}
-
-{% block head_title %}{% trans "Change"%}{% trans t_exchange_type|title %}{% trans "and Pattern" %}{% endblock %}
+{% trans "Change"%}{% trans t_exchange_type|title %}{% trans "and Pattern" %}
+{% endblock %}
 
 {% block extra_head %}
 
@@ -143,6 +146,10 @@ h3 {
 {% block body_class %}exchange{% endblock %}
 
 {% block body_base %}
+{% type_exchange_type as t_exchange_type %}
+{% type_resource_type as t_resource_type %}
+{% type_facet as t_facet %}
+{% type_transfer_type as t_transfer_type %}
     <div class="container">
         {% include "_messages.html" %}
 	    <div>

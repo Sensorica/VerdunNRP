@@ -6,8 +6,7 @@
 {% load chair_tag %}
 {% load types %}
 
-{% type_event_type as t_evt_type %}
-{% type_event as t_evt %}
+
 
 {% block head_title %}{% trans "Filter demo" %}{% endblock %}
 
@@ -31,6 +30,8 @@
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_event_type as t_evt_type %}
+{% type_event as t_evt %}
     <div class="container">
         {% include "_messages.html" %}
         <div>

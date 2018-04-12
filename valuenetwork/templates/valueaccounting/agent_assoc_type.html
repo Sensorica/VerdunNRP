@@ -5,9 +5,12 @@
 {% load thumbnail %}
 {% load types %}
 
-{% type_agent_association_type as typename %}
 
-{% block head_title %}{% trans typename|title %}: {{ agent_assoc_type.name }}{% endblock %}
+
+{% block head_title %}
+{% type_agent_association_type as typename %}
+{% trans typename|title %}: {{ agent_assoc_type.name }}
+{% endblock %}
 
 {% block extra_head %}
 
@@ -35,6 +38,7 @@
 {% block body_class %}x{% endblock %}
 
 {% block body_base %}
+{% type_agent_association_type as typename %}
     <div class="container">
         {% include "_messages.html" %}
 
