@@ -199,39 +199,39 @@ legend {
 		    <div class="span4">
 
 	            <div class="not-table">
-	                  {% chair {% trans "Identifier" %} agent.nick %}
+	                  {% chair "Identifier"|tr agent.nick %}
 
                   {% if user_agent and agent.username %}
-                    {% chair {% trans "Username" %} agent.username %}
+                    {% chair "Username"|tr agent.username %}
 
                   {% endif %}
-                    {% chair {% trans "Name" %} agent.name %}
-                    {% chair {% trans "Type" %} agent.agent_type.name %}
+                    {% chair "Name"|tr agent.name %}
+                    {% chair "Type"|tr agent.agent_type.name %}
 
                   {% if agent.unit_of_claim_value %}
-                    {% chair {% trans "Unit of claim value" %} agent.unit_of_claim_value %}
+                    {% chair "Unit of claim value"|tr agent.unit_of_claim_value %}
                   {% endif %}
 	                {% if agent.url %}
 	                  {% autoescape off %}
-                    {% chair {% trans "URL" %} '<a href="{{ agent.url|escape }}">Open</a>' %}
+                    {% chair "URL" '<a href="'|add:agent.url|escape|add:'">Open</a>' %}
                     {% endautoescape %}
                   {% endif %}
 	                {% if agent.description %}
-	                    {% chair {% trans "Description" %} agent.description|urlize|linebreaks %}
+	                    {% chair "Description"|tr agent.description|urlize|linebreaks %}
 
                   {% endif %}
                   {% if user_agent %}
                       {% if agent.email %}
-                            {% chair {% trans "Email" %} agent.email|urlize %}
+                            {% chair "Email"|tr agent.email|urlize %}
 
                       {% endif %}
                       {% if agent.address or agent.primary_location %}
 
                             {% if agent.primary_location %}
-                              {% chair {% trans "Address" %} {{ agent.primary_location.address }} %}
+                              {% chair "Address"|tr agent.primary_location.address %}
                               <a href="{% url change_location location_id=agent.primary_location.id agent_id=agent.id %}">{% trans "Change on Map" %} </a>
                             {% else %}
-                              {% chair {% trans "Address" %} {{ agent.address }} %}
+                              {% chair "Address"|tr agent.address %}
                               <a href="{% url create_location agent_id=agent.id %}">{% trans "Add to Map" %} </a>
                             {% endif %}
 
@@ -239,19 +239,19 @@ legend {
                     {% endif %}
                     {% if agent.photo %}
                       {% autoescape off %}
-	                	    {% chair {% trans "Photo" %} '<img src="{% thumbnail agent.photo photo_size %}" />' %}
+	                	   <b>{% trans "Photo" %}</b> <div><img src="{% thumbnail agent.photo photo_size %}"/></div>
                       {% endautoescape %}
                 	  {% elif agent.photo_url %}
                       {% autoescape off %}
-                        {% chair {% trans "Photo" %} '<img src="{{ agent.photo_url|escape }}" width="128" height="96" />' %}
+                        <b>{% trans "Photo" %}</b> <div><img src="{{ agent.photo_url|escape }}" width="128" height="96" /></div>
                       {% endautoescape %}
 	                  {% endif %}
 
                     {% if agent.reputation %}
-                      {% chair {% trans "Reputation" %} {{ agent.reputation }} %}
+                      {% chair "Reputation"|tr agent.reputation %}
                     {% endif %}
-                    {% chair {% trans "Record created date" %} {{ agent.created_date }} %}
-                    {% chair {% trans "Record created by" %} {{ agent.created_by }} %}
+                    {% chair "Record created date"|tr agent.created_date %}
+                    {% chair "Record created by"|tr agent.created_by %}
 
 	            </div>
 
