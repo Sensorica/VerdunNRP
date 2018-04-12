@@ -5,10 +5,7 @@
 {% load types %}
 
 {# type tags go back here on rollback #}
-{% type_exchange as t_xchg %}
-{% type_exchange_type as t_xchg_type %}
 
-{% with t_xchg=t_xchg t_xchg_type=t_xchg_type %}
 {% block head_title %}{% trans "Supply" %}{% endblock %}
 
 {% block extra_head %}
@@ -54,7 +51,9 @@ h3 {
 
 {% block body_base %}
   {# see if this is a block scope issue - another very painful and silly thing to fix #}
-  {# TYPES #}
+  {# it is so irritating that this works #}
+  {% type_exchange as t_xchg %}
+  {% type_exchange_type as t_xchg_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
@@ -243,4 +242,3 @@ h3 {
     </script>
 
 {% endblock %}
-{% endwith %}
