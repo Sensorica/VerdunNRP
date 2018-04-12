@@ -178,7 +178,7 @@ li {
 
         <div class="span7">
             <div class="trt">
-                <h3 class="trtheading">{{ t_transfer|title }}s
+                <h3 class="trtheading">{{ t_transfer|title|s }}
                 <span class="info"> <a href="#" id="xfer-info" data-toggle="popover" data-trigger='hover' title="Transfers" data-placement="left"
                     data-content="Log the planned and actual transfers for this exchange.  The types of transfers are determined by the type of exchange,
                     as defined by your network.">
@@ -563,7 +563,7 @@ li {
                 {% endfor %}
             </div>
             <div class="trt">
-                <h3 CLASS="trtheading">Reciprocal {{ t_transfer|title }}s
+                <h3 CLASS="trtheading">Reciprocal {{ t_transfer|title|s }}
                 <span class="info"> <a href="#" id="rxfer-info" data-toggle="popover" data-trigger='hover' title="Reciprocal Transfers" data-placement="left"
                     data-content="Log the planned and actual reciprocal transfers for this exchange.  The types of reciprocal transfers are determined by the type of exchange,
                     as defined by your network.  They are in return for the primary transfers above.">

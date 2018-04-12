@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_resource_type %}
 {% type_facet as t_facet %}
@@ -178,7 +179,7 @@ th, td {
 		    <legend>
 		        {% trans "Change Pattern" %}:
 		        <input id="patternName" name="patternName" value="{{ pattern.name }}" />
-		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change {{ t_resource_type|title }} {{ t_facet|title}}s" %}</a>
+		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% blocktrans %}Change {{ t_resource_type|title }} {{ t_facet|title|s }} {% endblocktrans %}</a>
 		        &nbsp;&nbsp;&nbsp;<span id="saving"></span>
 	        </legend>
 
@@ -199,10 +200,10 @@ th, td {
                         </div>
                         <div class="row-fluid">
                             <div class="span8 resourcesHeader">
-                                <h4>{% trans "{{ t_resource_type|title }}s" %}</h4>
+                                <h4>{% trans t_resource_type|title|s %}</h4>
                             </div>
                             <div class="span4 facetsHeader">
-                                <h4>{% trans "{{ t_resource_type|title }} {{ t_facet|title }}s" %}</h4>
+                                <h4>{% trans t_resource_type|title|sp:t_facet|title|s %}</h4>
                             </div>
                         </div>
 
@@ -236,7 +237,7 @@ th, td {
                               {% comment %}
                                 <table>
                                     <thead>
-				                        <th>{% trans "Pattern {{ t_facet|title }}s" %}</th>
+				                        <th>{% trans "Pattern "|add:t_facet|title|s %}</th>
 				                        <th>{% trans "Del" %}</th>
 			                        </thead>
 			                        <tbody>

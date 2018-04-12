@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_res_type %}
 {% type_resource as t_res %}
@@ -133,7 +134,7 @@
                                 {% endif %}
                                 {% if rtl.list_elements.all %}
                                     <div class="elements">
-                                        {{ t_res_type|title|add:"s"|tr }}: {{ rtl.resource_types_string }}
+                                        {{ t_res_type|title|s|tr }}: {{ rtl.resource_types_string }}
                                     </div>
                                 {% endif %}
 

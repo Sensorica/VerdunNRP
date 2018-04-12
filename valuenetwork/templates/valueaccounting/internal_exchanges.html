@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_exchange as t_xchg %}
 {% type_exchange_type as t_xchg_type %}
@@ -41,7 +42,7 @@ div.logical-only {
 {% block body_base %}
     <div class="container">
         {% include "_messages.html" %}
-		<legend>{% trans "Internal "|add:t_xchg|title|add:"s" %}
+		<legend>{% trans "Internal "|add:t_xchg|title|s %}
             {% if agent %} for {{ agent.agent_type }} {{ agent.name }} {% endif %}
         </legend>
 

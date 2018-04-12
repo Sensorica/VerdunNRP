@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_res_type %}
 {% type_facet as t_facet %}
@@ -162,7 +163,7 @@ th, td {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans "Maintain Process Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change "|add:t_res_type|title|add:" "|add:t_facet|title|add:"s" %}</a>
+		        {% trans "Maintain Process Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change "|add:t_res_type|title|add:" "|add:t_facet|title|s %}</a>
 	        </legend>
 
 	        <form id="useCaseForm" action="." method="POST" >

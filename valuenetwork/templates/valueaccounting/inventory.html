@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load thumbnail %}
+{% load chair_tag %}
 {% load types %}
 
 {% type_resource_type as t_res_type %}
@@ -48,7 +49,7 @@ img {
 		<div class="span9">
 		    <legend>
 			    {% trans "Inventory" %}
-			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url resource_types %}">{% trans t_res_type|title|add:"s" %}</a>
+			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url resource_types %}">{% trans t_res_type|title|s %}</a>
 			    &nbsp;&nbsp;&nbsp;&nbsp; <a href="{% url locations %}">{% trans "Locations" %}</a>
 		    </legend>
             {% for rt in resource_types %}

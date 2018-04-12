@@ -3,13 +3,15 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load chair_tag %}
 {% load types %}
+
 {% type_exchange_type as t_xchg_type %}
 {% type_resource_type as t_res_type %}
 {% type_facet as t_facet %}
 {% type_use_case as t_use %}
 
-{% block head_title %}{% trans "Maintain "|add:t_xchg_type|title|add:"s" %}{% endblock %}
+{% block head_title %}{% trans "Maintain "|add:t_xchg_type|title|s %}{% endblock %}
 
 {% block extra_head %}
 
@@ -59,7 +61,7 @@ h3 {
 
             <div class="row-fluid">
               <div class="span4">
-	            <h3>{% trans "Incoming / Supply "|add:t_xchg_type|title|add:"s" %}:</h3>
+	            <h3>{% trans "Incoming / Supply "|add:t_xchg_type|title|s %}:</h3>
 	            <ul>
 	            {% for ext in supply_exchange_types %}
 	                <li>
@@ -80,7 +82,7 @@ h3 {
                 </ul>
               </div>
               <div class="span4">
-                <h3>{% trans "Internal "|add:t_xchg_type|title|add:"s" %}:</h3>
+                <h3>{% trans "Internal "|add:t_xchg_type|title|s %}:</h3>
                 <ul>
                 {% for ext in internal_exchange_types %}
                     <li>
@@ -101,7 +103,7 @@ h3 {
                 </ul>
               </div>
               <div class="span4">
-                <h3>{% trans "Outgoing / Demand "|add:t_xchg_type|title|add:"s" %}:</h3>
+                <h3>{% trans "Outgoing / Demand "|add:t_xchg_type|title|s %}:</h3>
                 <ul>
                 {% for ext in demand_exchange_types %}
                     <li>

@@ -3,8 +3,9 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
-
+{% load chair_tag %}
 {% load types %}
+
 {% type_event_type as t_evt_type %}
 {% type_event as t_evt %}
 
@@ -48,7 +49,7 @@
             </form>
 
             {% if events %}
-                <h3>{{ count }} {% trans t_evt|title|add:"s" %}</h3>
+                <h3>{{ count }} {% trans t_evt|title|s %}</h3>
                 <div>
                     <table class="event-table">
                         <thead>

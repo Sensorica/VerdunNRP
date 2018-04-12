@@ -94,7 +94,7 @@ div.logical-only {
                     {% endif %}
                     {% if rtl.list_elements.all %}
                         <div class="elements">
-                            <span class="element">{{ t_res_type|title|add:"s"|tr }}: </span><span class="element-list">{{ rtl.resource_types_string }}</span>
+                            <span class="element">{{ t_res_type|title|s|tr }}: </span><span class="element-list">{{ rtl.resource_types_string }}</span>
                         </div>
                     {% endif %}
                 </div>

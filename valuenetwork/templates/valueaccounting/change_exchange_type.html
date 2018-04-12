@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_exchange_type as t_exchange_type %}
 {% type_resource_type as t_resource_type %}
@@ -149,7 +150,7 @@ h3 {
 		        {% trans t_exchange_type|title %} {% trans "with Pattern" %}: <b>{{ exchange_type.name }}</b>
 
                 &nbsp;&nbsp;&nbsp;<a href="{% url exchange_types %}">{% trans t_exchange_type|title %}s</a>
-		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change"|add:t_resource_type|title|add:t_facet|title|add:"s" %}</a>
+		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change"|add:t_resource_type|title|add:t_facet|title|s %}</a>
 		        &nbsp;&nbsp;&nbsp;<span id="saving"></span>
 	        </legend>
 
@@ -163,9 +164,9 @@ h3 {
                     </form>
                 </div>
                 <div class="span7">
-                    <h3>{{ t_transfer_type|title }}s for this {{ t_exchange_type|title }}
+                    <h3>{{ t_transfer_type|title|s }} for this {{ t_exchange_type|title }}
                         <a href="#addTT" role="button" class="btn btn-info btn-side" data-toggle="modal" title="Add a new transfer type for this exchange type" >
-                            {% trans "New"|add:t_transfer_type|title %}
+                            {% trans "New"|sp:t_transfer_type|title %}
                         </a>
                     </h3>
                     <div class="modal hide fade" id="addTT" tabindex="-1" role="dialog" aria-labelledby="ttype" aria-hidden="true">
@@ -250,10 +251,10 @@ h3 {
                         </div>
                         <div class="row-fluid">
                             <div class="span8 resourcesHeader">
-                                <h4>{% trans t_resource_type|title|add:"s" %}</h4>
+                                <h4>{% trans t_resource_type|title|s %}</h4>
                             </div>
                             <div class="span4 facetsHeader">
-                                <h4>{% trans t_resource_type|title|add:t_facet|title|add:"s" %}</h4>
+                                <h4>{% trans t_resource_type|title|add:t_facet|title|s %}</h4>
                             </div>
                         </div>
 
@@ -277,7 +278,7 @@ h3 {
                             <div class="span8">
                                 <table>
                                     <thead>
-                                        <th>{% trans "Pattern "|add:t_facet|title|add:"s" %}</th>
+                                        <th>{% trans "Pattern "|add:t_facet|title|s %}</th>
                                         <th>{% trans "Del" %}</th>
                                     </thead>
                                     <tbody>
