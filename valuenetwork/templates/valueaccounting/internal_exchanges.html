@@ -4,8 +4,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_exchange as t_xchg %}
-{% type_exchange_type as t_xchg_type %}
+
 
 {% block head_title %}{% trans "Internal Exchanges" %}{% endblock %}
 
@@ -40,6 +39,8 @@ div.logical-only {
 {% block body_class %}exchange{% endblock %}
 
 {% block body_base %}
+{% type_exchange as t_xchg %}
+{% type_exchange_type as t_xchg_type %}
     <div class="container">
         {% include "_messages.html" %}
 		<legend>{% trans "Internal "|add:t_xchg|title|s %}

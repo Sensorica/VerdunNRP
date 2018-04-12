@@ -2,11 +2,14 @@
 
 {% load chair_tag %}
 {% load types %}
-{% type_exchange as t_xchg %}
-{% type_exchange_type as t_xchg_type %}
+
 {% load i18n %}
 
-{% block head_title %}{% trans "Incoming "|add:t_xchg|title|s %}{% endblock %}
+{% block head_title %}
+{% type_exchange as t_xchg %}
+{% type_exchange_type as t_xchg_type %}
+{% trans "Incoming "|add:t_xchg|title|s %}
+{% endblock %}
 
 {% block extra_head %}
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
@@ -36,6 +39,8 @@
 {% block body_class %}exchange{% endblock %}
 
 {% block body_base %}
+{% type_exchange as t_xchg %}
+{% type_exchange_type as t_xchg_type %}
     <div class="container">
         {% include "_messages.html" %}
 		<legend>{% trans "Incoming "|add:t_xchg|title|s %}

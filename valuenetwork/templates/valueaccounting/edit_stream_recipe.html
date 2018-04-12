@@ -7,8 +7,6 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_process_type as t_process_type %}
-{% type_resource_type as t_resource_type %}
 
 {% block head_title %}{% trans " Edit Workflow Recipe for " %} {{ resource_type }}{% endblock %}
 
@@ -113,6 +111,9 @@ div.logical-only {
 {% block body_class %}recipe{% endblock %}
 
 {% block body_base %}
+{% type_process_type as t_process_type %}
+{% type_resource_type as t_resource_type %}
+
     <div class="container-fluid">
         {% include "_messages.html" %}
       <div>

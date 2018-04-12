@@ -6,12 +6,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_exchange_type as t_exchange_type %}
-{% type_transfer_type as t_transfer_type %}
-{% type_exchange as t_exchange %}
-{% type_transfer as t_transfer %}
-{% type_resource_type as t_resource_type %}
-{% type_resource as t_resource %}
+
 
 {% block head_title %}{% trans "Exchange" %}: {{ exchange }}{% endblock %}
 
@@ -137,6 +132,12 @@ li {
 {% block body_class %}exchange{% endblock %}
 
 {% block body_base %}
+{% type_exchange_type as t_exchange_type %}
+{% type_transfer_type as t_transfer_type %}
+{% type_exchange as t_exchange %}
+{% type_transfer as t_transfer %}
+{% type_resource_type as t_resource_type %}
+{% type_resource as t_resource %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

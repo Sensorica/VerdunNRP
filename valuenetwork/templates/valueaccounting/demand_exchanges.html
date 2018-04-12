@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load types %}
 
-{% type_exchange_type as t_exchange_type %}
+
 
 {% block head_title %}{% trans "Demand Side Exchanges" %}{% endblock %}
 
@@ -35,6 +35,7 @@
 {% block body_class %}exchange{% endblock %}
 
 {% block body_base %}
+{% type_exchange_type as t_exchange_type %}
     <div class="container">
         {% include "_messages.html" %}
 		<legend>{% trans "Outgoing Exchanges" %}

@@ -6,7 +6,7 @@
 {% load chair_tag %}
 {% load types %}
 
-{% type_resource_type as t_res_type %}
+
 
 {% block head_title %}{% trans "Inventory" %}{% endblock %}
 <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
@@ -43,6 +43,7 @@ img {
 {% block body_class %}inventory{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div class="row-fluid">

@@ -5,8 +5,7 @@
 {% load bootstrap_tags %}
 {% load types %}
 
-{% type_resource_type as t_resource_type %}
-{% type_event_type as t_event_type %}
+
 
 {% block head_title %}{% trans "Create R&amp;D Project" %}{% endblock %}
 
@@ -54,6 +53,8 @@
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_resource_type %}
+{% type_event_type as t_event_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

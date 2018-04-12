@@ -4,7 +4,7 @@
 {% load chair_tag %}
 {% load types %}
 
-{% type_exchange as t_exchange %}
+
 
 {% block head_title %}{% trans "Demand" %}{% endblock %}
 
@@ -24,6 +24,7 @@
 {% block body_class %}demand{% endblock %}
 
 {% block body_base %}
+{% type_exchange as t_exchange %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
