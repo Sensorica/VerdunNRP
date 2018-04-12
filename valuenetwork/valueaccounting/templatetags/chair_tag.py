@@ -7,8 +7,14 @@ register = template.Library()
 def chair(desc, field, no_trans=False):
     if not no_trans:
         desc = _(desc)
-    field = str(field)
-    return {'desc': desc, 'field': field, 'linebreaks': ('\n' in field or '<br' in field)}
+
+    linebreaks = False
+    try:
+        linebreaks = '\n' in field or '<br' in field or '<textarea' in field
+    except:
+        pass
+
+    return {'desc': desc, 'field': field, 'linebreaks': linebreaks}
 
 @register.simple_tag
 def field_as_p(ff, label=''):
@@ -42,3 +48,14 @@ def tr(txt):
 @register.filter
 def ta(txt, arg):
     return txt + _(arg)
+
+@register.filter
+def s(txt):
+    if txt.endswith('y'):
+        return txt[:-1] + 'ies'
+    else:
+        return txt + 's'
+
+@register.filter
+def img_src(src):
+    return '<img src="%s"/>'
