@@ -6,8 +6,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
-{% type_resource as t_res %}
+
 
 {% block head_title %}{% trans "Work Order from Recipe" %}{% endblock %}
 
@@ -52,6 +51,8 @@
 {% block body_class %}x{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
+{% type_resource as t_res %}
     <div class="container">
       {% include "_messages.html" %}
 	  <div>

@@ -5,7 +5,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource as t_res %}
+
 
 {% block head_title %}{% trans "Process" %}: {{ process }}{% endblock %}
 
@@ -62,6 +62,7 @@ body .modal {
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource as t_res %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

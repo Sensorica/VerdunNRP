@@ -6,7 +6,7 @@
 {% load chair_tag %}
 {% load types %}
 
-{% type_resource as t_res %}
+
 
 {% block head_title %}{% trans "Process" %}: {{ process }}{% endblock %}
 
@@ -156,6 +156,7 @@ hr {
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource as t_res %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

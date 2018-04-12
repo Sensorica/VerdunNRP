@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load thumbnail %}
 {% load types %}
-{% type_resource_type as t_res_type %}
+
 
 {% block head_title %}{% trans "Project-level Value Network" %}{% endblock %}
 
@@ -14,6 +14,7 @@
 {% block body_class %}projects{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

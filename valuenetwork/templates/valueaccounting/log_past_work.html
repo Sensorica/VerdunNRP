@@ -4,7 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
-{% type_resource_type as t_res_type %}
+
 
 {% block head_title %}{% trans "Labnotes for " %} {{ commitment.from_agent.name }} doing {{ commitment.resource_type.name }} on {{ process.name }}{% endblock %}
 
@@ -88,6 +88,7 @@
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>

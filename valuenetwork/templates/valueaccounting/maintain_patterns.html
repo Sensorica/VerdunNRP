@@ -6,9 +6,6 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
-{% type_facet as t_facet %}
-{% type_use_case as t_use %}
 
 {% block head_title %}{% trans "Maintain Patterns" %}{% endblock %}
 
@@ -159,6 +156,10 @@ th, td {
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
+{% type_use_case as t_use %}
+
     <div class="container">
         {% include "_messages.html" %}
 	    <div>
