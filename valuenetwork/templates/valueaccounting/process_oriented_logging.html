@@ -245,7 +245,7 @@ hr {
                                 {% if to_be_changed_requirement.resources_ready_to_be_changed %}
                                     {% for resource in to_be_changed_requirement.resources_ready_to_be_changed %}
                                         <div>
-                                            {% trans "{{ t_res|title }}" %}: <a href="{% url resource resource_id=resource.id  %}">{{ resource }}</a>
+                                            {{ t_res|title|tr }: <a href="{% url resource resource_id=resource.id  %}">{{ resource }}</a>
                                             <form
                                                 style="display: inline;"
                                                 class="changeable-form"
@@ -326,7 +326,7 @@ hr {
                                 </a>
                                 {% if item.addable_resources %}
                                     <a href="#addToResourceModal{{ item.id }}" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Add to an existing Resource" >
-                                        {% trans "Add to {{ t_res|title }}" %}
+                                        {% trans "Add to "|add:t_res|title %}
                                     </a>
                                 {% endif %}
 
@@ -394,7 +394,7 @@ hr {
 					    {% endif %}
 					    {% if event.resource %}
                             </br>
-                            &nbsp;&nbsp;{% trans "{{ t_res|title }}" %}: <a href="{% url resource resource_id=event.resource.id  %}">
+                            &nbsp;&nbsp;{{ t_res|title|tr }}: <a href="{% url resource resource_id=event.resource.id  %}">
                             {{ event.resource }} {{ event.resource.quantity }} {{ event.resource.resource_type.unit }} </a>
                         {% endif %}
 
@@ -1430,7 +1430,7 @@ hr {
             <form class="output-form validateMe" name="addout" enctype="multipart/form-data" id="addOutputForm" action="{% url add_process_output process_id=process.id %}" method="POST" >
 	            {% csrf_token %}
 
-                    <p class="modal-line">{% trans "{{ t_res_type|title }}" %} </p>
+                    <p class="modal-line">{{ t_res_type|title|tr }} </p>
                     {% field_as_p add_output_form.resource_type "" %}
                     {% comment %}
                     <a href="#createResourceModal" role="button" class="add-another" data-toggle="modal">

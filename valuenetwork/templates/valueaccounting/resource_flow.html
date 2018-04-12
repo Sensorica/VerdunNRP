@@ -59,11 +59,11 @@ th {
 		<div class="row-fluid">
 
                 <h3 class="hdg">Resource</h3>
-              {% field_as_p resource_form.context_agent {% trans "Network" %} %}
-              {% field_as_p resource_form.resource_type {% trans "{{ t_res_type|title }}" %} %}
-              {% field_as_p resource_form.identifier {% trans "Lot identifier" %} %}
+              {% field_as_p resource_form.context_agent "Network"|tr %}
+              {% field_as_p resource_form.resource_type t_res_type|title|tr %} %}
+              {% field_as_p resource_form.identifier "Lot identifier"|tr %}
               {% field_as_p resource_form.current_location %}
-              {% field_as_p resource_form.from_agent {% trans "Owner" %} %}
+              {% field_as_p resource_form.from_agent "Owner"|tr %}
               {% comment %}
 	            <table>
                     <tr>
@@ -93,9 +93,9 @@ th {
         <div class="row-fluid">
             <div class="span6">
                 <h3 class="hdg">Harvest</h3>
-                {% field_as_p resource_form.event_date {% trans "Date" %} %}
-                {% field_as_p resource_form.from_agent {% trans "Farm" %} %}
-                {% field_as_p resource_form.to_agent {% trans "Harvester" %} %}
+                {% field_as_p resource_form.event_date "Date"|tr %}
+                {% field_as_p resource_form.from_agent "Farm"|tr %}
+                {% field_as_p resource_form.to_agent "Harvester"|tr %}
                 {% field_as_p resource_form.quantity %}
                 {% field_as_p resource_form.notes %}
                 {% comment %}
@@ -125,12 +125,12 @@ th {
             </div>
             <div class="span6">
                 <h3 class="hdg">or Receipt</h3>
-                {% field_as_p resource_form.event_date {% trans "Date" %} %}
-                {% field_as_p resource_form.from_agent {% trans "Farm" %} %}
+                {% field_as_p resource_form.event_date "Date"|tr %}
+                {% field_as_p resource_form.from_agent "Farm"|tr %}
                 {% field_as_p resource_form.quantity %}
                 <p>
-                    {% field_as_div resource_form.value {% trans "If paid, $" %} %}
-                    {% field_as_div resource_form.to_agent {% trans "Paid by" %} %}
+                    {% field_as_div resource_form.value "If paid, $"|tr %}
+                    {% field_as_div resource_form.to_agent "Paid by"|tr %}
                 </p>
                 {% field_as_p resource_form.notes %}
                 {% comment %}
@@ -163,9 +163,9 @@ th {
         <div class="row-fluid">
 
                 <h3 class="hdg">Dry</h3>
-                {% field_as_p resource_form.event_date {% trans "Date" %} %}
-                {% field_as_p resource_form.from_agent {% trans "Facility" %} %}
-                {% field_as_p resource_form.quantity {% trans "Quantity (LB)" %} %}
+                {% field_as_p resource_form.event_date "Date"|tr %}
+                {% field_as_p resource_form.from_agent "Facility"|tr %}
+                {% field_as_p resource_form.quantity "Quantity (LB)"|tr %}
                 {% field_as_p resource_form.notes %}
                 {% comment %}
                 <table>

@@ -63,13 +63,13 @@ div.logical-only {
 		<div class="span9">
 
 			<legend>
-                {% trans "{{ t_res_type|title }}s" %}&nbsp;&nbsp;&nbsp;
-                <a href="{% url resource_type_lists %}">{% trans "{{ t_res_type|title }} Lists" %}</a>
+                {{ t_res_type|title|s|tr }}&nbsp;&nbsp;&nbsp;
+                <a href="{% url resource_type_lists %}">{% trans t_res_type|title|add:" Lists" %}</a>
             </legend>
 
 			{% if user.is_authenticated %}
 				<div class="logical-only">
-					<a href="#createResourceForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Create new {{ t_res_type|title }}" %}</a>
+					<a href="#createResourceForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Create new "|add:t_res_type|title %}</a>
 					<br /><br />
 				</div>
 
@@ -77,7 +77,7 @@ div.logical-only {
 				<div class="modal hide fade" id="createResourceForm" tabindex="-1" role="dialog" aria-labelledby="resource-create-label" aria-hidden="true">
 					<div class="modal-header">
 						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-						<h3 id="resource-create-label">{% trans "Create a new {{ t_res_type|title }}" %}</h3>
+						<h3 id="resource-create-label">{% trans "Create a new "|add:t_res_type|title %}</h3>
 					</div>
 					<div class="modal-body">
 						<form class="resource-create-form" id="resourceCreateForm" enctype="multipart/form-data" action="{% url create_resource_type %}" method="POST" >

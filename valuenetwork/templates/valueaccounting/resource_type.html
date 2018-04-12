@@ -5,10 +5,12 @@
 {% load bootstrap_tags %}
 {% load thumbnail %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_res_type %}
+{% type_resource as t_res %}
 
-{% block head_title %}{% trans "{{ t_res_type|title }}" %}:  {{ resource_type.name }}{% endblock %}
+{% block head_title %}{{ t_res_type|title|tr }}:  {{ resource_type.name }}{% endblock %}
 
 {% block extra_head %}
 
@@ -65,7 +67,7 @@ div.logical-only {
         {% include "_messages.html" %}
 
 		<legend>
-		    {% trans "{{ t_res_type|title }}" %}:  {{ resource_type.name }}
+		    {{ t_res_type|title|tr }}:  {{ resource_type.name }}
 		    {% if agent %}
 		      <div class="logical-only">
 				    <a href="#resourceChangeForm{{ resource_type.id }}" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>
@@ -77,7 +79,7 @@ div.logical-only {
 		        {% endif %}
 
 		        <div class="logical-only">
-			        <a href="#resourceModal" role="button" class="btn btn-info" data-toggle="modal">{% trans "Create Resource" %}</a>
+			        <a href="#resourceModal" role="button" class="btn btn-info" data-toggle="modal">{% trans "Create "|add:t_res|title %}</a>
 		        </div>
 
 		    {% endif %}
@@ -115,7 +117,7 @@ div.logical-only {
                 {% endif %}
 	        {% endif %}
 
-	        <a href="{% url resource_types %}">{% trans "All {{ t_res_type|title }}s" %}</a>
+	        <a href="{% url resource_types %}">{% trans "All "|add:t_res_type|title|add:"s" %}</a>
 
 		</legend>
 
@@ -124,7 +126,7 @@ div.logical-only {
             <div class="modal hide fade resourceModal" id="resourceModal" tabindex="-1" role="dialog" aria-labelledby="resource-label" aria-hidden="true">
 	            <div class="modal-header">
 		            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-		            <h3 id="resource-label">{% trans "Create Resource of type" %} {{ resource_type.name }}</h3>
+		            <h3 id="resource-label">{% trans "Create "|add:t_res|title|add:" of type" %} {{ resource_type.name }}</h3>
 	            </div>
 	            <div class="modal-body">
 		            <form class="resource-form" id="resourceForm" enctype="multipart/form-data" action="." method="POST" >

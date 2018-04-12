@@ -5,10 +5,11 @@
 {% load bootstrap_tags %}
 {% load thumbnail %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_res_type %}
 
-{% block head_title %}{% trans "{{ t_res_type|title }} Lists" %}{% endblock %}
+{% block head_title %}{% trans t_res_type|title|add:" Lists" %}{% endblock %}
 
 {% block extra_head %}
 
@@ -55,7 +56,7 @@ div.logical-only {
         {% include "_messages.html" %}
 
         <legend>
-            {% trans "{{ t_res_type|title }} Lists" %} &nbsp;&nbsp;&nbsp;
+            {% trans t_res_type|title|add:" Lists" %} &nbsp;&nbsp;&nbsp;
             {% if agent %}
                 <div class="logical-only">
                     <a href="{% url create_resource_type_list %}" role="button" class="btn btn-primary" >{% trans "Create new List" %}</a>
@@ -64,7 +65,7 @@ div.logical-only {
 
         </legend>
         <div>
-            {% trans "{{ t_res_type|title }} Lists may be used to schedule many deliverables on the same Work Order." %}
+            {% trans t_res_type|title|add:" Lists may be used to schedule many deliverables on the same Work Order." %}
         </div>
 
         <div class="row-fluid">
@@ -93,7 +94,7 @@ div.logical-only {
                     {% endif %}
                     {% if rtl.list_elements.all %}
                         <div class="elements">
-                            <span class="element">{% trans "{{ t_res_type|title }}s" %}: </span><span class="element-list">{{ rtl.resource_types_string }}</span>
+                            <span class="element">{{ t_res_type|title|add:"s"|tr }}: </span><span class="element-list">{{ rtl.resource_types_string }}</span>
                         </div>
                     {% endif %}
                 </div>

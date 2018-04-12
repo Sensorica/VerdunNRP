@@ -4,11 +4,12 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_res_type %}
 
 {% block head_title %}
-    {% trans "{{ t_res_type|title }} List" %}
+    {% trans t_res_type|title|add:" List" %}
     {% if rt_list %}
         {{ rt_list }}
     {% endif %}
@@ -41,9 +42,9 @@
 <div class="container">
     <legend>
         {% if rt_list %}
-            {% trans "Change {{ t_res_type|title }} List" %} {{ rt_list }}
+            {% trans "Change "|add:t_res_type|title|add:" List" %} {{ rt_list }}
         {% else %}
-            {% trans "Create {{ t_res_type|title }} List" %}
+            {% trans "Create "|add:t_res_type|title|add:" List" %}
         {% endif %}
     </legend>
 
@@ -74,7 +75,7 @@
                 <table class="table table-condensed table-hover">
                     <thead>
                         <tr class="headings">
-                            <th>{% trans "{{ t_res_type|title }}" %}</th>
+                            <th>{{ t_res_type|title|tr }}</th>
                             {% comment %}<th>{% trans "Default Quantity" %}</th>{% endcomment %}
                             <th>{% trans "Selected" %}</th>
                         </tr>

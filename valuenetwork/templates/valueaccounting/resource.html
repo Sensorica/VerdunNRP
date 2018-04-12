@@ -4,8 +4,13 @@
 {% load bootstrap_tags %}
 {% load thumbnail %}
 {% load chair_tag %}
+{% load types %}
 
-{% block head_title %}{% trans "Resource" %}: {{ resource }}{% endblock %}
+{% type_resource as t_res %}
+{% type_event as t_ev %}
+{% type_exchange as t_xchg %}
+
+{% block head_title %}{{ t_res|tr|title }}: {{ resource }}{% endblock %}
 
 {% block extra_head %}
 
@@ -49,7 +54,7 @@
         {% include "_messages.html" %}
 
 		<legend>
-			{% trans "Resource" %}: {{ resource }} &nbsp;
+			{{ t_res|tr|title }}: {{ resource }} &nbsp;
 			{% if agent %}
 		        <a href="#resourceChangeForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Change" %}</a>&nbsp;&nbsp;
 		        <a href="#resourceOrderForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Plan Work Order" %}</a>&nbsp;&nbsp;
@@ -128,29 +133,31 @@
 	                {% chair {% trans "Quantity" %} "{{ resource.quantity }} {{ resource.unit_of_quantity }}" %}
 
                   {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
-                    {% chair "{% trans "Value per" %} {{ resource.resource_type.unit_of_use.abbrev }} {% trans "of use" %}" "{{ resource.value_per_unit_of_use }}" %}
+                    {% chair "Value per "|tr|add:resource.resource_type.unit_of_use.abbrev|ta:" of use" resource.value_per_unit_of_use %}
                   {% endif %}
 
 	                {% if resource.url %}
-	                    {% chair {% trans "URL" %} "{{ resource.url|urlize }}" %}
+	                    {% chair "URL"|tr resource.url|urlize %}
                   {% endif %}
 
                   {% if resource.current_location %}
-	                    {% chair {% trans "Current Location" %} "{{ resource.current_location }}" %}
+	                    {% chair "Current Location"|tr resource.current_location %}
                   {% endif %}
 
                   {% if resource.notes %}
-                    {% chair {% trans "Notes" %} "{{ resource.notes|urlize|linebreaks }}" %}
+                    {% chair "Notes"|tr resource.notes|urlize|linebreaks %}
                   {% endif %}
 
                   {% if resource.access_rules %}
-                    {% chair {% trans "Access Rules" %} "{{ resource.access_rules|urlize|linebreaks }}" %}
+                    {% chair "Access Rules"|tr resource.access_rules|urlize|linebreaks %}
                   {% endif %}
 
+                  {# I really don't like this, but without a better thumbnail, there's no way around it #}
+                  {# since I can't nest % tags to include the thumbnail url, I have to manually include the output of the chair tag #}
                   {% if resource.photo %}
-	                	{% chair {% trans "Photo" %} '<img src="{% thumbnail resource.photo photo_size %}" />'|safe %}
+	                	<b>{% trans "Photo" %}</b> <div><img src="{% thumbnail resource.photo photo_size %}" /></div>
                 	{% elif resource.photo_url %}
-                    {% chair {% trans "Photo" %} '<img src="{{ resource.photo_url }}" width="128" height="96" />'|safe %}
+                    <b>{% trans "Photo" %}</b> <div><img src="{{ resource.photo_url }}" width="128" height="96" /></div>
 	                {% endif %}
 
                     {% if resource.agent_resource_roles.all %}
@@ -165,8 +172,8 @@
                       </p>
                     {% endif %}
 
-                    {% chair {% trans "Record created date" %} "{{ resource.created_date }}" %}
-                    {% chair {% trans "Record created by" %} "{{ resource.created_by }}" %}
+                    {% chair "Record created date"|tr resource.created_date %}
+                    {% chair "Record created by"|tr resource.created_by %}
 
 
 	            </div>
@@ -290,9 +297,9 @@
                                 </ul>
                                 {% for op in event.process.outputs %}
                                     {% if op.resource %}
-                                        <li>{% trans "Event" %}: <b>{{ op.event_type }}</b>  {{ op.resource_type.name }} {{ event.quantity }} {{ event.unit_of_quantity.abbrev }} {{ event.event_date }}</li>
+                                        <li>{{ t_ev|tr|title }}: <b>{{ op.event_type }}</b>  {{ op.resource_type.name }} {{ event.quantity }} {{ event.unit_of_quantity.abbrev }} {{ event.event_date }}</li>
                                         <ul>
-                                            <li><b>{% trans "Resource" %}:</b> <a href="{% url resource resource_id=op.resource.id %}">{{ op.resource.label }}</a></li>
+                                            <li><b>{{ t_res|tr|title }}:</b> <a href="{% url resource resource_id=op.resource.id %}">{{ op.resource.label }}</a></li>
                                         </ul>
                                     {% endif %}
                                 {% endfor %}
@@ -302,7 +309,7 @@
                                 {% if event.transfer.exchange %}
                                     {% with event.transfer.exchange as exchange %}
                                     <ul>
-                                        <li><b>{% trans "Exchange" %}:</b> <a href="{% url exchange_logging exchange_type_id=0 exchange_id=exchange.id %}">{{ exchange }}</a>
+                                        <li><b>{{ t_xchg|tr|title }}:</b> <a href="{% url exchange_logging exchange_type_id=0 exchange_id=exchange.id %}">{{ exchange }}</a>
                                         </li>
                                     </ul>
                                     {% endwith %}

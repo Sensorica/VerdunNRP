@@ -3,13 +3,14 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load types %}
+
 {% type_resource_type as t_res_type %}
 {% type_facet as t_facet %}
 
 {# I don't like this, but I can see the appeal after thinking about how to arrange the options for a few minutes #}
-{# Do we need this at all?  We have other ways to alter resource types' facets and values #}
+{# Tibi says it's useful, so we keep it #}
 
-{% block head_title %}{% trans "{{ t_res_type|title }} {{ t_facet|title }}s" %}{% endblock %}
+{% block head_title %}{% blocktrans %}{{ t_res_type }} {{ t_facet|title }}s {% endblocktrans %}{% endblock %}
 
 {% block extra_head %}
 
@@ -24,7 +25,7 @@
     <div class="container">
         {% include "_messages.html" %}
 	    <div>
-		    <legend>{% trans "{{ t_res_type|title }} {{ t_facet|title }}s" %}</legend>
+		    <legend>{% blocktrans %}{{ t_res_type|title }} {{ t_facet|title }}s{% endblocktrans %}</legend>
 
         <p>Click on a heading to sort. Double-click on a cell to change.</p>
 
