@@ -87,7 +87,7 @@
                     <td class="description">{{ form.instance.description|urlize|linebreaks }}</td>
                     <td class="state">{{ form.instance.state }}</td>
                     <td>{{ form.DELETE }}</td>
-                    {% form_dialog dialog_id="edit-modal-{{ form.id }}" method="dialog" action="#" form=form title="Edit Association" %}
+                    {% form_dialog dialog_id="edit-modal-"|add:form.id method="dialog" action="#" form=form title="Edit Association" %}
                 </tr>
             {% endfor %}
             </tbody>
