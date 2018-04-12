@@ -212,9 +212,9 @@ legend {
                     {% chair "Unit of claim value"|tr agent.unit_of_claim_value %}
                   {% endif %}
 	                {% if agent.url %}
-	                  {% autoescape off %}
-                    {% chair "URL" '<a href="'|add:agent.url|escape|add:'">Open</a>' %}
-                    {% endautoescape %}
+	                  {% with agent.url|escape as url %}
+                    {% chair "URL" '<a href="'|add:url|add:'">Open</a>'|safe %}
+                    {% endwith %}
                   {% endif %}
 	                {% if agent.description %}
 	                    {% chair "Description"|tr agent.description|urlize|linebreaks %}
