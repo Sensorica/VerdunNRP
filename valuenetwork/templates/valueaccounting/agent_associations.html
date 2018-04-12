@@ -68,7 +68,7 @@
             <thead>
                 <tr class="headings">
                     <th>{% trans "Edit" %}</th>
-                    <th>{% trans "{{ t_agent_assoc_type|title }}" %}</th>
+                    <th>{{ t_agent_assoc_type|tr|title }}</th>
                     <th>{% trans "Associated Agent" %}</th>
                     <th>{% trans "Description of association" %}</th>
                     <th>{% trans "Active?" %}</th>
@@ -78,16 +78,16 @@
             <tbody>
             {% for form in has_associates_formset %}
 
+                {{ form.id }}
+                <tr>
 
-                <tr id="row-for-{{ form.id }}">
-                  {{ form.id }}
-                    <td><a href="#edit-modal-{{form.id}}" role="button" class="btn" data-toggle="modal">Edit</a></td>
+                    <td><a href="#" data-target="#edit-modal-{{form.instance.id}}" role="button" class="btn" data-toggle="modal">Edit</a></td>
                     <td class="association-type-name">{{ form.instance.association_type.name }}</td>
                     <td class="associate-nick">{{ form.instance.is_associate.nick }}</td>
                     <td class="description">{{ form.instance.description|urlize|linebreaks }}</td>
                     <td class="state">{{ form.instance.state }}</td>
                     <td>{{ form.DELETE }}</td>
-                    {% form_dialog dialog_id="edit-modal-"|add:form.id method="dialog" action="#" form=form title="Edit Association" %}
+                    {% form_dialog dialog_id="edit-modal-"|add:form.instance.id method="dialog" action="#" form=form title="Edit Association" %}
                 </tr>
             {% endfor %}
             </tbody>
