@@ -6,7 +6,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
+
 
 {% block head_title %}{% trans "Resource Flow" %} {% endblock %}
 
@@ -49,6 +49,7 @@ th {
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 

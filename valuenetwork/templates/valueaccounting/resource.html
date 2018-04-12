@@ -6,11 +6,14 @@
 {% load chair_tag %}
 {% load types %}
 
+
+
+{% block head_title %}
 {% type_resource as t_res %}
 {% type_event as t_ev %}
 {% type_exchange as t_xchg %}
-
-{% block head_title %}{{ t_res|tr|title }}: {{ resource }}{% endblock %}
+{{ t_res|tr|title }}: {{ resource }}
+{% endblock %}
 
 {% block extra_head %}
 
@@ -50,6 +53,9 @@
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource as t_res %}
+{% type_event as t_ev %}
+{% type_exchange as t_xchg %}
     <div class="container">
         {% include "_messages.html" %}
 

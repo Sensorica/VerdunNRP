@@ -5,8 +5,6 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
-{% type_facet as t_facet %}
 
 {# I don't like this, but I can see the appeal after thinking about how to arrange the options for a few minutes #}
 {# Tibi says it's useful, so we keep it #}
@@ -23,6 +21,9 @@
 {% block body_class %}patterns{% endblock %}
 
 {% block body_base %}
+
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
     <div class="container">
         {% include "_messages.html" %}
 	    <div>

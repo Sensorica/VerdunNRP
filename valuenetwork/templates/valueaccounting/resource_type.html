@@ -7,10 +7,13 @@
 {% load types %}
 {% load chair_tag %}
 
+
+
+{% block head_title %}
 {% type_resource_type as t_res_type %}
 {% type_resource as t_res %}
-
-{% block head_title %}{{ t_res_type|title|tr }}:  {{ resource_type.name }}{% endblock %}
+{{ t_res_type|title|tr }}:  {{ resource_type.name }}
+{% endblock %}
 
 {% block extra_head %}
 
@@ -63,6 +66,8 @@ div.logical-only {
 {% block body_class %}resource-types{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
+{% type_resource as t_res %}
     <div class="container">
         {% include "_messages.html" %}
 
