@@ -4,9 +4,10 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
-{% type_resource_type as t_res_type %
-}
+{% type_resource_type as t_res_type %}
+
 {% block head_title %}{% trans "Production" %}{% endblock %}
 
 {% block extra_head %}
@@ -117,7 +118,7 @@
                         {% if rand %}
                             <p>
                                 <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
-                              </br>Create planned work using the selected {{ t_res_type }}s.
+                              </br>Create planned work using the selected {{ t_res_type|s }}.
                             </p>
                             <p>
                                 <input type="submit" name="add-another" value="{% trans 'Save process & add another' %}" class="btn btn-primary" />
@@ -130,7 +131,7 @@
                         {% else %}
                             <p>
                                 <input type="submit" name="create-process" value="{% trans 'Save process & exit' %}" class="btn btn-primary" />
-                              </br>Create a process using the selected {{ t_res_types }}s, where you can log your work.
+                              </br>Create a process using the selected {{ t_res_types|s }}, where you can log your work.
                             </p>
                             <p>
                                 <input id="startNow" type="submit" name="labnotes" value="{% trans 'Work now' %}" class="btn btn-primary" disabled />

@@ -203,7 +203,7 @@ th, td {
                         {% endfor %}
                     </div>
                     <div class="span4">
-                        <h4 class="patternFacetHeader" >{% trans "Pattern {{ t_facet|title }}s" %}</h4>
+                        <h4 class="patternFacetHeader" >{% trans "Pattern "|add:t_facet|title|s %}</h4>
                         {% for facet in slot.facets %}
                             <p>{{ facet.facet_value }}</p>
                         {% endfor %}

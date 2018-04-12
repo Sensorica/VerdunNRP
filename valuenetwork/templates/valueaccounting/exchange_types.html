@@ -44,7 +44,7 @@ h3 {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans "Maintain "|add:t_xchg_type|title|add:"s / Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% blocktrans %}Change {{ t_res_type|title }} {{ t_facet|title }}s{% endblocktrans %}</a>
+		        {% trans "Maintain "|add:t_xchg_type|title|add:"s / Patterns" %} &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% blocktrans %}Change {{ t_res_type|title }} {{ t_facet|title|s }}{% endblocktrans %}</a>
 	        </legend>
 
             <div class="row-fluid">

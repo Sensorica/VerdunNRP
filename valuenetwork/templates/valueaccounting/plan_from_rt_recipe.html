@@ -4,6 +4,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
+{% load chair_tag %}
 
 {% type_resource_type as t_res_type %}
 {% type_resource as t_res %}
@@ -45,7 +46,7 @@
                             {{ resource.identifier }}
                         </p>
                     {% empty %}
-                        <p>Sorry, no starting {{ t_res }}s exist.</p>
+                        <p>Sorry, no starting {{ t_res|s }} exist.</p>
                     {% endfor %}
                 </div>
             {% endif %}
