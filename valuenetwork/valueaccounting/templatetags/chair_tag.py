@@ -53,6 +53,8 @@ def ta(txt, arg):
 def s(txt):
     if txt.endswith('y'):
         return txt[:-1] + 'ies'
+    elif txt.endswith('s'):
+        return txt + 'es'
     else:
         return txt + 's'
 
