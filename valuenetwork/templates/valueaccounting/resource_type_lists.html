@@ -7,9 +7,11 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
+{% block head_title %}
 
-{% block head_title %}{% trans t_res_type|title|add:" Lists" %}{% endblock %}
+{% type_resource_type as t_res_type %}
+{% trans t_res_type|title|add:" Lists" %}
+{% endblock %}
 
 {% block extra_head %}
 
@@ -52,6 +54,9 @@ div.logical-only {
 {% block body_class %}x{% endblock %}
 
 {% block body_base %}
+
+{% type_resource_type as t_res_type %}
+
     <div class="container">
         {% include "_messages.html" %}
 

@@ -6,9 +6,10 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
+
 
 {% block head_title %}
+{% type_resource_type as t_res_type %}
     {% trans t_res_type|title|add:" List" %}
     {% if rt_list %}
         {{ rt_list }}
@@ -39,6 +40,7 @@
 {% block body_class %}log{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
 <div class="container">
     <legend>
         {% if rt_list %}

@@ -6,8 +6,7 @@
 {% load types %}
 {% load chair_tag %}
 
-{% type_resource_type as t_res_type %}
-{% type_facet as t_facet %}
+
 
 {% block head_title %}{% trans "Test Patterns" %}{% endblock %}
 
@@ -158,6 +157,8 @@ th, td {
 {% block body_class %}work{% endblock %}
 
 {% block body_base %}
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
     <div class="container">
         {% include "_messages.html" %}
 	    <div>
