@@ -79,15 +79,15 @@ h3 {
                 </div>
             {% endif %}
 {% endcomment %}
-            <a class="report" href="{% url exchanges %}">{% trans "{{ t_xchg|title }} List" %}</a>
+            <a class="report" href="{% url exchanges %}">{% trans t_xchg|title|add:" List" %}</a>
         </legend>
 
         {% if agent %}
           <div>
             <form id="exchangeForm" method="POST" action="">
                 {% csrf_token %}
-                Choose which type to create a new {{ t_xchg }}: {{ nav_form.exchange_type }}
-                <input style="display: inline; vertical-align: top;" type="submit" name="submit" value="{% trans 'Create {{ t_xchg|title }}' %}" class="btn btn-primary" />
+                {% trans "Choose which type to create a new "|add:t_xchg %}: {{ nav_form.exchange_type }}
+                <input style="display: inline; vertical-align: top;" type="submit" name="submit" value="{% trans 'Create '|add:t_xchg|title %}" class="btn btn-primary" />
             </form>
           </div>
         {% endif %}
