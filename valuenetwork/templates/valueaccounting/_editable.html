@@ -1,0 +1,163 @@
+{# THIS IS NOT YET TESTED #}
+{# to use, include this template in your footer.  put your modals near the body #}
+{# wrapped in span.row-editor.  The span should have data attributes table=table id #}
+{# and index=0-based index #}
+{# add a class to each td of the table that corresponds to the python name of the field #}
+{# only include the form.id in the tr.  name the table, wrap}
+<style type="text/css">
+  td > input:not(.delete), td > select, td > textarea {
+    display: none;
+  }
+</style>
+<script type="text/javascript">
+  /**
+   * Make tables that display data from a Django model with a modal editor for
+   * each of the table's rows.  Tables are best practice in many cases (though
+   * generally not for form controls) but they really screw up layouts in mobile.
+   * Bootstrap modals do fine on a small screen, so the ideal solution is to let
+   * these two methods each do what they do well separately: tables for displaying
+   * the data, modals for editing.  The first column becomes an edit button that
+   * pops up the modal and we don't force mobile users to navigate the table.
+   * There are actually 3 non-model data representations that need to be bound
+   * together: the controls in the modal's form, the hidden controls in the table,
+   * and the display values in the table.
+   */
+  $(document).ready(function () {
+    // scan for all the span.row-editor; each has a data-table, data-index, and
+    // a modal inside.
+    class RowEditor {
+      constructor(el) {
+        this.$ = el;
+        this.fields = new Set;
+        for (fld of el.find(':input').get()) {
+          const ctl = $(fld);
+          if (ctl.attr('type') !== 'submit') {
+            ctl.on('click', () => this.syncTbl())
+          } else if (ctl.attr('id') && ctl.attr('id').endsWith('-DELETE')) {
+            el.find('form').find('div.control-group').has(fld).remove();
+          } else {
+            const rf = new RowField(this, ctl);
+            this.fields.add(rf);
+            rf.install();
+          }
+        }
+      }
+      syncTbl() {
+        let field;
+        for (field of this.fields) {
+          field.syncTbl();
+        }
+      }
+      syncForm() {
+        let field;
+        for (field of this.fields) {
+          field.syncForm();
+        }
+      }
+      get index() {
+        return 0|this.$.data('index')
+      }
+      get table() {
+        return $(`table#${this.$.data('table')}`)
+      }
+      get tr() {
+        return this.table.find('tbody').find('tr').eq(this.index);
+      }
+      get modal() {
+        return this.$.find('.modal');
+      }
+      get form() {
+        return this.$.find('form');
+      }
+    }
+    class RowField {
+      constructor(editor, el) {
+        this.$ = el;
+        this.editor = editor;
+        this.pyName = /^(?:[^-]*-)*([^-]*)$/.exec(el.attr('name'))[1];
+      }
+      install() {
+        const td = this.td;
+
+        if (this.$.hasAttr('id') && td.find(':input').size() === 0) {
+          const el = this.$.clone(true);
+          this.$.removeAttr('id');
+          $('<span>').addClass('cell-sync-value').appendTo(td);
+          td.append(el);
+
+          const data = td.data();
+          if (data && data.override) {
+            this.wrapVal = this.override(data);
+          } else {
+            this.wrapVal = this.simple();
+          }
+        }
+
+        this.syncTbl();
+      }
+      get td() {
+        const tr = this.editor.tr;
+        return tr.children(`td.${this.pyName}`);
+      }
+      syncTbl() {
+        const tr = this.editor.tr,
+          form = this.editor.form,
+          hiddenFld = tr.find(`td.${this.pyName} > :input`),
+          sourceFld = form.find(`:input[name=${hiddenFld.attr('name')}]`),
+          span = hiddenFld.closest('td').find('span.cell-sync-value'),
+          val = sourceFld.val();
+        hiddenFld.val(val);
+        span.empty();
+        this.wrapVal(sourceFld).appendTo(span);
+      }
+      syncForm() {
+        const td = this.td,
+          form = this.editor.form,
+          hiddenFld = t.find(':input'),
+          formFld = form.find(`:input[name=${hiddenFld.attr('name')}]`);
+        formFld.val(hiddenFld.val());
+      }
+      override(data) {
+        let fn = this[data.override];
+        if (typeof fn !== 'function') fn = this.simple;
+        return fn.call(this, data);
+      }
+      simple() {
+        return (fld) => $('<span>').text(fld.val());
+      }
+      add(data) {
+        const prefix = data.prefix || '',
+          suffix = data.suffix || '';
+        return (fld) => (
+          $('<span>')
+          .append($('<span>').text(prefix))
+          .append($('<span>').text(fld.val()))
+          .append($('<span>').text(suffix))
+        );
+      }
+      model(data) {
+        const prefix = data.prefix || '',
+          suffix = data.suffix || '';
+
+        return (sel) => (
+          $('<a>')
+          .attr('href', `${prefix}/${sel.val()}/${suffix}`)
+          .text(sel.find(':selected').text())
+        );
+
+      }
+      p(data) {
+        return (fld) => $(fld.val().split('\n').map(t => $('<p>').text(t)));
+      }
+    }
+    const rowEditors = $('span.row-editor');
+    let re;
+    for (re of rowEditors.get()) {
+      let ed = new RowEditor($(re));
+      ed.modal.on('hidden.bs.modal show.bs.modal', () => {
+        ed.syncForm();
+      });
+    }
+    
+  });
+</script>
