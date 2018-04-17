@@ -36,7 +36,7 @@
             ctl.on('click', () => this.syncTbl())
           } else if (ctl.attr('id') && ctl.attr('id').endsWith('-DELETE')) {
             el.find('form').find('div.control-group').has(fld).remove();
-          } else {
+          } else if (!ctl.is('button')) {
             const rf = new RowField(this, ctl);
             this.fields.add(rf);
             rf.install();
@@ -76,6 +76,9 @@
         this.$ = el;
         this.editor = editor;
         this.pyName = /^(?:[^-]*-)*([^-]*)$/.exec(el.attr('name'))[1];
+      }
+      wrapVal() {
+        throw new Error(`wrapVal not assigned on ${this.pyName} with elements ${this.$}`);
       }
       install() {
         const td = this.td;
@@ -159,7 +162,7 @@
     let re;
     for (re of rowEditors.get()) {
       let ed = new RowEditor($(re));
-      ed.modal.on('show.bs.modal', () => {
+      ed.modal.on('show.bs.modal hidden.bs.modal', () => {
         ed.syncForm();
       });
     }
