@@ -86,7 +86,7 @@
         this.pyName = /^(?:[^-]*-)*([^-]*)$/.exec(el.attr('name'))[1];
       }
       wrapVal() {
-        throw new Error(`wrapVal not assigned on ${this.pyName} with elements:${this.$.get().map(e => `${e.tagName}.${e.className.split(' ').join('.')}#${e.id}:${e.type}`}`);
+        throw new Error(`wrapVal not assigned on ${this.pyName} with elements:${this.$.get().map(e => `${e.tagName}.${e.className.split(' ').join('.')}#${e.id}:${e.type}`).join(', ')}`);
       }
       install() {
         const td = this.td;
