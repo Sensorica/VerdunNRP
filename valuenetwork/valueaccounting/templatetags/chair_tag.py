@@ -65,3 +65,7 @@ def img_src(src):
 @register.filter
 def sp(txt, more_txt=''):
     return '%s %s' % (txt, more_txt)
+
+@register.filter
+def ts(thing):
+    return '%d' % (thing,)
