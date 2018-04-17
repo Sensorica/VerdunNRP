@@ -140,9 +140,13 @@
           suffix = data.suffix || '';
 
         return (sel) => (
-          $('<a>')
-          .attr('href', `${prefix}/${sel.val()}/${suffix}`)
-          .text(sel.find(':selected').text())
+          ( (prefix || suffix) && sel.val()|0 ?
+              $('<a>' )
+              .attr('href', `${prefix}/${sel.val()}/${suffix}`)
+            :
+              $('<span>')
+          )
+          .text(sel.val()|0 ? sel.find(':selected').text() : '')
         );
 
       }
@@ -154,10 +158,10 @@
     let re;
     for (re of rowEditors.get()) {
       let ed = new RowEditor($(re));
-      ed.modal.on('hidden.bs.modal show.bs.modal', () => {
+      ed.modal.on('show.bs.modal', () => {
         ed.syncForm();
       });
     }
-    
+
   });
 </script>

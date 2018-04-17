@@ -47,7 +47,13 @@
 {% type_agent_association_type as t_agent_assoc_type %}
 <div class="container">
     <legend>{% trans "Maintain Associations for" %} {{ agent.name }} </legend>
-
+    {% for form in has_associates_formset %}
+      {% with index=forloop.counter0 %}
+        <span class="row-editor" data-table="has-assoc" data-index="{{ index }}">
+          {% form_dialog dialog_id="edit-has-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" %}
+        </span>
+      {% endwith %}
+    {% endfor %}
 
     <form method="POST" action=".">
         {% csrf_token %}
@@ -64,7 +70,7 @@
         <h3 class="hdg">{{ agent.nick }} {% trans "has these associates" %}: </h3>
         {{ has_associates_formset.management_form }}
         {# changing the form fields to the corresponding field values, adding a column of edit buttons #}
-        <table class="table table-bordered table-condensed table-hover">
+        <table id="has-assoc" class="table table-bordered table-condensed table-hover">
             <thead>
                 <tr class="headings">
                     <th>{% trans "Edit" %}</th>
@@ -77,18 +83,19 @@
             </thead>
             <tbody>
             {% for form in has_associates_formset %}
-
+                {% with index=forloop.counter0 %}
                 {{ form.id }}
                 <tr>
 
-                    <td><a href="#" data-target="#edit-modal-{{form.instance.id}}" role="button" class="btn" data-toggle="modal">Edit</a></td>
-                    <td class="association-type-name">{{ form.instance.association_type.name }}</td>
-                    <td class="associate-nick">{{ form.instance.is_associate.nick }}</td>
-                    <td class="description">{{ form.instance.description|urlize|linebreaks }}</td>
+                    <td><a href="#edit-modal-{{index}}" role="button" class="btn" data-toggle="modal">Edit</a></td>
+                    <td class="association_type" data-override="model">{{ form.instance.association_type.name }}</td>
+                    <td class="is_associate" data-override="model" data-prefix="/accounting/agent">{{ form.instance.is_associate.nick }}</td>
+                    <td class="description" data-override="p">{{ form.instance.description|urlize|linebreaks }}</td>
                     <td class="state">{{ form.instance.state }}</td>
                     <td>{{ form.DELETE }}</td>
-                    {% form_dialog dialog_id="edit-modal-"|add:form.instance.id method="dialog" action="#" form=form title="Edit Association" %}
+
                 </tr>
+                {% endwith %}
             {% endfor %}
             </tbody>
         </table>
@@ -140,7 +147,7 @@
 
 {% block extra_body %}
     {{ block.super }}
-
+    {% include "_editable.html" %}
     <script type="text/javascript">
 
     $(document).ready(function(){
@@ -155,23 +162,7 @@
             $( "#help" ).text("Show Help");
         })
 
-        /* New JS to bind the table data to the edit dialogs */
-        $("tr.has-associate form").submit(function () {
-          const me = $(this),
-            row = me.closest("tr"),
-            dlgType = $(this.association_type),
-            dlgAgent = $(this.is_associate),
-            dlgDesc = $(this.description),
-            dlgState = $(this.state),
-            rowType = row.find(".association-type-name"),
-            rowAgent = row.find(".associate-nick"),
-            rowDesc = row.find(".description"),
-            rowState - row.find(".state");
-          rowType.text(dlgType.find("[selected]").text());
-          rowAgent.text(dlgType.find("[selected]").text());
-          rowDesc.text(dlgDesc.val());
-          rowState.text(dlgState.val());
-        })
+
 
     }); // end document.ready
 
