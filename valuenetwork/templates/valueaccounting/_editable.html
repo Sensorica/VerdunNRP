@@ -29,17 +29,25 @@
       constructor(el) {
         this.$ = el;
         this.fields = new Set;
+
         let fld;
         for (fld of el.find(':input').get()) {
           const ctl = $(fld);
-          if (ctl.attr('type') !== 'submit') {
+
+          if (ctl.is(':submit')) {
+
             ctl.on('click', () => this.syncTbl())
+
           } else if (ctl.attr('id') && ctl.attr('id').endsWith('-DELETE')) {
+
             el.find('form').find('div.control-group').has(fld).remove();
-          } else if (!ctl.is('button')) {
+
+          } else if (!ctl.is(':button')) {
+
             const rf = new RowField(this, ctl);
             this.fields.add(rf);
             rf.install();
+
           }
         }
       }
@@ -78,7 +86,7 @@
         this.pyName = /^(?:[^-]*-)*([^-]*)$/.exec(el.attr('name'))[1];
       }
       wrapVal() {
-        throw new Error(`wrapVal not assigned on ${this.pyName} with elements ${this.$}`);
+        throw new Error(`wrapVal not assigned on ${this.pyName} with elements ${''+this.$}`);
       }
       install() {
         const td = this.td;
