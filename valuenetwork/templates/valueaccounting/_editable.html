@@ -42,7 +42,7 @@
 
             el.find('form').find('div.control-group').has(fld).remove();
 
-          } else if (!ctl.is(':button')) {
+          } else if (!ctl.is(':button,[type=hidden]')) {
 
             const rf = new RowField(this, ctl);
             this.fields.add(rf);
@@ -86,7 +86,7 @@
         this.pyName = /^(?:[^-]*-)*([^-]*)$/.exec(el.attr('name'))[1];
       }
       wrapVal() {
-        throw new Error(`wrapVal not assigned on ${this.pyName} with elements ${''+this.$}`);
+        throw new Error(`wrapVal not assigned on ${this.pyName} with elements:${this.$.get().map(e => `${e.tagName}.${e.className.split(' ').join('.')}#${e.id}:${e.type}`}`);
       }
       install() {
         const td = this.td;
