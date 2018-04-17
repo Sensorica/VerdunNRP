@@ -5,6 +5,7 @@ Bob Haugen
 Lynn Foster
 Seth Horne
 Thierry Marianne
+David Hand
 
 Ideas, testing, issue and bug reporting
 =======================================
