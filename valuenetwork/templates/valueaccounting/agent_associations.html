@@ -48,7 +48,7 @@
 <div class="container">
     <legend>{% trans "Maintain Associations for" %} {{ agent.name }} </legend>
     {% for form in has_associates_formset %}
-      {% with index=forloop.counter0 %}
+      {% with index=forloop.counter0|tr %}
         <span class="row-editor" data-table="has-assoc" data-index="{{ index }}">
           {% form_dialog dialog_id="edit-has-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" %}
         </span>
