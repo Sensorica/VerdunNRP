@@ -34,7 +34,7 @@
         for (fld of el.find(':input').get()) {
           const ctl = $(fld);
 
-          if (ctl.is(':submit')) {
+          if (ctl.is(':submit') && !ctl.is('.cancel')) {
 
             ctl.on('click', (ev) => {
               this.syncTbl();
