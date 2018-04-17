@@ -87,7 +87,7 @@
                 {{ form.id }}
                 <tr>
 
-                    <td><a data-target="#edit-modal-{{index}}" role="button" class="btn btn-large" data-toggle="modal">Edit</a></td>
+                    <td><a href="#edit-has-modal-{{index}}" role="button" class="btn btn-large" data-toggle="modal">Edit</a></td>
                     <td class="association_type" data-override="model">{{ form.instance.association_type.name }}</td>
                     <td class="is_associate" data-override="model" data-prefix="/accounting/agent">{{ form.instance.is_associate.nick }}</td>
                     <td class="description" data-override="p">{{ form.instance.description|urlize|linebreaks }}</td>
