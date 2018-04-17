@@ -128,7 +128,7 @@
       syncForm() {
         const td = this.td,
           form = this.editor.form,
-          hiddenFld = t.find(':input'),
+          hiddenFld = td.find(':input'),
           formFld = form.find(`:input[name=${hiddenFld.attr('name')}]`);
         formFld.val(hiddenFld.val());
       }
