@@ -43,6 +43,7 @@
               } else if (typeof ev.preventDefault == 'function') {
                 ev.preventDefault();
               }
+              this.modal.modal('hide');
             });
 
           } else if (ctl.attr('id') && ctl.attr('id').endsWith('-DELETE')) {
