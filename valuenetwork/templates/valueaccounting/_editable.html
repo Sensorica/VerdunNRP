@@ -175,7 +175,7 @@
       let ed = new RowEditor($(re));
       ed.modal.on('show.bs.modal hidden.bs.modal', () => {
         ed.syncForm();
-      });
+      }).on('shown.bs.modal', () => ed.modal.focus());
     }
 
   });
