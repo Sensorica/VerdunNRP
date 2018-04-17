@@ -50,6 +50,9 @@
 
           }
         }
+
+        // enctype=multipart/form-data mutates the form to method=GET
+        this.form.removeAttr('enctype');
       }
       syncTbl() {
         let field;
