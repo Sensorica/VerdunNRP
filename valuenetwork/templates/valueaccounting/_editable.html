@@ -5,7 +5,7 @@
 {# add a class to each td of the table that corresponds to the python name of the field #}
 {# only include the form.id in the tr.  name the table, wrap #}
 <style type="text/css">
-  td > input:not(.delete), td > select, td > textarea {
+  .cell-hidden-control {
     display: none;
   }
 </style>
@@ -92,10 +92,12 @@
         const td = this.td;
 
         if (this.$.attr('id') && td.find(':input').size() === 0) {
+
+          td.empty();
           const el = this.$.clone(true);
           this.$.removeAttr('id');
           $('<span>').addClass('cell-sync-value').appendTo(td);
-          td.append(el);
+          $('<span>').addClass('cell-hidden-control').appendTo(td).append(el)
 
           const data = td.data();
           if (data && data.override) {
@@ -103,6 +105,7 @@
           } else {
             this.wrapVal = this.simple();
           }
+
         }
 
         this.syncTbl();
@@ -114,7 +117,7 @@
       syncTbl() {
         const tr = this.editor.tr,
           form = this.editor.form,
-          hiddenFld = tr.find(`td.${this.pyName} > :input`),
+          hiddenFld = tr.find(`td.${this.pyName} :input`),
           sourceFld = form.find(`:input[name=${hiddenFld.attr('name')}]`),
           span = hiddenFld.closest('td').find('span.cell-sync-value'),
           val = sourceFld.val();
