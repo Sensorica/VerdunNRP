@@ -36,7 +36,14 @@
 
           if (ctl.is(':submit')) {
 
-            ctl.on('click', () => this.syncTbl())
+            ctl.on('click', (ev) => {
+              this.syncTbl();
+              if ('defaultPrevented' in ev) {
+                ev.defaultPrevented = true;
+              } else if (typeof ev.preventDefault == 'function') {
+                ev.preventDefault();
+              }
+            });
 
           } else if (ctl.attr('id') && ctl.attr('id').endsWith('-DELETE')) {
 

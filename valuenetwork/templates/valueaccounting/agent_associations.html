@@ -47,6 +47,7 @@
 {% type_agent_association_type as t_agent_assoc_type %}
 <div class="container">
     <legend>{% trans "Maintain Associations for" %} {{ agent.name }} </legend>
+
     {% for form in has_associates_formset %}
       {% with index=forloop.counter0|ts %}
         <span class="row-editor" data-table="has-assoc" data-index="{{ index }}">
