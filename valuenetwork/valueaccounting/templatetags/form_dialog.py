@@ -14,12 +14,13 @@ def form_dialog(
     label_id=None,
     form_id=None
 ):
+
     if not label_id:
         label_id = 'label-for-%s' % (dialog_id,)
     if not form_id:
         form_id = 'form-for-%s' % (dialog_id,)
 
-    return {
+    raise Exception({
         'dialog_id': dialog_id,
         'action': action,
         'form': form,
@@ -29,4 +30,4 @@ def form_dialog(
         'formset': formset,
         'label_id': label_id,
         'form_id': form_id
-    }
+    })
