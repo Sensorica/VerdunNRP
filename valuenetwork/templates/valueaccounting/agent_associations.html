@@ -56,6 +56,14 @@
       {% endwith %}
     {% endfor %}
 
+    {% for form in is_associates_formset %}
+      {% with index=forloop.counter0|ts %}
+        <span class="row-editor" data-table="is-assoc" data-index="{{ index }}">
+          {% form_dialog dialog_id="edit-is-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" %}
+        </span>
+      {% endwith %}
+    {% endfor %}
+
     <form method="POST" action=".">
         {% csrf_token %}
 
@@ -103,10 +111,11 @@
 
         <h3 class="hdg">{{ agent.nick }} {% trans "is associated with" %}: </h3>
         {{ is_associates_formset.management_form }}
-        <table class="table table-bordered table-condensed table-hover">
+        <table id="is-assoc" class="table table-bordered table-condensed table-hover">
             <thead>
                 <tr class="headings">
-                    <th>{% trans "Association Type" %}</th>
+                    <th>Edit</th>
+                    <th>{{ t_agent_assoc_type|tr|title }}</th>
                     <th>{% trans "Associated Agent" %}</th>
                     <th>{% trans "Description of association" %}</th>
                     <th>{% trans "Active?" %}</th>
@@ -115,14 +124,17 @@
             </thead>
             <tbody>
             {% for form in is_associates_formset %}
+              {% with index=forloop.counter0 %}
                 {{ form.id }}
                 <tr>
-                    <td>{{ form.association_type }}</td>
-                    <td>{{ form.has_associate }}</td>
-                    <td>{{ form.description }}</td>
-                    <td>{{ form.state }}</td>
+                    <td><a href="#edit-is-modal-{{ index }}" class="btn btn-large" role="button" data-toggle="modal">Edit</a></td>
+                    <td class="association_type" data-override="model">{{ form.instance.association_type.name }}</td>
+                    <td class="has_associate" data-override="model" data-prefix="/accounting/agent">{{ form.instance.has_associate.nick }}</td>
+                    <td class="description" data-override="p">{{ form.instance.description|urlize|linebreaks }}</td>
+                    <td class="state">{{ form.instance.state }}</td>
                     <td>{{ form.DELETE }}</td>
                 </tr>
+              {% endwith %}
             {% endfor %}
             </tbody>
         </table>
