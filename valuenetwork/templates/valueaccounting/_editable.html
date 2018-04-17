@@ -163,7 +163,7 @@
 
       }
       p(data) {
-        return (fld) => $(fld.val().split('\n').map(t => $('<p>').text(t)));
+        return (fld) => $(fld.val().split('\n').map(t => $('<p>').text(t)).reduce(((el, span) => span.append(el)), $('<span>')));
       }
     }
     const rowEditors = $('span.row-editor');
