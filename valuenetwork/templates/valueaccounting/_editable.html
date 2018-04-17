@@ -80,7 +80,7 @@
       install() {
         const td = this.td;
 
-        if (this.$.hasAttr('id') && td.find(':input').size() === 0) {
+        if (this.$.attr('id') && td.find(':input').size() === 0) {
           const el = this.$.clone(true);
           this.$.removeAttr('id');
           $('<span>').addClass('cell-sync-value').appendTo(td);
