@@ -3,6 +3,9 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load form_dialog %}
+{% load chair_tag %}
+{% load types %}
 
 {% block head_title %}{% trans "Contributions from " %} {{ agent }}{% endblock %}
 
@@ -13,7 +16,7 @@
 
 <style>
 
-	tr.even td 
+	tr.even td
 	{
 		color:#000000;
 		background-color:#EAF2D3;
@@ -35,6 +38,9 @@
 {% block body_class %}projects{% endblock %}
 
 {% block body_base %}
+{% type_event as t_ev %}
+{% type_event_type as t_ev_type %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
@@ -47,7 +53,7 @@
         <div>
             <form id="filterForm" action="." method="POST" style="display: inline;" >
                 {% csrf_token %}
-                <div id="div_id_start_date" class="control-group" style="display: inline;" >     
+                <div id="div_id_start_date" class="control-group" style="display: inline;" >
                     <label for="id_start_date" class="control-label required-field" style="display: inline;" >
                         {% trans "Show contributions from " %}
                     </label>
@@ -55,7 +61,7 @@
                         {{ filter_form.start_date }}
                     </div>
                 </div>
-                <div id="div_id_end_date" class="control-group" style="display: inline;" >     
+                <div id="div_id_end_date" class="control-group" style="display: inline;" >
                     <label for="id_end_date" class="control-label required-field" style="display: inline;" >
                         {% trans " through " %}
                     </label>
@@ -65,71 +71,96 @@
                 </div>
                 <div id="div_id_event_types" class="control-group" style="display: inline;" >
                     <label for="id_event_types" class="control-label" style="display: inline;" >
-                        {% trans "Event Types" %}
+                        {{ t_ev_type|s|tr|title }}
                     </label>
                     <div class="controls" style="display: inline; vertical-align: bottom;" >
                         {{ filter_form.event_types }}
-                    </div>                    
+                    </div>
                 </div>&nbsp;
                 <input type="submit" name="submit" class="btn btn-info" style="display: inline;" value="{% trans 'Filter' %}" />
             </form>
             {% if event_ids and agent %}
-                <a 
-                    href=" {% url contribution_events_csv %}?event-ids={{ event_ids }}" 
-                    id="btn-export" 
-                    class="btn btn-primary" 
-                    title="Export filtered list to csv (comma separated value) format" 
+                <a
+                    href=" {% url contribution_events_csv %}?event-ids={{ event_ids }}"
+                    id="btn-export"
+                    class="btn btn-primary"
+                    title="Export filtered list to csv (comma separated value) format"
                     style="display: inline; vertical-align: middle;"
                     >{% trans "Export CSV File" %}
                 </a>
             {% endif %}
-        
+
         </div>
-        
-		
+
+
 		{% if user_is_agent %}
-            <p>
-                {% trans "You can change date or qty inline and it will be automatically saved." %} <span id="saving"></span>
+				{% comment %}
+						<p>
+                {% trans "You can change date or qty inline and it will be automatically saved." %} {# no you can't #}
             </p>
+				{% endcomment %}
+				<span id="saving"></span>
+				{% for event in events %}
+					{% with index=forloop.counter0|ts %}
+						<span class="row-edit" data-table="events" data-index="{{ index }}" data-save-to="/accounting/change-event/{{ event.id }}/">
+							{% form_dialog dialog_id="event-edit-"|add:index form=event.change_form title="Edit"|sp:t_ev|tr|title action="#" method="dialog" %}
+						</span>
+					{% endwith %}
+				{% endfor %}
 	    {% endif %}
-		<table class="table table-bordered table-hover table-condensed" >
+		<table class="table table-bordered table-hover table-condensed" id="events">
 			<thead>
+				{% if user_is_agent %}
+					<th>{% trans "Edit" %}</th>
+				{% endif %}
 				<th>{% trans "Date" %}</th>
-				<th>{% trans "Type" %}</th>
+				<th>{{ t_ev_type|tr|title }}</th>
 				<th>{% trans "Project" %}</th>
-				<th>{% trans "Resource Type" %}</th>
+				<th>{{ t_res_type|tr|title }}</th>
 				<th>{% trans "Qty" %}</th>
 				<th>{% trans "URL" %}</th>
 				<th>{% trans "Description" %}</th>
 				<th>{% trans "Process" %}</th>
 				<th>{% trans "Deliverables" %}</th>
 				{% if user_is_agent %}
-                    <th>&nbsp;</th>
-                {% endif %}
+            <th>Delete</th>
+        {% endif %}
 			</thead>
-			<tbody>	
-				{% for event in events %}
+			<tbody>
+				{% for event in events %}{% with index=forloop.counter0 %}
 					<tr class="{% cycle 'odd' 'even' %}">
-						<td>
-                            {% if user_is_agent %}
-						    <form class="eventDateForm" id="eventDateForm-{{ event.id }}" >
+						{% if user_is_agent %}
+							<td>
+								<a data-toggle="modal" href="#event-edit-{{ index }}"><i class="icon-edit icon-white"/></a>
+							</td>
+						{% endif %}
+						<td class="event_date" data-override="datepicker" data-format="yy-mm-dd">
+							{% comment %}{# no #}
+							{% if user_is_agent %}
+
+								<form class="eventDateForm" id="eventDateForm-{{ event.id }}" >
 								{% csrf_token %}
 								{% with event.change_date_form as form %}
 								    {{ form.id }}
 								    {{ form.event_date }}
 							    {% endwith %}
-							</form>
+								</form>
+
+
 							{% else %}
-                                {{ event.event_date }}
+                {{ event.event_date }}
 							{% endif %}
+							{% endcomment %}
+							{{ event.event_date }}
 						</td>
-						<td>{{ event.event_type }}</td>
-						<td>{{ event.context_agent }}</td>
-						<td>{{ event.resource_type }}</td>
+						<td class="event_type" data-override="model">{{ event.event_type }}</td>
+						<td class="context_agent" data-override="model" data-prefix="/accounting/agent">{{ event.context_agent }}</td>
+						<td class="resource_type" data-override="model" data-prefix="/accounting/resource-type">{{ event.resource_type }}</td>
 						{% comment %}
 						<td style="text-align: right;" >{{ event.quantity_formatted }}</td>
 						{% endcomment %}
-						<td style="white-space:nowrap;" >
+						<td style="white-space:nowrap;" class="quantity" data-override="add" data-suffix="{{ event.unit_of_quantity }}">
+							{% comment %}{# no #}
                             {% if user_is_agent %}
 						    <form class="eventQtyForm" id="eventQtyForm-{{ event.id }}" >
 								{% csrf_token %}
@@ -141,39 +172,47 @@
 							{% else %}
                                 {{ event.quantity }} {{ event.unit_of_quantity.abbrev }}
                             {% endif %}
+							{% endcomment %}
+							{{ event.quantity }}{{ event.unit_of_quantity }}
 						</td>
-						<td>
+						<td class="url" data-override="a">
 							{% if event.url %}
 								<a href="{{ event.url }}" target="_blank">Open</a>
 							{% endif %}
 						</td>
-						<td>{% if event.description %}{{ event.description|urlize }}
-                            {% else %} {{ event.commitment.description|urlize }} {% endif %}
-                       </td>
-						<td>
+						<td class="description" data-override="p" data-fallback="{{ event.commitment.description }}">
+							{% if event.description %}
+								{{ event.description|urlize }}
+              {% else %}
+								{{ event.commitment.description|urlize }}
+							{% endif %}
+            </td>
+						<td class="process" data-override="model" data-prefix="/accounting/process">
 							{% if event.process %}
 								<a href="{{ event.process.get_absolute_url }}" target="_blank">{{ event.process.name }}</a>
 							{% endif %}
 						</td>
-						<td>
+						<td class="process-deliverables" data-override="json" data-prefix="accounting/json-process-deliverables" data-pyname="process">
 						    {% for d in event.process.deliverables %}
-						        <a href="{% url resource resource_id=d.id %}">{{ d }}</a></br >
-					        {% endfor %}
+						      <a href="{% url resource resource_id=d.id %}">{{ d }}</a></br >
+					      {% endfor %}
 					    </td>
 					    {% if user_is_agent %}
                             <td>
+																{% comment %}{# moved to top #}
                                 <form
-                                    class="change-form" 
-                                    id="changeForm{{ event.id }}" 
-                                    action="{% url change_event event_id=event.id %}" 
+                                    class="change-form"
+                                    id="changeForm{{ event.id }}"
+                                    action="{% url change_event event_id=event.id %}"
                                     method="GET" >
                                     <input type='hidden' class="page" id='changePage{{ event.id }}' name='page' value='' />
                                     <button class="btn btn-info btn-mini" title="Change" ><i class="icon-edit icon-white"></button>
                                 </form>
+																{% endcomment %}
                                 <form
-                                    class="delete-form" 
-                                    id="deleteForm{{ event.id }}" 
-                                    action="{% url delete_event event_id=event.id %}" 
+                                    class="delete-form"
+                                    id="deleteForm{{ event.id }}"
+                                    action="{% url delete_event event_id=event.id %}"
                                     method="POST" >
                                     {% csrf_token %}
                                     <input type='hidden' class="page" id='deletePage{{ event.id }}' name='page' value='' />
@@ -183,8 +222,8 @@
                             </td>
 					    {% endif %}
 					</tr>
-				{% endfor %}
-			<tbody>	
+				{% endwith %}{% endfor %}
+			</tbody>
 		</table>
 <div class="pagination">
     <span class="step-links">
@@ -213,7 +252,7 @@
 
 {% block extra_body %}
 	{{ block.super }}
-
+{% include "valueaccounting/_editable.html" %}
 <script type="text/javascript">
 
     $(document).ready(function(){
@@ -242,26 +281,26 @@
         });
 
         $("select").chosen();
-        
+				/* No.
         $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
         $('.filter-date').datepicker({ dateFormat: "yy-mm-dd" });
 
         $('.date-entry').change(saveDate);
         $('.quantity').change(saveQuantity);
-
-        jQuery.validator.setDefaults({ 
+				/**/
+        jQuery.validator.setDefaults({
             success: function(label) {
 		        label
 			        .text('').addClass('valid')
 			        .closest('.control-group').addClass('success');
 	        }
         });
-
+				{% comment %}{# no. #}
         {% for event in events %}
             $("#eventDateForm-{{ event.id }}").validate({
 			    rules: {
 				    "{{ event.id }}-event_date": {
-					    required: true, 
+					    required: true,
                         date: true
 				    }
 			    },
@@ -272,8 +311,8 @@
 		    $("#eventQtyForm-{{ event.id }}").validate({
 			    rules: {
 				    "{{ event.id }}-quantity": {
-					    required: true, 
-                        number: true, 
+					    required: true,
+                        number: true,
                         max: 999999.99
 				    }
 			    },
@@ -282,25 +321,25 @@
 			    }
 		    });
 		{% endfor %}
-
+		{% endcomment %}
 
     }); // end document.ready
 
     function notifySaving()
 	{
-		$("#saving").css("color","green"); 
+		$("#saving").css("color","green");
 		$("#saving").text("Saving...");
 	}
 
 	function notifySaved()
 	{
-		$("#saving").css("color","green"); 
+		$("#saving").css("color","green");
 		$("#saving").text("Saved");
 	}
 
 	function notifyProblem()
 	{
-		$("#saving").css("color","red"); 
+		$("#saving").css("color","red");
 		$("#saving").text("Problem saving");
 	}
 
@@ -312,7 +351,7 @@
         var formData = $(formId).serialize();
         var eventId = "&eventId=" + eventId;
         formData += eventId;
-        
+
         var url = "{%url change_event_date %}";
 
         notifySaving();
@@ -321,9 +360,9 @@
             function( data ) {
                 notifySaved();
             })
-            .fail(function() 
-            { 
-                notifyProblem(); 
+            .fail(function()
+            {
+                notifyProblem();
             }
         );
     }
@@ -332,11 +371,11 @@
     {
         var field = event.target;
         var formId = "#" + field.form.id;
-        eventId = formId.split("-")[1];
+        var eventId = formId.split("-")[1];
         var formData = $(formId).serialize();
-        var eventId = "&eventId=" + eventId;
+        eventId = "&eventId=" + eventId;
 		formData += eventId;
-        
+
         var url = "{%url change_event_qty %}";
 
 		notifySaving();
@@ -345,26 +384,26 @@
 			function( data ) {
 				notifySaved();
 			})
-			.fail(function() 
-			{ 
-				notifyProblem(); 
+			.fail(function()
+			{
+				notifyProblem();
 			}
 		);
     }
 
-	$(document).ajaxSend(function(event, xhr, settings) 
+	$(document).ajaxSend(function(event, xhr, settings)
 	{
-		function getCookie(name) 
+		function getCookie(name)
 		{
 		    var cookieValue = null;
-		    if (document.cookie && document.cookie != '') 
+		    if (document.cookie && document.cookie != '')
 			{
 		        var cookies = document.cookie.split(';');
-		        for (var i = 0; i < cookies.length; i++) 
+		        for (var i = 0; i < cookies.length; i++)
 				{
 		            var cookie = jQuery.trim(cookies[i]);
 		            // Does this cookie string begin with the name we want?
-		            if (cookie.substring(0, name.length + 1) == (name + '=')) 
+		            if (cookie.substring(0, name.length + 1) == (name + '='))
 					{
 		                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
 		                break;
@@ -374,7 +413,7 @@
 		    return cookieValue;
     	}
 
-		function sameOrigin(url) 
+		function sameOrigin(url)
 		{
 		    // url could be relative or scheme relative or absolute
 		    var host = document.location.host; // host + port
@@ -388,12 +427,12 @@
 		        !(/^(\/\/|http:|https:).*/.test(url));
 		}
 
-		function safeMethod(method) 
+		function safeMethod(method)
 		{
 		    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 		}
 
-		if (!safeMethod(settings.type) && sameOrigin(settings.url)) 
+		if (!safeMethod(settings.type) && sameOrigin(settings.url))
 		{
 		    xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
 		}

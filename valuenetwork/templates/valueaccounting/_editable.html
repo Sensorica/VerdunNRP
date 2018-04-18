@@ -3,7 +3,7 @@
 {# wrapped in span.row-editor.  The span should have data attributes table=table id #}
 {# and index=0-based index #}
 {# add a class to each td of the table that corresponds to the python name of the field #}
-{# only include the form.id in the tr.  name the table, wrap #}
+{# only include the form.id in the tr.  name the table #}
 <style type="text/css">
   .cell-hidden-control {
     display: none;
@@ -28,7 +28,7 @@
     class RowEditor {
       constructor(el) {
         this.$ = el;
-        this.fields = new Set;
+        this.fields = new Map;
 
         let fld;
         for (fld of el.find(':input').get()) {
@@ -37,14 +37,17 @@
           if (ctl.is(':submit') && !ctl.is('.cancel')) {
 
             ctl.on('click', (ev) => {
-              this.syncTbl();
+              this.save()
+              //this.syncTbl();
               if ('defaultPrevented' in ev) {
                 ev.defaultPrevented = true;
               } else if (typeof ev.preventDefault == 'function') {
                 ev.preventDefault();
               }
-              this.modal.modal('hide');
+              //this.modal.modal('hide');
             });
+
+
 
           } else if (ctl.attr('id') && ctl.attr('id').endsWith('-DELETE')) {
 
@@ -53,14 +56,26 @@
           } else if (!ctl.is(':button,[type=hidden]')) {
 
             const rf = new RowField(this, ctl);
-            this.fields.add(rf);
             rf.install();
+            this.fields.set(rf.pyName, rf);
 
           }
         }
 
         // enctype=multipart/form-data mutates the form to method=GET
         this.form.removeAttr('enctype');
+        // hopefully this doesn't screw up the async save
+
+      }
+      save() {
+        this.syncTbl();
+        this.modal.modal('hide');
+
+        const saveToUrl = this.saveTo;
+        if (saveToUrl) {
+          let data = this.form.serialize();
+          new Saving($('#saving')).save(data, saveToUrl);
+        }
       }
       syncTbl() {
         let field;
@@ -74,11 +89,14 @@
           field.syncForm();
         }
       }
+      get saveTo() {
+        return this.$.data('saveTo');
+      }
       get index() {
-        return 0|this.$.data('index')
+        return 0|this.$.data('index');
       }
       get table() {
-        return $(`table#${this.$.data('table')}`)
+        return $(`table#${this.$.data('table')}`);
       }
       get tr() {
         return this.table.find('tbody').find('tr').eq(this.index);
@@ -104,11 +122,7 @@
 
         if (this.$.attr('id') && td.find(':input').size() === 0) {
 
-          td.empty();
-          const el = this.$.clone(true);
-          this.$.removeAttr('id');
-          $('<span>').addClass('cell-sync-value').appendTo(td);
-          $('<span>').addClass('cell-hidden-control').appendTo(td).append(el)
+
 
           const data = td.data();
           if (data && data.override) {
@@ -117,6 +131,11 @@
             this.wrapVal = this.simple();
           }
 
+          td.empty();
+          const el = this.$.clone(true);
+          this.$.removeAttr('id');
+          $('<span>').addClass('cell-sync-value').appendTo(td);
+          $('<span>').addClass('cell-hidden-control').appendTo(td).append(el);
         }
 
         this.syncTbl();
@@ -179,7 +198,42 @@
       p(data) {
         return (fld) => $(fld.val().split('\n').map(t => $('<p>').text(t)).reduce(((el, span) => span.append(el)), $('<span>')));
       }
+      datepicker(data) {
+        this.$.datepicker({ dateFormat: data.format || 'yy-mm-dd' });
+        return this.simple(data);
+      }
     }
+
+    class Saving {
+      constructor(el) {
+        this.$ = el;
+      }
+      save(data, url) {
+        try {
+          $.post(url, data, () => {
+            this.saved();
+          }).fail(() => {
+            this.failed()
+          });
+          this.saving();
+        } catch (e) {
+          this.error(e);
+        }
+      }
+      saving() {
+        this.$.text('Saving...').css({color: 'green'});
+      }
+      saved() {
+        this.$.text('Saved').css({color: 'green'});
+      }
+      failed() {
+        this.$.text('Problem saving!').css({color: 'red'});
+      }
+      error(e) {
+        this.$.text(`Failed to save: ${''+e}`).css({color: 'red'});
+      }
+    }
+
     const rowEditors = $('span.row-editor');
     let re;
     for (re of rowEditors.get()) {
