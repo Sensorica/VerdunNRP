@@ -6157,7 +6157,8 @@ class Process(models.Model):
             quality__gte=0)
 
     def deliverables(self):
-        return [output.resource for output in self.outputs() if output.resource]
+        return EconomicResource.objects.filter(id__in=(output.resource for output in self.outputs() if output.resource))
+        #[output.resource for output in self.outputs() if output.resource]
 
     def failed_outputs(self):
         return self.events.filter(

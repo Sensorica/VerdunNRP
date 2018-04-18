@@ -1487,10 +1487,11 @@ class InputEventForm(forms.ModelForm):
     description = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
+    id = forms.HiddenField()
 
     class Meta:
         model = EconomicEvent
-        fields = ('event_date', 'quantity', 'description')
+        fields = ('event_date', 'quantity', 'description', 'id')
 
     def __init__(self, qty_help=None, *args, **kwargs):
         super(InputEventForm, self).__init__(*args, **kwargs)
