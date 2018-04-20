@@ -1558,9 +1558,15 @@ def agent_associations(request, agent_id):
         "help": get_help("associations"),
     }, context_instance=RequestContext(request))
 
+def json_process_deliverables(request, process_id):
+    process = get_object_or_404(Process, process_id)
+    deliverables = process.deliverables()
+    json = serializers.serialize("json", deliverables)
+    return HttpResponse(json, mimetype='application/json', fields=('id', 'url'))
+
 def json_resource_type_resources(request, resource_type_id):
     #import pdb; pdb.set_trace()
-    json = serializers.serialize("json", EconomicResource.objects.filter(resource_type=resource_type_id), fields=('identifier'))
+    json = serializers.serialize("json", EconomicResource.objects.filter(resource_type=resource_type_id), fields=('identifier',))
     return HttpResponse(json, mimetype='application/json')
 
 def json_resource_type_stages(request, resource_type_id):

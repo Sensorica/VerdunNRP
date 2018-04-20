@@ -1487,7 +1487,7 @@ class InputEventForm(forms.ModelForm):
     description = forms.CharField(
         required=False,
         widget=forms.Textarea(attrs={'class': 'input-xxlarge',}))
-    id = forms.HiddenField()
+    id = forms.IntegerField(widget=forms.HiddenInput)
 
     class Meta:
         model = EconomicEvent
