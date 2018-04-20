@@ -91,7 +91,10 @@ div.logical-only {
             	{{ create_formset.management_form }}
 							<ul> {{ t_facet|s|tr|title }}
 								{% for form in create_formset %}
-									<li>{{ form.facet_id }}{% chair form.facet_name form.value %}</li>
+									<li>{{ form.facet_id }}
+										<div class="facet-name">{{ form.facet_name }}</div>
+										<div>{{ form.value }}</div>
+									</li>
 								{% endfor %}
 							</ul>
 							{% comment %}
