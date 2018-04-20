@@ -131,7 +131,7 @@
 
         // enctype=multipart/form-data mutates the form to method=GET
         this.form.removeAttr('enctype');
-        // hopefully this doesn't screw up the async save
+        // hopefully this doesn't screw up the async save.  Appears to be necessary...
 
         this.owner = EdiTable.add(this);
       }
@@ -242,11 +242,15 @@
         return fn.call(this, data);
       }
       simple(data) {
-        return this.add(data); //(fld) => $('<span>').text(fld.val());
+        if (data && (data.prefix || data.suffix)) {
+          return this.add(data);
+        } else {
+          return (fld) => $('<span>').text(fld.val());
+        }
       }
       duration(data) {
         return () => {
-          let hrs = 0+this.td.find('.hours').val(),
+          const hrs = 0+this.td.find('.hours').val(),
             mins = 0+this.td.find('.minutes').val();
           return $('<span>').text(''+(hrs + mins/60).toFixed(2));
         };
