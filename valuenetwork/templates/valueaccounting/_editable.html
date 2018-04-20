@@ -147,13 +147,13 @@
       }
       syncTbl() {
         let field;
-        for (field of this.fields) {
+        for (field of this.fields.values()) {
           field.syncTbl();
         }
       }
       syncForm() {
         let field;
-        for (field of this.fields) {
+        for (field of this.fields.values()) {
           field.syncForm();
         }
       }
