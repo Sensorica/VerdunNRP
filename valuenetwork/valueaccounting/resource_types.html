@@ -1,0 +1,327 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+{% load thumbnail %}
+{% load chair_tag %}
+{% load types %}
+
+
+
+{% block head_title %}
+{% type_resource_type as t_res_type %}
+{{ t_res_type|s|tr|title }}{% endblock %}
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.9.2/themes/base/jquery-ui.css" />
+{% block extra_head %}
+
+<style>
+
+.name {
+	font-size: 1.3em;
+	font-weight: bold;
+}
+
+.description {
+    font-style: italic;
+}
+
+.container li {
+    margin-top: 10px;
+}
+/*ul {
+    list-style-type: none;
+}*/
+.facet {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+.facet-name {
+    padding-right: 1em;
+    text-align: right;
+}
+.facets {
+    font-weight: bold;
+}
+.modal {
+    width: 600px;
+}
+#resourceCreateForm textarea {
+  width: 500px;
+  height: 100px;
+}
+div.logical-only {
+	display: inline;
+}
+</style>
+
+{% endblock %}
+
+{% block body_class %}resource-types{% endblock %}
+
+{% block body_base %}
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
+{% type_facet_value as t_facet_val %}
+    <div class="container">
+        {% include "_messages.html" %}
+	<div class="row-fluid">
+		<div class="span9">
+
+			<legend>
+                {{ t_res_type|title|s|tr }}&nbsp;&nbsp;&nbsp;
+                <a href="{% url resource_type_lists %}">{% trans t_res_type|title|add:" Lists" %}</a>
+            </legend>
+
+			{% if user.is_authenticated %}
+				<div class="logical-only">
+					<a href="#createResourceForm" role="button" class="btn btn-primary" data-toggle="modal">{% trans "Create new "|add:t_res_type|title %}</a>
+					<br /><br />
+				</div>
+
+
+				<div class="modal hide fade" id="createResourceForm" tabindex="-1" role="dialog" aria-labelledby="resource-create-label" aria-hidden="true">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+						<h3 id="resource-create-label">{% trans "Create a new "|add:t_res_type|title %}</h3>
+					</div>
+					<div class="modal-body">
+						<form class="resource-create-form" id="resourceCreateForm" enctype="multipart/form-data" action="{% url create_resource_type %}" method="POST" >
+							{% csrf_token %}
+							{{ create_form|as_bootstrap }}
+            	{{ create_formset.management_form }}
+							<ul> {{ t_facet|s|tr|title }}
+								{% for form in create_formset %}
+									<li>{{ form.facet_id }}
+										<div>{{ form.facet_name }}</div>
+										<div>{{ form.value }}</div>
+									</li>
+								{% endfor %}
+							</ul>
+							{% comment %}
+                            <table>
+                                {% for form in create_formset %}
+                                    <tr><td class="facet-name"> {{ form.facet_name }} </td><td> {{ form.value }} {{ form.facet_id }} </td></tr>
+                                {% endfor %}
+                            </table>
+							{% endcomment %}
+							<input type="hidden" name="next" value="{% url resource_types %}" />
+
+						  <div class="modal-footer">
+							<button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
+							<button class="btn btn-primary">{% trans "Save" %}</button>
+						  </div>
+
+						</form>
+
+				    </div>
+                </div>
+			{% endif %}
+
+
+		    <ul>
+			    {% for resource_type in roots %}
+
+				    <li>
+					    <span class="name"><a href="{% url resource_type resource_type_id=resource_type.id %}">{{ resource_type }}</a></span>
+
+					    {% if resource_type.photo %}
+			                <img src="{% thumbnail resource_type.photo photo_size %}" />
+		                {% elif resource_type.photo_url %}
+                    	    <img src="{{ resource_type.photo_url }}" width="128" height="96" />
+		                {% endif %}
+
+		                {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
+		                {% if resource_type.producing_process_type_relationships %}
+		                  {% if resource_type.recipe_is_staged %}
+                            <a href="{% url view_stream_recipe resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
+
+		                  {% else %}
+			                <a href="{% url extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
+		                  {% endif %}
+                        {% endif %}
+
+                        {% if resource_type.parent or resource_type.resource_class %}
+                            <div class="parent" >
+                                {% if resource_type.parent %}
+                                    {% trans "Parent" %}:
+                                    {{ resource_type.parent }}
+                                {% endif %}
+                                {% if resource_type.parent and resource_type.resource_class %}
+                                &mdash;
+                                {% endif %}
+                                {% if resource_type.resource_class %}
+                                    {% trans "Resource class" %}:
+                                    {{ resource_type.resource_class }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+		                <div class="facets" >{{ resource_type.facet_list }}</div>
+                        {% if resource_type.description %}
+                            <div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
+                        {% endif %}
+
+			        </li>
+
+			    {% endfor %}
+		    </ul>
+		</div>
+
+		<div class="span3 filter">
+            {% include "valueaccounting/_facet_filter.html" %}
+		</div>
+
+	</div>
+    </div>
+{% endblock %}
+{% block extra_script %}
+    <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+	<script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/jquery.validate/1.10.0/jquery.validate.min.js"></script>
+{% endblock %}
+{% block extra_body %}
+	{{ block.super }}
+    <script type="text/javascript">
+
+	$(document).ready(function(){
+
+	    function html_unescape(text) {
+            // Unescape a string that was escaped using django.utils.html.escape.
+            text = text.replace(/&lt;/g, '<');
+            text = text.replace(/&gt;/g, '>');
+            text = text.replace(/&quot;/g, '"');
+            text = text.replace(/&#39;/g, "'");
+            text = text.replace(/&amp;/g, '&');
+            return text;
+        }
+
+        var nameArray = html_unescape("{{ resource_names }}").split("~");
+
+
+		$('#inventory').addClass('active');
+
+		$( "#help" ).toggle( function(){
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
+            $( "#help" ).text("Hide Help");
+        }, function() {
+            $('#help-content').hide("slide", { direction: "right" }, "slow");
+            $( "#help" ).text("Show Help");
+        })
+
+		var selectedVals = "{{ selected_values }}";
+
+		$('.category').each(function()
+		{
+			var val = $(this)[0];
+            if (selectedVals.indexOf(val.name) > -1)
+			{
+				$(this).prop('checked', true);
+			}
+		});
+
+        jQuery.validator.setDefaults({
+            success: function(label) {
+		        label
+			        .text('').addClass('valid')
+			        .closest('.control-group').addClass('success');
+	        }
+        });
+
+
+		$('.category').click(function()
+		{
+			var checkedVals = [];
+			var checkedBox = $(this)[0];
+			var allBox = $('#all')[0];
+			if (checkedBox == allBox)
+			{
+				$('.category').each(function()
+				{
+		            $(this).prop('checked', false);
+				});
+				$('#all').prop('checked', true);
+				checkedVals.push('all');
+			}
+			else
+			{
+				$('#all').prop('checked', false);
+				$('.category').each(function()
+				{
+					var val = $(this)[0];
+		            if (val.checked)
+					{
+						checkedVals.push(val.value);
+					}
+				});
+			}
+			$('#categories').prop('value', checkedVals);
+		});
+
+
+        jQuery.validator.addMethod("unique", function(value, element, param) {
+            return this.optional(element) || $.inArray(value, param) < 0; // <-- Check if the value is not in the array.
+        }, "Name is not unique.");
+
+        jQuery.validator.addMethod("quantity",
+            function(value, element) {
+                var isValidQuantity = /^\d{0,6}(\.\d{0,2})?$/.test(value);
+                return this.optional(element) || isValidQuantity;
+            },
+            "Please enter a number less than 1000000 with no more than 2 decimal places"
+        );
+
+
+		$('#resourceCreateForm').validate(
+		{
+			rules: {
+				name: {
+					required: true,
+					unique: nameArray
+				},
+				url: {
+					url: true
+				},
+				"value_per_unit": {
+					quantity: true,
+					required: true
+				},
+				"value_per_unit_of_use": {
+                    quantity: true,
+                    required: true
+                },
+                "price_per_unit": {
+                    quantity: true,
+                    required: true
+                },
+			},
+			highlight: function(label) {
+				$(label).closest('.control-group').addClass('error');
+			}
+
+		});
+
+		$('.resource-change-form').each( function(){
+			var form = $(this);
+			form.validate({
+				rules: {
+					name: {
+						required: true
+					},
+					url: {
+						url: true
+					},
+					rate: {
+						number: true
+					}
+				},
+				highlight: function(label) {
+					$(label).closest('.control-group').addClass('error');
+				}
+
+			});
+		});
+
+
+	}); // end document.ready
+
+    </script>
+{% endblock %}
