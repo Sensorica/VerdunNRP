@@ -256,8 +256,8 @@
       }
       duration(data) {
         return () => {
-          const hrs = 0+(this.td.find('.hours').val() || 0),
-            mins = 0+(this.td.find('.minutes').val() || 0);
+          const hrs = parseFloat(this.td.find('.hours').val() || '0'),
+            mins = parseFloat(this.td.find('.minutes').val() || '0');
           return $('<span>').text(''+(hrs + mins/60).toFixed(2));
         };
       }
