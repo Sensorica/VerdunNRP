@@ -49,12 +49,7 @@
      return new Set(this.instances.values());
    }
    static table(id) {
-     if (!id) {
-       let it;
-       for (it of this.instances.values()) {
-         return it;
-       }
-     }
+     if (!id) return [...this.instances.values()][0];
      return this.instances.get(id) || null;
    }
    onSave(fn) {
