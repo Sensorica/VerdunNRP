@@ -123,12 +123,12 @@
 
 				let total = 0, s;
 				for (s of col) {
-					const n = 0+s;
+					const n = parseFloat(s);
 					total += n;
 				}
 
 				$('#total').text(''+total.toFixed(2));
-			});
+			}).save();
 		});
 	</script>
     <script type="text/javascript">

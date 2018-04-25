@@ -26,6 +26,7 @@
    constructor() {
      this.rows = [];
      this.toSave = [];
+     this.table = null;
    }
    addRow(row) {
      this.rows[row.index] = row;
@@ -54,19 +55,21 @@
    }
    onSave(fn) {
      this.toSave.push(fn);
+     return this;
    }
    save(row) {
      if (row) {
        row.save();
      } else {
        for (row of this.rows) {
-         this.save(row);
+         row.save();
        }
      }
      let cb;
      for (cb of this.toSave) {
        cb(this, row);
      }
+     return this;
    }
    columns() {
      if (!this.table) return [];
@@ -100,7 +103,7 @@
 
     class RowEditor {
       constructor(el) {
-        this.$ = el;
+        this.$ = el.addClass('edi-table-row');
         this.fields = new Map;
 
         let fld;
@@ -136,7 +139,7 @@
         }
 
         // enctype=multipart/form-data mutates the form to method=GET
-        if (!this.saveTo) this.form.removeAttr('enctype');
+        this.form.removeAttr('enctype');
         // hopefully this doesn't screw up the async save.  Appears to be necessary...
 
         this.owner = EdiTable.add(this);
