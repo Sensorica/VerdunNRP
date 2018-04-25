@@ -1,4 +1,4 @@
-{# THIS IS NOT YET TESTED #}
+{# THIS IS PARTIALLY TESTED #}
 {# to use, include this template in your footer.  put your modals near the body #}
 {# wrapped in span.row-editor.  The span should have data attributes table=table id #}
 {# and index=0-based index #}
@@ -56,7 +56,13 @@
      this.toSave.push(fn);
    }
    save(row) {
-     row.save();
+     if (row) {
+       row.save();
+     } else {
+       for (row of this.rows) {
+         this.save(row);
+       }
+     }
      let cb;
      for (cb of this.toSave) {
        cb(this, row);
@@ -124,13 +130,13 @@
 
             const rf = new RowField(this, ctl);
             rf.install();
-            this.fields.set(rf.pyName, rf);
+            if (rf.td) this.fields.set(rf.pyName, rf);
 
           }
         }
 
         // enctype=multipart/form-data mutates the form to method=GET
-        this.form.removeAttr('enctype');
+        if (!this.saveTo) this.form.removeAttr('enctype');
         // hopefully this doesn't screw up the async save.  Appears to be necessary...
 
         this.owner = EdiTable.add(this);
@@ -188,13 +194,13 @@
       install() {
         const td = this.td;
 
-        if (this.$.attr('id') && td.find(':input').size() === 0) {
+        if (this.$.attr('id')) {
 
           const data = td.data();
           if (data && data.override) {
             this.wrapVal = this.override(data);
           } else {
-            this.wrapVal = this.simple();
+            this.wrapVal = this.simple(data);
           }
 
           const el = this.$.clone(true);
@@ -219,11 +225,11 @@
         return tr.children(`td.${this.pyName}`);
       }
       syncTbl() {
-        const tr = this.editor.tr,
+        const td = this.td,
           form = this.editor.form,
-          hiddenFld = tr.find(`td.${this.pyName} .cell-hidden-control.${this.pyName} :input`),
+          hiddenFld = td.find(`.cell-hidden-control.${this.pyName} :input`),
           sourceFld = form.find(`:input[name=${hiddenFld.attr('name')}]`),
-          span = hiddenFld.closest('td').find('span.cell-sync-value'),
+          span = td.find('span.cell-sync-value'),
           val = sourceFld.val();
         hiddenFld.val(val);
         span.empty();
@@ -250,8 +256,8 @@
       }
       duration(data) {
         return () => {
-          const hrs = 0+this.td.find('.hours').val(),
-            mins = 0+this.td.find('.minutes').val();
+          const hrs = 0+(this.td.find('.hours').val() || 0),
+            mins = 0+(this.td.find('.minutes').val() || 0);
           return $('<span>').text(''+(hrs + mins/60).toFixed(2));
         };
       }
