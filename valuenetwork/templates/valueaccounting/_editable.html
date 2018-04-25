@@ -301,6 +301,11 @@
       a(data) {
         return (ipt) => $('<a>').attr({href: ipt.val()}).text(ipt.val());
       }
+      check(data) {
+        const checked = data.checked || "true",
+          unchecked = data.unchecked || "false";
+        return (checkbox) => $('<span>').text(checkbox.is(':checked') ? checked : unchecked);
+      }
     }
 
     class Saving {

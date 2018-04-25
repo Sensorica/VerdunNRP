@@ -80,13 +80,13 @@
 	                    {{ form.instance.quantity }}</br>
 	                    {{ form.quantity.help_text }}
                   </td>
-                  <td class="is_contribution">{{ form.instance.is_contribution }}</td>
+                  <td class="is_contribution" data-override="check" data-checked="{% trans 'Yes' %}" data-unchecked="{% trans 'No' %}">{{ form.instance.is_contribution }}</td>
 	                <td class="description" data-override="p">{{ form.description }}</td>
 	                <td class="url" data-override="a"><a href="{{ form.instance.url }}">{{ form.instance.url }}</a></td>
 	            </tr>
            	{% endfor %}
            	<tr>
-           	    <td>&nbsp;</td><td>&nbsp;</td><td style="text-align: right;" >{% trans 'Total' %}:</td>
+           	    <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td style="text-align: right;" >{% trans 'Total' %}:</td>
            	    <td style="text-align: right;" ><span id="total"></span> {% trans 'hours' %}</td>
            	    <td>&nbsp;</td><td>&nbsp;</td>
            	</tr>
