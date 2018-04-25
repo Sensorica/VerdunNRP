@@ -59,6 +59,7 @@
 	    <table class="table table-bordered table-condensed table-hover" id="time">
 	        <thead>
 	            <tr class="headings">
+									<th>{% trans "Edit" %}</th>
 	                <th>{% trans "Date" %}</th>
 	                <th>{% trans "Type of work" %}</th>
 	                <th>{% trans "Project" %}</th>
@@ -71,8 +72,9 @@
 	        <tbody>
 	        {% for form in time_formset %}
 	            <tr>{{ form.id }}
+									<td><a class="btn btn-large" href="#time-modal-{{ forloop.counter0 }}" data-toggle="modal">Edit</a></td>
 	                <td class="event_date" data-override="datepicker" data-format="yy-mm-dd">{{ form.instance.event_date }}</td>
-	                <td class="resource_type" data-pverride="model" data-prefix="/accounting/resource-type">{{ form.instance.resource_type.name }}</td>
+	                <td class="resource_type" data-override="model" data-prefix="/accounting/resource-type">{{ form.instance.resource_type.name }}</td>
 	                <td class="context_agent" data-override="model" data-prefix="/accounting/agent">{{ form.instance.context_agent.nick }}</td>
 	                <td class="quantity_0 quantity_1" data-override="duration" data-suffix="{{ form.quantity.help_text|urlize|linebreaks }}" style="white-space:nowrap;" >
 	                    {{ form.instance.quantity }}</br>
