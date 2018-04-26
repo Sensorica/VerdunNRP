@@ -294,7 +294,7 @@
       p(data) {
         return (fld) => {
 
-          return $(fld.val().split('\n').map(t => $('<p>').text(t)).reduce(((el, span) => span.append(el)), $('<span>')));
+          return $(fld.val().split('\n').map(t => $('<p>').text(t)).reduce(((span, el) => span.append(el)), $('<span>')));
         };
       }
       datepicker(data) {
