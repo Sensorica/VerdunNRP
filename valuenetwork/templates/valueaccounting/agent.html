@@ -129,8 +129,8 @@ legend {
             {% if agent.is_context and user_agent %}
                 <form style="display: inline;" class="indent" id="exchangeForm" method="POST" action="">
                     {% csrf_token %}
-                    Create an internal exchange in this context: <span style="vertical-align: middle;">{{ nav_form.exchange_type }}</span>
-                    <input style="display: inline;" type="submit" name="submit" value="{% trans 'Create Exchange' %}" class="btn btn-primary" />
+                    Create an internal exchange in this context: <span id="create-exchange-type-container" style="vertical-align: middle;">{{ nav_form.exchange_type }}</span>
+                    <input style="display: inline;" id="create-exchange" type="submit" name="submit" value="{% trans 'Create Exchange' %}" class="btn btn-primary" />
                 </form>
             {% endif %}
 
@@ -239,11 +239,11 @@ legend {
                     {% endif %}
                     {% if agent.photo %}
                       {% autoescape off %}
-	                	   <b>{% trans "Photo" %}</b> <div><img src="{% thumbnail agent.photo photo_size %}"/></div>
+	                	   <div><b>{% trans "Photo" %}</b> <div><img src="{% thumbnail agent.photo photo_size %}"/></div></div>
                       {% endautoescape %}
                 	  {% elif agent.photo_url %}
                       {% autoescape off %}
-                        <b>{% trans "Photo" %}</b> <div><img src="{{ agent.photo_url|escape }}" width="128" height="96" /></div>
+                        <div><b>{% trans "Photo" %}</b> <div><img src="{{ agent.photo_url|escape }}" width="128" height="96" /></div></div>
                       {% endautoescape %}
 	                  {% endif %}
 
@@ -370,6 +370,16 @@ legend {
 
     <script type="text/javascript">
 
+    function preventDefault(ev) {
+      if ('defaultPrevented' in ev) {
+        ev.defaultPrevented = true;
+      } else if (typeof ev.preventDefault == 'function') {
+        ev.preventDefault();
+      } else {
+        throw new Error('neither defaultPrevented nor deprecated preventDefault() is available.');
+      }
+    }
+
     $(document).ready(function(){
 
 		$('#projects').addClass('active');
@@ -422,6 +432,13 @@ legend {
             },
         });
 
+        $('#create-exchange').click((ev) => {
+          const extSelected = $('#create-exchange-type-container :input :selected');
+          if (extSelected.length === 0 || !extSelected.val() || !extSelected.text()) {
+            preventDefault(ev);
+            alert('An exchange type must be selected to create an exchange.');
+          }
+        });
 
     }); // end document.ready
 
