@@ -131,15 +131,7 @@
 					<tr class="{% cycle 'odd' 'even' %}">
 						{% if user_is_agent %}
 							<td>
-								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn">Time & Duration</a>
-								<form
-										class="change-form"
-										id="changeForm{{ event.id }}"
-										action="{% url change_event event_id=event.id %}"
-										method="GET" >
-										<input type='hidden' class="page" id='changePage{{ event.id }}' name='page' value='' />
-										<button class="btn btn-info" title="Change" >{{ t_ev|tr|title }}</button>
-								</form>
+								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn">Edit</a>
 							</td>
 						{% endif %}
 						<td class="event_date" data-override="datepicker" data-format="yy-mm-dd">
