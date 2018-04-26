@@ -131,7 +131,15 @@
 					<tr class="{% cycle 'odd' 'even' %}">
 						{% if user_is_agent %}
 							<td>
-								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn btn-large">Edit</a>
+								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn">Contribution</a>
+								<form
+										class="change-form"
+										id="changeForm{{ event.id }}"
+										action="{% url change_event event_id=event.id %}"
+										method="GET" >
+										<input type='hidden' class="page" id='changePage{{ event.id }}' name='page' value='' />
+										<button class="btn btn-info btn-mini" title="Change" >{{ t_ev|tr|title }}</button>
+								</form>
 							</td>
 						{% endif %}
 						<td class="event_date" data-override="datepicker" data-format="yy-mm-dd">
@@ -150,7 +158,7 @@
 							{% else %}
                 {{ event.event_date }}
 							{% endif %}
-							{% endcomment %}
+						{% endcomment %}
 							{{ event.event_date }}
 						</td>
 						<td class="event_type" data-override="model">{{ event.event_type }}</td>
@@ -281,10 +289,10 @@
         });
 
         $("select").chosen();
-				/* No.
+
         $('.date-entry').datepicker({ dateFormat: "yy-mm-dd" });
         $('.filter-date').datepicker({ dateFormat: "yy-mm-dd" });
-
+				/* No.
         $('.date-entry').change(saveDate);
         $('.quantity').change(saveQuantity);
 				/**/
@@ -295,7 +303,7 @@
 			        .closest('.control-group').addClass('success');
 	        }
         });
-				{% comment %}{# no. #}
+
         {% for event in events %}
             $("#eventDateForm-{{ event.id }}").validate({
 			    rules: {
@@ -321,7 +329,7 @@
 			    }
 		    });
 		{% endfor %}
-		{% endcomment %}
+
 
     }); // end document.ready
 
