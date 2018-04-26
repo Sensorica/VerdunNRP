@@ -65,8 +65,8 @@ STATIC_ROOT = "/home/valnet/webapps/verdunnrp_static/"
 
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
-STATIC_URL = "/site_media/static/"
-#STATIC_URL = "/static/"
+#STATIC_URL = "/site_media/static/"
+STATIC_URL = "/static/"
 
 # Additional locations of static files
 STATICFILES_DIRS = [
