@@ -246,7 +246,7 @@ hr {
                                 {% if to_be_changed_requirement.resources_ready_to_be_changed %}
                                     {% for resource in to_be_changed_requirement.resources_ready_to_be_changed %}
                                         <div>
-                                            {{ t_res|title|tr }: <a href="{% url resource resource_id=resource.id  %}">{{ resource }}</a>
+                                            {{ t_res|tr|title }}: <a href="{% url resource resource_id=resource.id  %}">{{ resource }}</a>
                                             <form
                                                 style="display: inline;"
                                                 class="changeable-form"
