@@ -131,7 +131,7 @@
 					<tr class="{% cycle 'odd' 'even' %}">
 						{% if user_is_agent %}
 							<td>
-								<a data-toggle="modal" href="#event-edit-{{ index }}"><i class="icon-edit icon-white"/></a>
+								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn btn-large">Edit</a>
 							</td>
 						{% endif %}
 						<td class="event_date" data-override="datepicker" data-format="yy-mm-dd">
@@ -159,7 +159,7 @@
 						{% comment %}
 						<td style="text-align: right;" >{{ event.quantity_formatted }}</td>
 						{% endcomment %}
-						<td style="white-space:nowrap;" class="quantity" data-override="add" data-suffix="{{ event.unit_of_quantity }}">
+						<td style="white-space:nowrap;" class="quantity" data-override="add" data-suffix=" {{ event.unit_of_quantity }}">
 							{% comment %}{# no #}
                             {% if user_is_agent %}
 						    <form class="eventQtyForm" id="eventQtyForm-{{ event.id }}" >
@@ -192,7 +192,7 @@
 								<a href="{{ event.process.get_absolute_url }}" target="_blank">{{ event.process.name }}</a>
 							{% endif %}
 						</td>
-						<td class="process-deliverables" data-override="json" data-prefix="accounting/json-process-deliverables" data-pyname="process">
+						<td class="process_deliverables">
 						    {% for d in event.process.deliverables %}
 						      <a href="{% url resource resource_id=d.id %}">{{ d }}</a></br >
 					      {% endfor %}
