@@ -102,7 +102,7 @@
 				<span id="saving"></span>
 				{% for event in events %}
 					{% with index=forloop.counter0|ts %}
-						<span class="row-edit" data-table="events" data-index="{{ index }}" data-save-to="/accounting/change-event/{{ event.id }}/">
+						<span class="row-editor" data-table="events" data-index="{{ index }}" data-save-to="/accounting/change-event/{{ event.id }}/">
 							{% form_dialog dialog_id="event-edit-"|add:index form=event.change_form title="Edit"|sp:t_ev|tr|title action="#" method="dialog" %}
 						</span>
 					{% endwith %}
@@ -131,7 +131,7 @@
 					<tr class="{% cycle 'odd' 'even' %}">
 						{% if user_is_agent %}
 							<td>
-								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn">Contribution</a>
+								<a data-toggle="modal" href="#event-edit-{{ index }}" class="btn btn-mini">Contribution</a>
 								<form
 										class="change-form"
 										id="changeForm{{ event.id }}"
