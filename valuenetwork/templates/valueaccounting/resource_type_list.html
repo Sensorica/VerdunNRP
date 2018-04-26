@@ -72,9 +72,10 @@
                     <li>
                       {{ form.resource_type_id }}
                       {{ form.resource_type_name.as_hidden }}
-                      {{ form.added.as_widget }}
+
                       <label for="{{ form.added.id_for_label }}">
-                        {{ form.resource_type_name.data }}
+                        {{ form.added.as_widget }}
+                        {{ form.resource_type_name.value }}
                       </label>
                     </li>
                   {% endfor %}
