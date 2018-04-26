@@ -67,9 +67,16 @@
 
         <div class="row-fluid">
             <div class="span8">
-                <ul>
+                <ul class="checklist">
                   {% for form in element_forms %}
-                    <li><ul>{{ form.as_ul }}</ul></li>
+                    <li>
+                      {{ form.resource_type_id }}
+                      {{ form.resource_type_name.as_hidden }}
+                      {{ form.added.as_widget }}
+                      <label for="{{ form.added.id_for_label }}">
+                        {{ form.resource_type_name.data }}
+                      </label>
+                    </li>
                   {% endfor %}
                 </ul>
                 {% comment %}
