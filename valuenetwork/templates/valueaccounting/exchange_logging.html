@@ -331,7 +331,7 @@ li {
                                                 <div class="modal-body">
                                                     <form class="validateMe" enctype="multipart/form-data" action="{% url change_transfer_commitments transfer_id=xfer.id %}" method="POST" >
                                                         {% csrf_token %}
-                                                        {% include "valueaccounting/_commit_form.html" with form=xfer.change_commitments_form, slot=slot %}
+                                                        {% include "valueaccounting/_commit_form.html" with form=xfer.change_commitments_form slot=slot %}
 
                                                         {% comment %}
                                                         {% with xfer.change_commitments_form as cc_form %}

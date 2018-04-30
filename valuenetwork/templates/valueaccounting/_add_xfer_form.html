@@ -3,49 +3,49 @@
 {% type_resource_type as t_res_type %}
 {% type_resource as t_res %}
 
-{# call with ax_form, slot #}
+{# call with ax_form slot #}
 
-{% field_as_div ax_form.event_date "Event date" %}
-{% if not slot.give_agent_is_context %}{% field_as_div ax_form.from_agent "Transferred from" %}{% endif %}
-{% if not slot.receive_agent_is_context %}{% field_as_div ax_form.to_agent "Transferred to" %}{% endif %}
-{% field_as_div ax_form.quantity "Quantity transferred" %}
-{% field_as_div ax_form.resource_type t_res_type|capfirst|ta:" transferred" %}
+{% field_as_div ax_form.event_date "Event date"|tr %}
+{% if not slot.give_agent_is_context %}{% field_as_div ax_form.from_agent "Transferred from"|tr %}{% endif %}
+{% if not slot.receive_agent_is_context %}{% field_as_div ax_form.to_agent "Transferred to"|tr %}{% endif %}
+{% field_as_div ax_form.quantity "Quantity transferred"|tr %}
+{% field_as_div ax_form.resource_type t_res_type|capfirst|sp:"transferred"|tr %}
 {% if not slot.can_create_resource %}
     {% if slot.is_currency and xfer.transfer_type.exchange_type.use_case.identifier == "intrnl_xfer" %}
-        {% field_as_div ax_form.from_resource "Account from (if virtual account)" %}
-        {% field_as_div ax_form.resource "Account to (if virtual account)" %}
+        {% field_as_div ax_form.from_resource "Account from (if virtual account)"|tr %}
+        {% field_as_div ax_form.resource "Account to (if virtual account)"|tr %}
     {% else %}
-        {% field_as_div ax_form.resource t_res|capfirst|ta:" transferred (no entry if not inventoried)" %}
+        {% field_as_div ax_form.resource t_res|capfirst|sp:"transferred (no entry if not inventoried)"|tr %}
     {% endif %}
 {% else %}
-    {% field_as_div ax_form.from_resource t_res|capfirst|ta:" transferred from (no entry if not inventoried)" %}
+    {% field_as_div ax_form.from_resource t_res|capfirst|sp:"transferred from (no entry if not inventoried)"|tr %}
 {% endif %}
 {% field_as_p ax_form.description "Description" %}
 {% if not slot.is_currency %}
-    {% field_as_div ax_form.value "Value (total, not per unit)" %}
-    {% field_as_div ax_form.unit_of_value "Unit of value" %}
+    {% field_as_div ax_form.value "Value (total, not per unit)"|tr %}
+    {% field_as_div ax_form.unit_of_value "Unit of value"|tr %}
 {% endif %}
-{% if slot.is_contribution %}{% field_as_div ax_form.is_contribution "Can be a rewarded in a value equation" %}{% endif %}
-{% if slot.is_to_distribute %}{% field_as_div ax_form.is_to_distribute "Can be distributed in a value equation" %}{% endif %}
-{% if slot.is_currency %}{% field_as_div ax_form.event_reference "Event reference" %}{% endif %}
+{% if slot.is_contribution %}{% field_as_div ax_form.is_contribution "Can be a rewarded in a value equation"|tr %}{% endif %}
+{% if slot.is_to_distribute %}{% field_as_div ax_form.is_to_distribute "Can be distributed in a value equation"|tr %}{% endif %}
+{% if slot.is_currency %}{% field_as_div ax_form.event_reference "Event reference"|tr %}{% endif %}
 {% if slot.can_create_resource %}
 
     <div><span class="modal-hdg">Incoming {{ t_res }}:</span></div>
-    {% field_as_p ax_form.resource "Add to an existing "|ta:t_res %}
+    {% field_as_p ax_form.resource "Add to an existing"|sp:t_res|tr %}
     <p><b>OR create a new {{ t_res }}:</b></p>
-    {% field_as_div ax_form.identifier "Identifier (for example, lot number or serial number)" %}
+    {% field_as_div ax_form.identifier "Identifier (for example, lot number or serial number)"|tr %}
     {% field_as_div ax_form.url "URL" %}
-    {% field_as_div ax_form.photo_url "Photo URL" %}
-    {% field_as_p ax_form.current_location "Current "|ta:t_res|capfirst|ta:" Location" %}
-    {% field_as_p ax_form.notes t_res|capfirst|ta:" Notes" %}
-    {% field_as_p ax_form.access_rules t_res|capfirst|ta:" Access Rules" %}
+    {% field_as_div ax_form.photo_url "Photo URL"|tr %}
+    {% field_as_p ax_form.current_location "Current"|sp:t_res|capfirst|sp:"Location"|tr %}
+    {% field_as_p ax_form.notes t_res|capfirst|sp:"Notes"|tr %}
+    {% field_as_p ax_form.access_rules t_res|capfirst|sp:"Access Rules"|tr %}
     {{ slot.create_role_formset.management_form }}
     <ul>
         {% for form in slot.create_role_formset %}
             <ul class="{% cycle odd even %} role-row">{{ form.id }}
-                <li class="td-role">{% field_as_div form.role t_res|title|ta:" access role" %}</li>
-                <li class="td-agent">{% field_as_div form.agent "Assignment" %}</li>
-                <li class="text-center">{% field_as_div form.is_contact "Is contact" %}</li>
+                <li class="td-role">{% field_as_div form.role t_res|title|sp:"access role"|tr %}</li>
+                <li class="td-agent">{% field_as_div form.agent "Assignment"|tr %}</li>
+                <li class="text-center">{% field_as_div form.is_contact "Is contact"|tr %}</li>
             </ul>
         {% endfor %}
     </ul>
