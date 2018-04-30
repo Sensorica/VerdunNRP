@@ -3326,6 +3326,7 @@ class ExchangeFlowForm(forms.Form):
 
 class DemandExchangeNavForm(forms.Form):
     exchange_type = forms.ModelChoiceField(
+        required=True,
         queryset=ExchangeType.objects.demand_exchange_types(),
         empty_label=None,
         widget=forms.Select(
@@ -3333,6 +3334,7 @@ class DemandExchangeNavForm(forms.Form):
 
 class SupplyExchangeNavForm(forms.Form):
     exchange_type = forms.ModelChoiceField(
+        required=True,
         queryset=ExchangeType.objects.supply_exchange_types(),
         empty_label=None,
         widget=forms.Select(
@@ -3340,6 +3342,7 @@ class SupplyExchangeNavForm(forms.Form):
 
 class InternalExchangeNavForm(forms.Form):
     exchange_type = forms.ModelChoiceField(
+        required=True,
         queryset=ExchangeType.objects.internal_exchange_types(),
         empty_label=None,
         widget=forms.Select(
