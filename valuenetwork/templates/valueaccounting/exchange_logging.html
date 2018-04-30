@@ -662,7 +662,7 @@ li {
                                     <div class="modal-body">
                                         <form class="validateMe" id="commitForm" enctype="multipart/form-data" action="{% url add_transfer_commitment exchange_id=exchange.id transfer_type_id=slot.id %}" method="POST" >
                                             {% csrf_token %}
-                                            {% include "valueaccounting/_commit_form.html" with form=slot.add_commit_form, slot=slot %}
+                                            {% include "valueaccounting/_commit_form.html" with form=slot.add_commit_form slot=slot %}
                                             {% comment %}
                                             {% with slot.add_commit_form as ac_form %}
                                             Commitment date:<br />{{ ac_form.commitment_date }}<br />
