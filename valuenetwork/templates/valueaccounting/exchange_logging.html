@@ -413,7 +413,7 @@ li {
                                                                 {{ t_resource|capfirst }} access roles<br />
                                                                 <ul>
                                                                 {% for form in xfer.create_role_formset %} {# wtf #}
-                                                                    <li><ul class="{% cycle 'odd' 'even' %}">
+                                                                    <li><ul class="{% cycle 'odd' 'even' %}">{% trans "Create Role" %}
                                                                         <li>{{ form.role }}</li>
                                                                         <li>{{ form.agent }}</li>
                                                                         <li>{{ form.is_contact }} Is contact</li>
@@ -638,7 +638,7 @@ li {
                                                     {% endcomment %}
                                                     {% for form in slot.create_role_formset %}
                                                         <li>{{ form.id }}
-                                                        <ul class="role-row">
+                                                        <ul class="role-row">{% trans "Create Role" %}
                                                             <li class="td-role">Resource access role {{ form.role }}</li>
                                                             <li class="td-agent">Assignment {{ form.agent }}</li>
                                                             <li class="text-center">Is contact {{ form.is_contact }}</li>
@@ -783,7 +783,7 @@ li {
                                                                 {{ xfer.create_role_formset.management_form }}
                                                                 Resource access roles<br />
                                                                 {% for form in xfer.create_role_formset %}
-                                                                    <ul>
+                                                                    <ul>{% trans "Create Role" %}
                                                                         <li>{{ form.role }}</li>
                                                                         <li>{{ form.agent }}</li>
                                                                         <li>{{ form.is_contact }} Is contact</li>

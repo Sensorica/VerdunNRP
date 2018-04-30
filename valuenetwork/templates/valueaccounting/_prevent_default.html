@@ -1,0 +1,12 @@
+<script type="text/javascript">
+  // preventDefault() is deprecated, defaultPrevented is not universally supported.
+  function preventDefault(ev) {
+    if ('defaultPrevented' in ev) {
+      ev.defaultPrevented = true;
+    } else if (typeof ev.preventDefault == 'function') {
+      ev.preventDefault();
+    } else {
+      throw new Error('Neither event.defaultPrevented nor event.preventDefault() (deprecated) is available!  Your browser sucks!')
+    }
+  }
+</script>

@@ -197,39 +197,47 @@ h3 {
 
 {% block extra_body %}
 	{{ block.super }}
-
+    {% include "valueaccounting/_prevent_default.html" %}
     <script type="text/javascript">
 
-	$(document).ready(function(){
+    	$(document).ready(function(){
 
-		$('#supply').addClass('active');
-
-		$( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" );
-            $( "#help" ).text("Hide Help");
-        }, function() {
-            $('#help-content').hide("slide", { direction: "right" }, "slow");
-            $( "#help" ).text("Show Help");
-        })
-
-        $.validator.addClassRules("required-field", { required: true});
-
-        jQuery.validator.setDefaults({
-            success: function(label) {
-		        label
-			        .text('').addClass('valid')
-			        .closest('.control-group').addClass('success');
-	        }
+        $('form#exchangeForm :submit').click((ev) => {
+          const extSelected = $(this).closest('form').find(':input :selected');
+          if (extSelected.length === 0 || !extSelected.val() || !extSelected.text()) {
+            preventDefault(ev);
+            alert('An exchange type must be selected to create an exchange.');
+          }
         });
 
-        $('.validateMe').each( function(){
-			var form = $(this);
-			form.validate({
-				highlight: function(label) {
-					$(label).closest('.control-group').addClass('error');
-				}
-			});
-		});
+    		$('#supply').addClass('active');
+
+    		$( "#help" ).toggle( function(){
+                $('#help-content').show("slide", { direction: "right" }, "slow" );
+                $( "#help" ).text("Hide Help");
+            }, function() {
+                $('#help-content').hide("slide", { direction: "right" }, "slow");
+                $( "#help" ).text("Show Help");
+            })
+
+            $.validator.addClassRules("required-field", { required: true});
+
+            jQuery.validator.setDefaults({
+                success: function(label) {
+    		        label
+    			        .text('').addClass('valid')
+    			        .closest('.control-group').addClass('success');
+    	        }
+            });
+
+            $('.validateMe').each( function(){
+    			var form = $(this);
+    			form.validate({
+    				highlight: function(label) {
+    					$(label).closest('.control-group').addClass('error');
+    				}
+    			});
+    		});
 /*
         $('#supplierForm').click(function (event) {
             var isValid = $("#supplierForm").validate();
@@ -238,7 +246,7 @@ h3 {
             }
         });
 */
-	}); // end document.ready
+	   }); // end document.ready
     </script>
 
 {% endblock %}

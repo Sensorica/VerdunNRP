@@ -131,12 +131,12 @@
 
 {% block extra_body %}
 	{{ block.super }}
-
+    {% include "valueaccounting/_prevent_default.html" %}
     <script type="text/javascript">
 
-	$(document).ready(function(){
+    	$(document).ready(function(){
 
-		$('#demand').addClass('active');
+    		$('#demand').addClass('active');
 
         $( "#help" ).toggle( function(){
             $('#help-content').show("slide", { direction: "right" }, "slow" );
@@ -144,9 +144,16 @@
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
-        })
+        });
 
-	}); // end document.ready
+        $('form#exchangeForm :submit').click((ev) => {
+          const extSelected = $(this).closest('form').find(':input :selected');
+          if (extSelected.length === 0 || !extSelected.val() || !extSelected.text()) {
+            preventDefault(ev);
+            alert('An exchange type must be selected to create an exchange.');
+          }
+        });
+    	}); // end document.ready
     </script>
 
 {% endblock %}

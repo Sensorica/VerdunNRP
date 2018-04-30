@@ -367,9 +367,9 @@ legend {
 
 {% block extra_body %}
 	{{ block.super }}
-
+    {% include "valueaccounting/_prevent_default.html" %}
     <script type="text/javascript">
-
+    /*
     function preventDefault(ev) {
       if ('defaultPrevented' in ev) {
         ev.defaultPrevented = true;
@@ -379,7 +379,7 @@ legend {
         throw new Error('neither defaultPrevented nor deprecated preventDefault() is available.');
       }
     }
-
+    /**/
     $(document).ready(function(){
 
 		$('#projects').addClass('active');
