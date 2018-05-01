@@ -32,9 +32,11 @@ def field_as_div(ff, label=''):
 
     if not label:
         label = ff.label_tag()
+    else:
+        label = '<b>%s</b>' % (label,)
 
     span, end_span = ('<span class="pull-right">', '</span>') if pull_right else ('<div>', '</div>')
-    return '<div><b>' + str(label) + '</b>' + span + widget + end_span + '</div>'
+    return '<div>' + label + span + widget + end_span + '</div>'
 
 @register.simple_tag
 def field_as_li(ff, label=''):
