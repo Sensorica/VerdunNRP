@@ -3,8 +3,13 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load types %}
+{% load chair_tag %}
 
-{% block head_title %}{% trans "Create Exchange" %}{% endblock %}
+{% block head_title %}
+{% type_exchange as t_xchg %}
+{% trans "Create"|sp:t_xchg|title %}
+{% endblock %}
 
 {% block extra_head %}
 
@@ -32,17 +37,18 @@
 {% endblock %}
 
 {% block body_base %}
+{% type_exchange as t_xchg %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
 	{% if context_agent %}
-        <legend>{% trans "Create Exchange" %}</legend>
+        <legend>{% trans "Create"|sp:t_xchg|title %}</legend>
 		<form id="exchangeForm" method="POST" action="">
 			{% csrf_token %}
 			<div class="span12">
 				{{ exchange_form|as_bootstrap }}
 				<div class="form-actions">
-					<input type="submit" name="save" value="{% trans 'Save and go to step 2' %}" class="btn btn-primary" /> 
+					<input type="submit" name="save" value="{% trans 'Save and go to step 2' %}" class="btn btn-primary" />
 			   	</div>
 			</div>
             <input type="hidden" id="use-case" name="next" value= "{{ use_case.identifier }}" />
@@ -51,9 +57,9 @@
     {% else %}
         <h2>You need a {{ context_types }}.</h2>
         <p>
-            Read the 
+            Read the
             <a href="https://docs.google.com/presentation/d/1ztnDX-Cf-PmQPUNxAfntNBBpLH9mhsQ2lrJ77Ty8Plw/edit?usp=sharing" target= "_blank">
-                Network Setup tutorial</a> 
+                Network Setup tutorial</a>
             and create one.
         </p>
     {% endif %}
@@ -72,16 +78,16 @@
     <script type="text/javascript">
 
 	$(document).ready(function(){
-	
+
         $( "#help" ).toggle( function(){
-            $('#help-content').show("slide", { direction: "right" }, "slow" ); 
+            $('#help-content').show("slide", { direction: "right" }, "slow" );
             $( "#help" ).text("Hide Help");
         }, function() {
             $('#help-content').hide("slide", { direction: "right" }, "slow");
             $( "#help" ).text("Show Help");
         })
 
-        jQuery.validator.setDefaults({ 
+        jQuery.validator.setDefaults({
             success: function(label) {
 				label
 					.text('').addClass('valid')
@@ -117,10 +123,10 @@
         }
 
         $("#id_context_agent").change(getSuppliers);
-        
+
 
 	}); // end document.ready
-	
+
     function getSuppliers()
     {
         var selectedAgent = document.getElementById('id_context_agent').value;
@@ -131,12 +137,12 @@
             for(var i=0 ; i<data.length ; i++)
             {
                 var id = data[i]['pk'];
-                var name = data[i].fields['nick']; 
-                $("#id_supplier").append('<option value="' + id + '">' + name + '</option>') 
+                var name = data[i].fields['nick'];
+                $("#id_supplier").append('<option value="' + id + '">' + name + '</option>')
             }
         });
     }
-	
+
     </script>
 
 {% endblock %}
