@@ -1,8 +1,8 @@
-<div>
+{% if wrap %}<{{ wrap }}>{% else %}<div>{% endif %}
   <b>{{ desc }}</b>
   {% if linebreaks %}
     <div>{{ field|urlize|linebreaks }}</div>
   {% else %}
     :<span class="pull-right">{{ field }}</span>
   {% endif %}
-</div>
+{% if wrap %}</{{ wrap }}>{% else %}</div>{% endif %}
