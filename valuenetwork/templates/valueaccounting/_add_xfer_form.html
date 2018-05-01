@@ -33,7 +33,7 @@
     <div><span class="modal-hdg">Incoming {{ t_res }}:</span></div>
     {% field_as_p ax_form.resource "Add to an existing"|sp:t_res|tr %}
     <p><b>OR create a new {{ t_res }}:</b></p>
-    {% field_as_div ax_form.identifier "Identifier (for example, lot number or serial number)"|tr %}
+    {% field_as_div ax_form.identifier "Identifier (lot number or serial number)"|tr %}
     {% field_as_div ax_form.url "URL" %}
     {% field_as_div ax_form.photo_url "Photo URL"|tr %}
     {% field_as_p ax_form.current_location "Current"|sp:t_res|capfirst|sp:"Location"|tr %}
