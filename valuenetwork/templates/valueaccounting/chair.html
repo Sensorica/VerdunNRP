@@ -3,6 +3,7 @@
   {% if linebreaks %}
     <div>{{ field|urlize|linebreaks }}</div>
   {% else %}
-    :<span class="pull-right">{{ field }}</span>
+    {# hackish inline style warning!  This is to quickly fix the line-staggering #}
+    <b>:</b><span class="pull-right" style="line-height: 28px;">{{ field }}</span>
   {% endif %}
 {% if wrap %}</{{ wrap }}>{% else %}</p>{% endif %}
