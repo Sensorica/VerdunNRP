@@ -14,33 +14,31 @@ def chair(desc, field, no_trans=False):
     except:
         pass
 
-    return {'desc': desc, 'field': field, 'linebreaks': linebreaks}
+    return {'desc': desc, 'field': field, 'linebreaks': linebreaks, 'wrap': False}
 
-@register.simple_tag
+@register.inclusion_tag('valueaccounting/chair.html')
 def field_as_p(ff, label=''):
-    if label:
-        label = '<label for="%s">%s</label>' % (ff.auto_id, label)
-    else:
-        label = ff.label_tag()
+    return {'desc': label or ff.label_tag(), 'wrap': 'p', 'field': ff.as_widget(), 'linebreaks': True}
 
-    return '<p><div>' + label + '</div><div>' + ff.as_widget() + '</div></p>'
-
-@register.simple_tag
+@register.inclusion_tag('valueaccounting/chair.html')
 def field_as_div(ff, label=''):
-    widget = ff.as_widget()
-    pull_right = label and ('<textarea>' not in widget) and ('<select>' not in widget) and ('<br' not in widget) and ('radio' not in widget)
+    linebreaks = False
+    field = ff.as_widget()
+    try:
+        linebreaks = '\n' in field or '<br' in field or '<textarea' in field
+    except:
+        pass
+    return {'desc': label or ff.label_tag(), 'field': ff, 'linebreaks': linebreaks, 'wrap': False}
 
-    if not label:
-        label = ff.label_tag()
-    else:
-        label = '<b>%s</b>' % (label,)
-
-    span, end_span = ('<span class="pull-right">', '</span>') if pull_right else ('<div>', '</div>')
-    return '<div>' + label + span + widget + end_span + '</div>'
-
-@register.simple_tag
+@register.inclusion_tag('valueaccounting/chair.html')
 def field_as_li(ff, label=''):
-    return '<li>' + field_as_div(ff, label) + '</li>'
+    linebreaks = False
+    field = ff.as_widget()
+    try:
+        linebreaks = '\n' in field or '<br' in field or '<textarea' in field
+    except:
+        pass
+    return {'field': field, 'desc': label or ff.label_tag(), 'wrap': 'li', 'linebreaks': linebreaks}
 
 @register.filter
 def tr(txt):
