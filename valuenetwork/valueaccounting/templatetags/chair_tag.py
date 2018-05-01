@@ -35,7 +35,7 @@ def field_as_div(ff, label=''):
     widget = ff.as_widget()
     pull_right = '<textarea>' not in widget and '<select>' not in widget and '<br' not in widget and 'radio' not in widget
     span = '<span class="pull-right">' if pull_right else '<span>'
-    return '<b>' + label + '</b>' + span + ff.as_widget() + '</span>'
+    return '<div><b>' + label + '</b>' + span + ff.as_widget() + '</span></div>'
 
 @register.simple_tag
 def field_as_li(ff, label=''):
