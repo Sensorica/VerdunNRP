@@ -1,9 +1,9 @@
-{% if wrap %}<{{ wrap }}>{% else %}<p>{% endif %}
+{# hackish inline style warning!  This is to quickly fix the line-staggering #}
+{% if wrap %}<{{ wrap }}{% else %}<p{% endif %} style="line-height: 28px;">
   <b>{{ desc }}</b>
   {% if linebreaks %}
     <div>{{ field|urlize|linebreaks }}</div>
   {% else %}
-    {# hackish inline style warning!  This is to quickly fix the line-staggering #}
-    <b>:</b><span class="pull-right" style="line-height: 28px;">{{ field }}</span>
+    <b>:</b><span class="pull-right">{{ field }}</span>
   {% endif %}
 {% if wrap %}</{{ wrap }}>{% else %}</p>{% endif %}
