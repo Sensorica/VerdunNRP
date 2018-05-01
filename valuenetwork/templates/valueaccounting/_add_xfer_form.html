@@ -42,11 +42,13 @@
     {{ slot.create_role_formset.management_form }}
     <ul>
         {% for form in slot.create_role_formset %}
-            <ul class="{% cycle odd even %} role-row">{{ form.id }}
-                <li class="td-role">{% field_as_div form.role t_res|title|sp:"access role"|tr %}</li>
-                <li class="td-agent">{% field_as_div form.agent "Assignment"|tr %}</li>
-                <li class="text-center">{% field_as_div form.is_contact "Is contact"|tr %}</li>
-            </ul>
+            <li>Create Role
+              <ul class="{% cycle odd even %} role-row">{{ form.id }}
+                {% field_as_li form.role t_res|title|sp:"access role"|tr %}
+                {% field_as_li form.agent "Assignment"|tr %}
+                <li class="text-center">{{ form.is_context.as_widget }} {% trans "Is contact" %}</li>
+              </ul>
+            </li>
         {% endfor %}
     </ul>
 {% endif %}
