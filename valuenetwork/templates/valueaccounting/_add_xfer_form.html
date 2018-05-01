@@ -43,11 +43,11 @@
     {{ slot.create_role_formset.management_form }}
     <ul>
         {% for form in slot.create_role_formset %}
-            <li>Create Role
+            <li>Role #{{ forloop.counter }}
               <ul class="{% cycle odd even %} role-row">{{ form.id }}
                 {% field_as_li form.role t_res|title|sp:"access role"|tr %}
                 {% field_as_li form.agent "Assignment"|tr %}
-                <li class="text-center">{{ form.is_context.as_widget }} {% trans "Is contact" %}</li>
+                <li>{{ form.is_contact.as_widget }} {% trans "Is contact" %}</li>
               </ul>
             </li>
         {% endfor %}
