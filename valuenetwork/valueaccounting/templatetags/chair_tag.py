@@ -27,15 +27,14 @@ def field_as_p(ff, label=''):
 
 @register.simple_tag
 def field_as_div(ff, label=''):
-    if label:
-        label = '<label for="%s">%s</label>' % (ff.auto_id, label)
-    else:
+    widget = ff.as_widget()
+    pull_right = '<textarea>' not in widget and '<select>' not in widget and '<br' not in widget and 'radio' not in widget and label
+
+    if not label:
         label = ff.label_tag()
 
-    widget = ff.as_widget()
-    pull_right = '<textarea>' not in widget and '<select>' not in widget and '<br' not in widget and 'radio' not in widget
     span, end_span = ('<span class="pull-right">', '</span>') if pull_right else ('<div>', '</div>')
-    return '<p><b>' + label + '</b>' + span + widget + end_span + '</p>'
+    return '<div><b>' + label + '</b>' + span + widget + end_span + '</div>'
 
 @register.simple_tag
 def field_as_li(ff, label=''):
