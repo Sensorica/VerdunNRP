@@ -146,6 +146,8 @@
             $( "#help" ).text("Show Help");
         });
 
+        $('select option').eq(0).attr({selected: 'true'});
+
         $('form#exchangeForm :submit').click((ev) => {
           const extSelected = $(this).closest('form').find(':input :selected');
           if (extSelected.length === 0 || !extSelected.val() || !extSelected.text()) {
