@@ -433,8 +433,8 @@ legend {
         });
 
         $('select option').eq(0).attr({selected: 'true'});
-        
-        $('#create-exchange').click((ev) => {
+
+        $('#create-exchange').click(function (ev) {
           const extSelected = $('#create-exchange-type-container :input :selected');
           if (extSelected.length === 0 || !extSelected.val() || !extSelected.text()) {
             preventDefault(ev);

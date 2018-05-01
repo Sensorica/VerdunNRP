@@ -203,8 +203,8 @@ h3 {
     	$(document).ready(function(){
 
         $('select option').eq(0).attr({selected: true});
-        
-        $('form#exchangeForm :submit').click((ev) => {
+
+        $('form#exchangeForm :submit').click(function (ev) {
           const extSelected = $(this).closest('form').find(':input :selected');
           if (extSelected.length === 0 || !extSelected.val() || !extSelected.text()) {
             preventDefault(ev);
