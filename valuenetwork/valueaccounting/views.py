@@ -10179,6 +10179,10 @@ def create_patterned_facet_formset(pattern, slot, data=None):
 
 # This function has been gutted!  General rennovations just for followability
 def exchanges(request, agent_id=None):
+    # emptu query sets throw when union'd. =/
+    def union(qs1, qs2):
+        return qs1.union(qs2) if qs1 else qs2
+
     #import pdb; pdb.set_trace()
     agent = None
     if agent_id:
@@ -10231,7 +10235,7 @@ def exchanges(request, agent_id=None):
                 for extids in vals:
                     try:
                         ext = ExchangeType.objects.get(id=int(extids))
-                        exchanges_included = exchanges_included.union(exchanges.filter(exchange_type=ext))
+                        exchanges_included = union(exchanges_included, exchanges.filter(exchange_type=ext))
 
                     except:
                         pass
@@ -10267,13 +10271,13 @@ def exchanges(request, agent_id=None):
             #for event in transfer.events.all():
             events = transfer.events.all()
             transfer.event_list = list(events)
-            event_list = event_list.union(events)
-            x.transfer_event_list = x.transfer_event_list.union(event_list)
+            event_list = union(event_list, events)
+            x.transfer_event_list = union(x.transfer_event_list, event_list)
         # now we have a lot of possibilities for sorting
         x.transfer_event_list = x.transfer_event_list.distinct()
         x.own_event_list = x.events.distinct()
-        x.event_list = x.transfer_event_list.union(x.own_event_list).distinct()
-        event_list = event_list.union(x.all_event_list)
+        x.event_list = union(x.transfer_event_list, x.own_events_list).distinct()
+        event_list = union(event_list, x.all_event_list)
         x.transfer_event_list = list(x.transfer_event_list)
         x.own_event_list = list(x.own_event_list)
         x.all_event_list = list(x.all_event_list)
