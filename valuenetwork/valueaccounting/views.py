@@ -10276,8 +10276,8 @@ def exchanges(request, agent_id=None):
         # now we have a lot of possibilities for sorting
         x.transfer_event_list = x.transfer_event_list.distinct()
         x.own_event_list = x.events.distinct()
-        x.event_list = union(x.transfer_event_list, x.own_events_list).distinct()
-        event_list = union(event_list, x.all_event_list)
+        x.event_list = union(x.transfer_event_list, x.own_event_list).distinct()
+        event_list = union(event_list, x.all_event_list).distinct()
         x.transfer_event_list = list(x.transfer_event_list)
         x.own_event_list = list(x.own_event_list)
         x.all_event_list = list(x.all_event_list)
