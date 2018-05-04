@@ -13,7 +13,7 @@
 {% type_resource_type as t_resource_type %}
 {% type_facet as t_facet %}
 {% type_transfer_type as t_transfer_type %}
-{% trans "Change"%}{% trans t_exchange_type|title %}{% trans "and Pattern" %}
+{% trans "Change"|sp:t_exchange_type|title|sp:"and Pattern" %}
 {% endblock %}
 
 {% block extra_head %}
@@ -154,10 +154,10 @@ h3 {
         {% include "_messages.html" %}
 	    <div>
 		    <legend>
-		        {% trans t_exchange_type|title %} {% trans "with Pattern" %}: <b>{{ exchange_type.name }}</b>
+		        {% trans t_exchange_type|title|sp:"with Pattern" %}: <b>{{ exchange_type.name }}</b>
 
                 &nbsp;&nbsp;&nbsp;<a href="{% url exchange_types %}">{% trans t_exchange_type|title %}s</a>
-		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change"|add:t_resource_type|title|add:t_facet|title|s %}</a>
+		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change"|sp:t_resource_type|title|sp:t_facet|title|s %}</a>
 		        &nbsp;&nbsp;&nbsp;<span id="saving"></span>
 	        </legend>
 
@@ -261,7 +261,7 @@ h3 {
                                 <h4>{% trans t_resource_type|title|s %}</h4>
                             </div>
                             <div class="span4 facetsHeader">
-                                <h4>{% trans t_resource_type|title|add:t_facet|title|s %}</h4>
+                                <h4>{% trans t_resource_type|title|sp:t_facet|title|s %}</h4>
                             </div>
                         </div>
 
