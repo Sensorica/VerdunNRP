@@ -56,6 +56,10 @@ img.hang-left {
 	vertical-align: top;
 	float: left;
 }
+div.row-of-rt {
+	display: block;
+	height: 100%;
+}
 </style>
 
 {% endblock %}
@@ -126,7 +130,7 @@ img.hang-left {
 			    {% for resource_type in roots %}
 
 				    <li>
-							<div class="row-1-of-rt">
+							<div class="row-of-rt">
 								{% if resource_type.photo %}
 		                <img class="hang-left" src="{% thumbnail resource_type.photo photo_size %}" />
 	              {% elif resource_type.photo_url %}
