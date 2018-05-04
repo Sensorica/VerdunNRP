@@ -55,11 +55,11 @@ div.logical-only {
 img.hang-left {
 	vertical-align: top;
 	float: left;
-	height: 100%;
 }
-div.row-of-rt {
+div.row-of-rt::after {
 	display: block;
-	height: fit-content;
+	content: "";
+	clear: both;
 }
 </style>
 
