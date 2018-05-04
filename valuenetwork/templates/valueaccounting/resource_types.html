@@ -52,6 +52,10 @@
 div.logical-only {
 	display: inline;
 }
+img.hang-left {
+	vertical-align: top;
+	float: left;
+}
 </style>
 
 {% endblock %}
@@ -122,45 +126,50 @@ div.logical-only {
 			    {% for resource_type in roots %}
 
 				    <li>
-					    <span class="name"><a href="{% url resource_type resource_type_id=resource_type.id %}">{{ resource_type }}</a></span>
+							<div class="row-1-of-rt">
+								{% if resource_type.photo %}
+		                <img class="hang-left" src="{% thumbnail resource_type.photo photo_size %}" />
+	              {% elif resource_type.photo_url %}
+	            	    <img class="hang-left" src="{{ resource_type.photo_url }}" width="128" height="96" />
+	              {% endif %}
+								<div class="right-of-img">
+									<div class="name"><a href="{% url resource_type resource_type_id=resource_type.id %}">{{ resource_type }}</a></div>
 
-					    {% if resource_type.photo %}
-			                <img src="{% thumbnail resource_type.photo photo_size %}" />
-		                {% elif resource_type.photo_url %}
-                    	    <img src="{{ resource_type.photo_url }}" width="128" height="96" />
-		                {% endif %}
+
 
 		                {% comment %}#todo pr: shd this use own or own_or_parent_recipes?{% endcomment %}
 		                {% if resource_type.producing_process_type_relationships %}
-		                  {% if resource_type.recipe_is_staged %}
-                            <a href="{% url view_stream_recipe resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
-
-		                  {% else %}
-			                <a href="{% url extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
-		                  {% endif %}
-                        {% endif %}
-
-                        {% if resource_type.parent or resource_type.resource_class %}
-                            <div class="parent" >
-                                {% if resource_type.parent %}
-                                    {% trans "Parent" %}:
-                                    {{ resource_type.parent }}
-                                {% endif %}
-                                {% if resource_type.parent and resource_type.resource_class %}
-                                &mdash;
-                                {% endif %}
-                                {% if resource_type.resource_class %}
-                                    {% trans "Resource class" %}:
-                                    {{ resource_type.resource_class }}
-                                {% endif %}
-                            </div>
-                        {% endif %}
+											<div class="compactification-row">
+												{% if resource_type.recipe_is_staged %}
+	                        <a href="{% url view_stream_recipe resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
+			                  {% else %}
+				                	<a href="{% url extended_bill resource_type_id=resource_type.id %}" role="button" class="btn btn-info" >{% trans "View Recipe" %}</a>
+			                  {% endif %}
+											</div>
+                    {% endif %}
+									</div>
+									<div class="under-image">
+                    {% if resource_type.parent or resource_type.resource_class %}
+                        <div class="parent" >
+                            {% if resource_type.parent %}
+                                {% trans "Parent" %}:
+                                {{ resource_type.parent }}
+                            {% endif %}
+                            {% if resource_type.parent and resource_type.resource_class %}
+                            &mdash;
+                            {% endif %}
+                            {% if resource_type.resource_class %}
+                                {% trans "Resource class" %}:
+                                {{ resource_type.resource_class }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
 
 		                <div class="facets" >{{ resource_type.facet_list }}</div>
-                        {% if resource_type.description %}
-                            <div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
-                        {% endif %}
-
+                    {% if resource_type.description %}
+                        <div class="description" >{{ resource_type.description|urlize|linebreaks }}</div>
+                    {% endif %}
+									</div>
 			        </li>
 
 			    {% endfor %}
