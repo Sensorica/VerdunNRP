@@ -15,7 +15,7 @@
               {{ formset.management_form }}
               <ul>
                 {% for fsf in formset %}
-                  <li><ul>{{ fsf.as_ul }}</ul></li>
+                  <li>{{ fsf|as_bootstrap }}</li>
                 {% endfor %}
               </ul>
             {% endif %}

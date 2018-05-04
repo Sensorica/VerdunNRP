@@ -138,9 +138,11 @@ div.logical-only {
 			            {% csrf_token %}
 			            {{ create_form|as_bootstrap }}
                   {{ create_role_formset.management_form }}
-									<ul>
+									<ul><b>Roles</b>
 									{% for form in create_role_formset %}
-										<li><ul>{{ form.as_ul }}</ul></li>
+										<li>Role #{{ forloop.counter }}
+											<ul>{{ form.as_ul }}</ul>
+										</li>
 									{% endfor %}
 									</ul>
 									{% comment %}
