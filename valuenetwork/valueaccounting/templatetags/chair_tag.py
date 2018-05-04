@@ -46,7 +46,7 @@ def tr(txt):
 
 @register.filter
 def ta(txt, arg):
-    return txt + _(arg)
+    return unicode(txt) + _(arg)
 
 @register.filter
 def s(txt):
@@ -59,11 +59,11 @@ def s(txt):
 
 @register.filter
 def img_src(src):
-    return '<img src="%s"/>'
+    return '<img src="%s"/>' % (src,)
 
 @register.filter
 def sp(txt, more_txt=''):
-    return '%s %s' % (txt, more_txt)
+    return '%s %s' % (unicode(txt), unicode(more_txt))
 
 @register.filter
 def ts(thing):
