@@ -50,6 +50,7 @@ def ta(txt, arg):
 
 @register.filter
 def s(txt):
+    txt = unicode(txt)
     if txt.endswith('y'):
         return txt[:-1] + 'ies'
     elif txt.endswith('s'):
