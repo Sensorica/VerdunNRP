@@ -157,6 +157,9 @@ hr {
 
 {% block body_base %}
 {% type_resource as t_res %}
+{% type_process as t_proc %}
+{% type_facet as t_facet %}
+{% type_facet_value as t_facet_value %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
@@ -1467,7 +1470,13 @@ hr {
                 {% csrf_token %}
                 {{ resource_type_form|as_bootstrap }}
                 {{ facet_formset.management_form }}
-                <ul>{{ facet_formset.as_ul }}</ul>
+                <ul><b>{{ t_res_type|sp:t_facet|s|tr|title }}</b>
+                  {% for facet_form in facet_formset %}
+                    <li>{{ t_facet_value|tr|title }} #{{ forloop.counter }}
+                      <ul>{{ facet_form.as_ul }}</ul>
+                    </li>
+                  {% endfor %}
+                </ul>
                 {% comment %}
                 <table>
                     {% for form in facet_formset %}
@@ -1607,7 +1616,13 @@ hr {
                 {% csrf_token %}
                 {{ unplanned_output_form|as_bootstrap }}
                 {{ role_formset.management_form }}
-                <ul>{{ role_formset.as_ul }}</ul>
+                <ul><b>Roles</b>
+                  {% for role_form in role_formset %}
+                    <li>Role #{{ forloop.counter }}
+                      <ul>{{ role_formset.as_ul }}</ul>
+                    </li>
+                  {% endfor %}
+                </ul>
                 {% comment %}
                 <table>
                     <tr>

@@ -99,6 +99,9 @@
 
 {% block body_base %}
 {% type_resource_type as t_res_type %}
+{% type_resource as t_res %}
+{% type_facet as t_facet %}
+{% type_facet_value as t_facet_value %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
@@ -245,9 +248,11 @@
 				                    {% csrf_token %}
 				                    {{ resource_type_form|as_bootstrap }}
                             {{ facet_formset.management_form }}
-                            <ul>
+                            <ul><b>{{ t_res|sp:t_facet_value|s|tr|title }}</b>
                               {% for form in facet_formset %}
-                                <li><ul>{{ form.as_ul }}</ul></li>
+                                <li>{{ t_facet|tr|title }} #{{ forloop.counter }}
+                                  <ul>{{ form.as_ul }}</ul>
+                                </li>
                               {% endfor %}
                             </ul>
                             {% comment %}

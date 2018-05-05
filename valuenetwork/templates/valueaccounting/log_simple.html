@@ -3,6 +3,8 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load staticfiles %}
+{% load types %}
+{% load chair_tag %}
 
 {% block head_title %}{% trans "Log Design Contributions" %}{% endblock %}
 
@@ -52,7 +54,11 @@
 {% block body_class %}log{% endblock %}
 
 {% block body_base %}
+{% type_resource as t_res %}
+{% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
 <div class="container">
+
     {% include "_messages.html" %}
 
     <form id="simpleForm" method="POST" action="">
@@ -126,9 +132,11 @@
 				{% csrf_token %}
 				{{ rt_create_form|as_bootstrap }}
         {{ rtf_create_formset.management_form }}
-				<ul>
+				<ul><b>{{ t_res|sp:t_facet|s|tr|title }}</b>
 					{% for form in rtf_create_formset %}
-					<li><ul>{{ form.as_ul }}</ul></li>
+						<li>{{ t_facet|tr|title }} #{{ forloop.counter }}
+							<ul>{{ form.as_ul }}</ul>
+						</li>
 					{% endfor %}
 				</ul>
 								{% comment %}

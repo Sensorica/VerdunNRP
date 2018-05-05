@@ -3,6 +3,7 @@
 {% load staticfiles %}
 {% load i18n %}
 {% load bootstrap_tags %}
+{% load chair_tag %}
 {% load types %}
 
 
@@ -89,6 +90,7 @@
 
 {% block body_base %}
 {% type_resource_type as t_res_type %}
+{% type_facet as t_facet %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
@@ -218,9 +220,11 @@
 				                    {% csrf_token %}
 				                    {{ resource_type_form|as_bootstrap }}
                             {{ facet_formset.management_form }}
-                            <ul>
+                            <ul><b>{{ t_facet|s|tr|title }}</b>
                               {% for form in facet_formset %}
-                              <li><ul>{{ forms.as_ul }}</ul></li>
+                                <li>{{ t_facet|tr|title }} #{{ forloop.counter }}
+                                  <ul>{{ forms.as_ul }}</ul>
+                                </li>
                               {% endfor %}
                             </ul>
                                     {% comment %}

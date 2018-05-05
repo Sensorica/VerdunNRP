@@ -80,9 +80,11 @@
 					    {% csrf_token %}
 					    {{ resource.change_form|as_bootstrap }}
               {{ role_formset.management_form }}
-              <ul>
+              <ul><b>Roles</b>
                 {% for form in role_formset %}
-                  <li><ul>{{ form.as_ul }}</ul></li>
+                  <li>Role #{{ forloop.counter }}
+                    <ul>{{ form.as_ul }}</ul>
+                  </li>
                 {% endfor %}
               </ul>
               {% comment %}
