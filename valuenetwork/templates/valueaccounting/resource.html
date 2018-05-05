@@ -138,7 +138,7 @@
 		    <div class="span6 resource">
 
 	            <div>
-	                {% chair "Quantity"|sp:resource.quantity|sp:resource.unit_of_quantity|tr %}
+	                {% chair "Quantity in"|sp:resource.resource_type.unit_of_quantity.abbrev|tr resource.quantity %}
 
                   {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
                     {% chair "Value per"|sp:resource.resource_type.unit_of_use.abbrev|sp:"of use"|tr resource.value_per_unit_of_use %}
