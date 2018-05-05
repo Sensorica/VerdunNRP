@@ -138,14 +138,14 @@
 		    <div class="span6 resource">
 
 	            <div>
-	                {% chair {% trans "Quantity" %} "{{ resource.quantity }} {{ resource.unit_of_quantity }}" %}
+	                {% chair "Quantity"|sp:resource.quantity|sp:resource.unit_of_quantity|tr %}
 
                   {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
-                    {% chair "Value per "|tr|add:resource.resource_type.unit_of_use.abbrev|ta:" of use" resource.value_per_unit_of_use %}
+                    {% chair "Value per"|sp:resource.resource_type.unit_of_use.abbrev|sp:"of use"|tr resource.value_per_unit_of_use %}
                   {% endif %}
 
 	                {% if resource.url %}
-	                    {% chair "URL"|tr resource.url|urlize %}
+	                    {% chair "URL" resource.url|urlize %}
                   {% endif %}
 
                   {% if resource.current_location %}
