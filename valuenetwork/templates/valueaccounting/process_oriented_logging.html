@@ -72,9 +72,9 @@
 h3, h4, h2 {
     color: firebrick;
 }
-li {
+/*li {
     list-style-type: none;
-}
+}*/
 .proc-notes {
     font-style: italic;
     font-weight: normal;
@@ -150,7 +150,7 @@ hr {
 }
 */
 </style>
-{{ block.super }}
+
 {% endblock %}
 
 {% block body_class %}work{% endblock %}
@@ -1621,7 +1621,7 @@ hr {
                 <ul><b>Roles</b>
                   {% for role_form in role_formset %}
                     <li>Role #{{ forloop.counter }}
-                      <ul>{{ role_formset.as_ul }}</ul>
+                      <ul>{{ role_form.as_ul }}</ul>
                     </li>
                   {% endfor %}
                 </ul>
