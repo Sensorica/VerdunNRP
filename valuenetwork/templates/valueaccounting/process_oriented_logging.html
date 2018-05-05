@@ -150,7 +150,7 @@ hr {
 }
 */
 </style>
-
+{{ block.super }}
 {% endblock %}
 
 {% block body_class %}work{% endblock %}
@@ -211,10 +211,12 @@ hr {
 		    <h2 style="margin-bottom: 4px;" >
 		        {% trans "Outputs" %}
 		        {% if logger %}
+              {% if add_output_form %}
 		            <a href="#addOutputModal" role="button" class="btn btn-primary btn-mini" data-toggle="modal" title="Add an output requirement">
 		                {% trans "Add an output requirement" %}
 	                </a>
-	             {% endif %}
+              {% endif %}
+            {% endif %}
                  {% if agent %}
 		                <a href="#unplannedOutputModal" role="button" class="btn btn-info btn-mini" data-toggle="modal" title="Log an unplanned output" >
 			                {% trans "Log an unplanned output" %}
