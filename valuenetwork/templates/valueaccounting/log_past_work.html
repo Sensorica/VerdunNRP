@@ -223,7 +223,7 @@
                             <ul><b>{{ t_facet|s|tr|title }}</b>
                               {% for form in facet_formset %}
                                 <li>{{ t_facet|tr|title }} #{{ forloop.counter }}
-                                  <ul>{{ forms.as_ul }}</ul>
+                                  <ul>{{ form.as_ul }}</ul>
                                 </li>
                               {% endfor %}
                             </ul>
