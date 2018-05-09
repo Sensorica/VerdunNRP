@@ -180,7 +180,7 @@ th, td {
 		    <legend>
 		        {% trans "Change Pattern" %}:
 		        <input id="patternName" name="patternName" value="{{ pattern.name }}" />
-		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% blocktrans %}Change {{ t_resource_type|title }} {{ t_facet|title|s }} {% endblocktrans %}</a>
+		        &nbsp;&nbsp;&nbsp;<a href="{% url resource_facet_table %}">{% trans "Change"|sp:t_resource_type|title|sp:t_facet|title|s %}</a>
 		        &nbsp;&nbsp;&nbsp;<span id="saving"></span>
 	        </legend>
 
