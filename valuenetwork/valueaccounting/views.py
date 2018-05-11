@@ -10181,15 +10181,7 @@ def create_patterned_facet_formset(pattern, slot, data=None):
 def exchanges(request, agent_id=None):
     # empty query sets throw when union'd. =/
     def union(qs1, qs2):
-        #DEBUG#
-        from django.db.models.query import QuerySet
-
-        if qs1 and not isinstance(qs1, QuerySet):
-            raise Exception('qs1 is not a QuerySet')
-        elif qs2 and not isinstance(qs2, QuerySet):
-            raise Exception('qs2 is not a QuerySet')
-        #/DEBUG#    
-        return qs1.union(qs2) if qs1 else qs2
+        return set(qs1).union(qs2) if qs1 else qs2
 
     #import pdb; pdb.set_trace()
     agent = None
@@ -10282,10 +10274,10 @@ def exchanges(request, agent_id=None):
             event_list = union(event_list, events)
             x.transfer_event_list = union(x.transfer_event_list, event_list)
         # now we have a lot of possibilities for sorting
-        x.transfer_event_list = x.transfer_event_list.distinct()
-        x.own_event_list = x.events.distinct()
-        x.all_event_list = union(x.transfer_event_list, x.own_event_list).distinct()
-        event_list = union(event_list, x.all_event_list).distinct()
+        x.transfer_event_list = x.transfer_event_list#.distinct()
+        x.own_event_list = x.events#.distinct()
+        x.all_event_list = union(x.transfer_event_list, x.own_event_list)#.distinct()
+        event_list = union(event_list, x.all_event_list)#.distinct()
         x.transfer_event_list = list(x.transfer_event_list)
         x.own_event_list = list(x.own_event_list)
         x.all_event_list = list(x.all_event_list)
@@ -10301,7 +10293,7 @@ def exchanges(request, agent_id=None):
         "selected_values": selected_values,
         #"references": references,
         "ets": ets,
-        "event_ids": ','.join([str(ev.id) for ev in event_list.distinct()]),#event_ids,
+        "event_ids": ','.join([str(ev.id) for ev in event_list]),#event_ids,
         "agent": agent,
     }, context_instance=RequestContext(request))
 
