@@ -141,7 +141,7 @@
 
 
                   {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
-                    {% chair "Value per "|resource.resource_type.unit_of_use resource.value_per_unit_of_use %}
+                    {% chair "Value per"|sp:resource.resource_type.unit_of_use resource.value_per_unit_of_use %}
                   {% endif %}
 
 	                {% if resource.url %}
