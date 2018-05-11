@@ -103,7 +103,7 @@
 				{% for event in events %}
 					{% with index=forloop.counter0|ts %}
 						<span class="row-editor" data-table="events" data-index="{{ index }}" data-save-to="/accounting/change-event/{{ event.id }}/">
-							{% form_dialog dialog_id="event-edit-"|add:index form=event.change_form title="Edit"|sp:t_ev|tr|title action="#" method="dialog" %}
+							{% form_dialog dialog_id="event-edit-"|add:index form=event.change_form title="Edit"|sp:t_ev|tr|title action="#" method="dialog" confirm_text="Confirm" %}
 						</span>
 					{% endwith %}
 				{% endfor %}

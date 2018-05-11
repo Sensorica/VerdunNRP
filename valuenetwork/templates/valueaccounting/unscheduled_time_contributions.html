@@ -49,7 +49,7 @@
 	{% for form in time_formset %}
 		{% with index=forloop.counter0|ts %}
 			<span class="row-editor" data-table="time" data-index="{{ index }}">
-				{% form_dialog dialog_id="time-modal-"|add:index form=form method="dialog" action="#" title="Contribution Log" %}
+				{% form_dialog dialog_id="time-modal-"|add:index form=form method="dialog" action="#" title="Contribution Log" confirm_text="Confirm" %}
 			</span>
 		{% endwith %}
 	{% endfor %}

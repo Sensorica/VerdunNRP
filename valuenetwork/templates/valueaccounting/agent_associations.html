@@ -51,7 +51,7 @@
     {% for form in has_associates_formset %}
       {% with index=forloop.counter0|ts %}
         <span class="row-editor" data-table="has-assoc" data-index="{{ index }}">
-          {% form_dialog dialog_id="edit-has-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" %}
+          {% form_dialog dialog_id="edit-has-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" confirm_text="Confirm" %}
         </span>
       {% endwith %}
     {% endfor %}
@@ -59,7 +59,7 @@
     {% for form in is_associates_formset %}
       {% with index=forloop.counter0|ts %}
         <span class="row-editor" data-table="is-assoc" data-index="{{ index }}">
-          {% form_dialog dialog_id="edit-is-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" %}
+          {% form_dialog dialog_id="edit-is-modal-"|add:index method="dialog" action="#" form=form title="Edit Association" confirm_text="Confirm" %}
         </span>
       {% endwith %}
     {% endfor %}
