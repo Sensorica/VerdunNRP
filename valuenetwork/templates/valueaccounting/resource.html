@@ -136,12 +136,11 @@
 		<div class="row-fluid">
 
 		    <div class="span6 resource">
-
 	            <div>
-                  {% if resource.resource_type.unit_of_quantity %}
-	                   {% chair "Quantity ("|add:resource.resource_type.unit_of_quantity|add:")"|tr resource.quantity %}
+                  {% if resource.unit_of_quantity %}
+	                   {% chair "Quantity"|tr resource.quantity|ts|sp:resource.unit_of_quantity.abbrev %}
                   {% else %}
-                     {% chair "Quantity"|tr resource.quantity %}
+                     {% chair "Quantity"|tr resource.quantity|ts %}
                   {% endif %}
 
                   {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
@@ -225,7 +224,7 @@
                             {% endif %}
                             {% if event.transfer %}
                                 {% if event.transfer.exchange %}
-                                    {% with event.transfer.exchange as exchange %}
+                                    {% with exchange=event.transfer.exchange %}
                                     <ul>
                                         <li><b>{% trans "Exchange" %}:</b> <a href="{% url exchange_logging exchange_type_id=0 exchange_id=exchange.id %}">{{ exchange }}</a>
                                         </li>
