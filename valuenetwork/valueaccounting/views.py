@@ -10179,8 +10179,16 @@ def create_patterned_facet_formset(pattern, slot, data=None):
 
 # This function has been gutted!  General rennovations just for followability
 def exchanges(request, agent_id=None):
-    # emptu query sets throw when union'd. =/
+    # empty query sets throw when union'd. =/
     def union(qs1, qs2):
+        #DEBUG#
+        from django.db.models.query import QuerySet
+
+        if qs1 and not isinstance(qs1, QuerySet):
+            raise Exception('qs1 is not a QuerySet')
+        elif qs2 and not isinstance(qs2, QuerySet):
+            raise Exception('qs2 is not a QuerySet')
+        #/DEBUG#    
         return qs1.union(qs2) if qs1 else qs2
 
     #import pdb; pdb.set_trace()
