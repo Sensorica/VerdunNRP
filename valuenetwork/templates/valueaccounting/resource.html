@@ -137,14 +137,11 @@
 
 		    <div class="span6 resource">
 	            <div>
-                  {% if resource.unit_of_quantity %}
-	                   {% chair "Quantity"|tr resource.quantity|ts|sp:resource.unit_of_quantity.abbrev %}
-                  {% else %}
-                     {% chair "Quantity"|tr resource.quantity|ts %}
-                  {% endif %}
+                  {% chair "Quantity"|tr resource.formatted_quantity %}
+
 
                   {% if resource.value_per_unit_of_use and resource.resource_type.unit_of_use %}
-                    {% chair "Value per "|tr resource.value_per_unit_of_use %}
+                    {% chair "Value per "|resource.resource_type.unit_of_use resource.value_per_unit_of_use %}
                   {% endif %}
 
 	                {% if resource.url %}
