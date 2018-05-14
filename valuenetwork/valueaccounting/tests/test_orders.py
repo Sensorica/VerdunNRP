@@ -180,18 +180,18 @@ class OrderTest(WebTest):
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
             form = response.form
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
             for fieldName, field in form.fields.items():
                 if fieldName.endswith('quantity'):
                     form[fieldName] = 0
 
-            response = form.submit("submit1").follow()
+            response = form.submit("submit1")#.follow()
         except ValidationError:
             pass
-        #except Exception as ex:
-        #    e = ex
+        except Exception as ex:
+            e = ex
 
         self.assertIsNone(e, msg="setting form fields or submit threw %s" % (str(e),))
 
