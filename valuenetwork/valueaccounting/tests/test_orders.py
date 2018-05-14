@@ -190,8 +190,8 @@ class OrderTest(WebTest):
             response = form.submit("submit1").follow()
         except ValidationError:
             pass
-        except Exception as ex:
-            e = ex
+        #except Exception as ex:
+        #    e = ex
 
         self.assertIsNone(e, msg="setting form fields or submit threw %s" % (str(e),))
 
