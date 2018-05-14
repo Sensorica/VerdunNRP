@@ -129,7 +129,7 @@ class OrderTest(WebTest):
     def rt_form_name(self, rt, field):
         """Hack to repair test code that hard-coded field names
         """
-        return 'RT-%d-%s' % (rt.id, field)
+        return 'RT-%d-%s' % (rt.pk, field)
 
     def rt_by_id(self, n):
         """Hack to repair field names that hard-coded primary keys
@@ -180,7 +180,7 @@ class OrderTest(WebTest):
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
             form = response.form
-            #import pdb; pdb.set_trace()
+            import pdb; pdb.set_trace()
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
             for fieldName, field in form.fields.items():
