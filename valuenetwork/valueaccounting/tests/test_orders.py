@@ -28,7 +28,7 @@ class OrderTest(WebTest):
     def setUp(self):
 
         # Need to set up an ExchangeType too.
-        self.extype = ExchangeType.all.filter(slug='sale')
+        self.extype = ExchangeType.objects.filter(slug='sale')
 
         self.user = User.objects.create_user('alice', 'alice@whatever.com', 'password')
 
