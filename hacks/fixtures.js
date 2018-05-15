@@ -1,9 +1,3 @@
-/**
- * Consumes Django models and Python initialization code (within reason) to
- * produce a JSON fixture format that you can use with manage.py loaddata
- */
-
-// was going to have model classes extend a Model class, but, nah.
 function modelFactory(cls, flds) {
 
   function createFields(...args) {
@@ -57,6 +51,17 @@ class ModelClass {
   override(fn) {
   	this.create = fn(this.create);
   }
+  // DOES NOT affect dictionaries
+  set(obj, addProps) {
+  	let key;
+    const keys = Object.keys(addProps);
+    for (key of keys) {
+    	let v = addProps[key];
+      if (typeof v === 'object') v = v.pk;
+      obj.fields[key] = v;
+    }
+    return obj;
+  }
 }
 
 function _(str) {
@@ -107,6 +112,29 @@ const AgentType = new ModelClass(
     	'use_case',
       'event_type'
     ]
+  ),
+  ExchangeType = new ModelClass(
+  	'ExchangeType',
+    [
+    	'name',
+      'use_case',
+      'slug'
+    ]
+  ),
+  TransferType = new ModelClass(
+  	'TransferType',
+    [
+    	'name',
+      'sequence',
+      'exchange_type',
+      'is_contribution',
+      'is_to_distribute',
+      'is_reciprocal',
+      'can_create_resource',
+      'give_agent_is_context',
+      'receive_agent_is_context',
+      'is_currency'
+    ]
   );
 
 UseCaseEventType.override(function (uber) {
@@ -118,7 +146,40 @@ UseCaseEventType.override(function (uber) {
   };
 });
 
-
+TransferType.override(function (uber) {
+	return function (name, et,
+  		{
+        is_contribution = false,
+        is_to_distribute = false,
+        is_reciprocal = false,
+        can_create_resource = false,
+        give_agent_is_context = false,
+        receive_agent_is_context = false,
+        is_currency = false
+      }
+  ) {
+    if (!ExchangeType.sequence) {
+    	ExchangeType.sequence = new Map();
+    }
+    if (!ExchangeType.sequence.has(et)) {
+	ExchangeType.sequence.set(et, 1);
+    }
+    let sequence = ExchangeType.sequence.get(et);
+    ExchangeType.sequence.set(et, sequence + 1);
+	return uber.call(this,
+	name,
+      sequence,
+      et,
+      is_contribution,
+      is_to_distribute,
+      is_reciprocal,
+      can_create_resource,
+      give_agent_is_context,
+      receive_agent_is_context,
+      is_currency
+    );
+  };
+});
 AgentType.create('Individual', 'individual', False);
 AgentType.create('Organization', 'org', False);
 AgentType.create('Network', 'network', True);
@@ -126,7 +187,7 @@ AgentType.create('Network', 'network', True);
 AgentAssociationType.create('child', 'Child', 'Children', 'child', 'is child of', 'has child');
 AgentAssociationType.create('member', 'Member', 'Members', 'member', 'is member of', 'has member');
 AgentAssociationType.create('supplier', 'Supplier', 'Suppliers', 'supplier', 'is supplier of', 'has supplier');
-AgentAssociationType.create('customer', 'Customer', 'Customers', 'customer', 'is customer of', 'has customer');
+const aatCustomer = AgentAssociationType.create('customer', 'Customer', 'Customers', 'customer', 'is customer of', 'has customer');
 
 UseCase.create('cash_contr', _('Cash Contribution'), True);
 UseCase.create('non_prod', _('Non-production Logging'), True);
@@ -146,7 +207,39 @@ UseCase.create('transfer', _('Transfer'));
 UseCase.create('available', _('Make Available'), True);
 UseCase.create('intrnl_xfer', _('Internal Exchange'));
 UseCase.create('supply_xfer', _('Incoming Exchange'));
-UseCase.create('demand_xfer', _('Outgoing Exchange'));
+const outXchg = UseCase.create('demand_xfer', _('Outgoing Exchange'));
+
+const extSale = ExchangeType.create('Sale', outXchg, 'sale');
+ExchangeType.set(extSale, {
+	description: 'Sale of a product or service.'
+});
+
+const ttShip = TransferType.create(
+		'Shipment',
+    extSale,
+    {
+    	give_agent_is_context: true
+    }
+  ),
+  ttRecv = TransferType.create(
+  	'Cash Receipt',
+    extSale,
+    {
+      is_contribution: true,
+      is_reciprocal: true,
+      receive_agent_is_context: true,
+      is_currency: true
+    }
+  );
+
+TransferType.set(ttShip, {
+  description: 'Log shipment.',
+  receive_agent_association_type: aatCustomer
+});
+TransferType.set(ttRecv, {
+  description: 'Log income.',
+  give_agent_association_type: aatCustomer
+});
 
 EventType.create('Citation', _('cites'), _('cited by'), 'cite', 'process', '=', '');
 EventType.create('Resource Consumption', _('consumes'), _('consumed by'), 'consume', 'process', '-', 'quantity');
