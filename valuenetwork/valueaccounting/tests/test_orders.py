@@ -27,6 +27,9 @@ class OrderTest(WebTest):
     fixtures = ['verdun']
     def setUp(self):
 
+        # Need to set up an ExchangeType too.
+        self.extype = ExchangeType.all.filter(slug='sale')
+
         self.user = User.objects.create_user('alice', 'alice@whatever.com', 'password')
 
         facets = Facets()
@@ -137,11 +140,11 @@ class OrderTest(WebTest):
         rt = None
         # CAUTION: WILD GUESS
         if n == 10:
-            rt = self.parent
-        elif n == 6:
-            rt = self.child
-        elif n == 9:
             rt = self.grandchild
+        elif n == 6:
+            rt = self.parent
+        elif n == 9:
+            rt = self.child
 
         self.assertIsNotNone(rt, msg='unknown resource type id %d' % (n,))
         return rt
@@ -157,6 +160,8 @@ class OrderTest(WebTest):
         form = response.form
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
+        # the form SHOULD do this itself, but let's do it anyway
+        form["exchange_type"] = self.extype
         form["due_date"] = due_date
         form[self.rt_form_name(self.rt_by_id(6), 'quantity')] = 3
         response = form.submit("submit1").follow()
@@ -180,7 +185,9 @@ class OrderTest(WebTest):
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
             form = response.form
-            import pdb; pdb.set_trace()
+            #import pdb; pdb.set_trace()
+            # the form SHOULD do this itself, but let's do it anyway
+            form["exchange_type"] = self.extype
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
             for fieldName, field in form.fields.items():
@@ -210,6 +217,8 @@ class OrderTest(WebTest):
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
+        # the form SHOULD do this itself, but let's do it anyway
+        form["exchange_type"] = self.extype
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-9-quantity"] = 2000
         response = form.submit("submit1").follow()
@@ -245,6 +254,8 @@ class OrderTest(WebTest):
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
+        # the form SHOULD do this itself, but let's do it anyway
+        form["exchange_type"] = self.extype
         #form["RT-9-quantity"] = 2000
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-10-quantity"] = 4000
