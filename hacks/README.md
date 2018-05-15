@@ -111,7 +111,15 @@ If there is already a `fixtures`, append `'whatever'` to it:
     class MyTest(TestCase):
       fixtures = ['some_other_fixture', 'whatever']
       
-Now your tests can run, and hopefully you can get rid of the hackish `post_migrate` calls, too.
+Now your tests can run, and hopefully you can get rid of the `post_migrate` calls, too.
+
+In the most recent version, you can also use `ModelClass.set(instance, properties)` if some instances need non-required fields (like a description) that you don't feel like modifying through the admin interface later.  `instance` is a model class instance returned by `modelClass.create()` or `modelClass.some_field.get()`.  `properties` is a dictionary `Object` whose keys are the (Python) names of the non-essential fields you need to add and the corresponding values are the corresponding field values.  Like `modelClass.create()`, instances will be replaced by their primary key, and you have to make sure the instance has been created first.  It will look like this:
+
+    NameOfClass.set(instanceOfClass, {
+        description: 'Description of this instance.'
+    });
+
+See the initializations of `ExchangeType` and `TransferType` instances for an additional example.
 
 # Other installation hacks
 
