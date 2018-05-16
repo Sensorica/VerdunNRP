@@ -95,7 +95,8 @@ class OrderTest(WebTest):
         )
         puc.save()
 
-        event_type_sale = EventType(
+        # There is already a Sale event type in the fixtures
+        """event_type_sale = EventType(
             name="Sale",
             label="sells",
             #relationship="output",
@@ -103,7 +104,8 @@ class OrderTest(WebTest):
             related_to="agent",
             resource_effect="=",
         )
-        event_type_sale.save()
+        event_type_sale.save()"""
+        event_type_sale = EventType.objects.get(slug="sale")
 
         pfv = PatternFacetValue(
             pattern=order_pattern,
@@ -142,6 +144,12 @@ class OrderTest(WebTest):
         )
         rtfv.save()
 
+        # To make the fault-finder work, clean out all of the DB's commitments
+        Commitment.objects.all().delete()
+
+    def tearDown(self):
+        Commitment.objects.all().delete()
+
     def rt_form_name(self, rt, field):
         """Hack to repair test code that hard-coded field names
         """
@@ -162,6 +170,37 @@ class OrderTest(WebTest):
         self.assertIsNotNone(rt, msg='unknown resource type id %d' % (n,))
         return rt
 
+    def get_commitment_fault(self, rt, coms):
+        """ Check on points of failure for commitment generation & association
+        """
+        # No failure at all
+        if coms:
+            return coms
+
+        # No commitments in the DB at all.  That would indicate a view fail.
+        check = Commitment.objects.all() or None
+        self.assertIsNotNone(check, msg='Operation produced no commitments')
+
+        # If there are commitments related to the RT, but get filtered out,
+        # it's a problem with a component of the filter.
+        check = rt.commitments or None
+        self.assertIsNotNone(check, msg='Operation produced no commitments related to %s' % (rt,))
+
+        # If we get here, there is an association flaw.
+        raise AssertionError(msg='association flaw')
+
+    def follow(self, resp):
+        """ Is there really a good reason to throw when you don't memorize your
+            redirects?
+        """
+        try:
+            resp = resp.follow()
+        except:
+            pass
+
+        return resp
+
+
     def test_create_order(self):
         """Test create_order view
 
@@ -178,15 +217,27 @@ class OrderTest(WebTest):
 
         form["due_date"] = due_date
         form[self.rt_form_name(self.rt_by_id(6), 'quantity')] = 3
-        response = form.submit("submit1")#.follow()
-        process = self.parent.producing_commitments()[0].process
+        response = self.follow(form.submit("submit1"))#.follow()
+
+        process = self.get_commitment_fault(self.parent, self.parent.producing_commitments())[0].process
+        #process = self.parent.producing_commitments()[0].process
+
         incoming = process.incoming_commitments()
-        child_input = incoming.filter(resource_type=self.child)[0]
+
+        child_input = self.get_commitment_fault(self.child, incoming.filter(resource_type=self.child))[0]
+        #child_input = incoming.filter(resource_type=self.child)[0]
+
         self.assertEqual(child_input.quantity, Decimal("6"))
         rt = child_input.resource_type
-        child_output=rt.producing_commitments()[0]
+
+        child_output = self.get_commitment_fault(rt, rt.producing_commitments())[0]
+        #child_output=rt.producing_commitments()[0]
+
         child_process=child_output.process
-        grandchild_input = child_process.incoming_commitments()[0]
+
+        grandchild_input = self.get_commitment_fault(self.grandchild, child_process.incoming_commitments())[0]
+        #grandchild_input = child_process.incoming_commitments()[0]
+
         self.assertEqual(grandchild_input.quantity, Decimal("18"))
 
 
@@ -209,7 +260,7 @@ class OrderTest(WebTest):
                 if fieldName.endswith('quantity'):
                     form[fieldName] = 0
 
-            response = form.submit("submit1")#.follow()
+            response = self.follow(form.submit("submit1"))#.follow()
         except ValidationError:
             pass
         except Exception as ex:
@@ -237,9 +288,9 @@ class OrderTest(WebTest):
 
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-9-quantity"] = 2000
-        response = form.submit("submit1")#.follow()
+        response = self.follow(form.submit("submit1"))#.follow()
         #import pdb; pdb.set_trace()
-        pcs = self.changeable.producing_commitments()
+        pcs = self.get_commitment_fault(self.changeable, self.changeable.producing_commitments())
         count = pcs.count()
         self.assertEqual(count, 2)
         first_pc = pcs[0]
@@ -276,10 +327,10 @@ class OrderTest(WebTest):
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-10-quantity"] = 4000
         form[self.rt_form_name(self.rt_by_id(10), 'quantity')] = 4000
-        response = form.submit("submit1")#.follow()
+        response = self.follow(form.submit("submit1"))#.follow()
         #import pdb; pdb.set_trace()
 
-        pcs = self.changeable.producing_commitments()
+        pcs = self.get_commitment_fault(self.changeable, self.changeable.producing_commitments())
         count = pcs.count()
         self.assertEqual(count, 2)
         first_pc = pcs[0]
@@ -294,7 +345,7 @@ class OrderTest(WebTest):
         self.assertTrue(first_process in prevs)
         self.assertTrue(last_process in nexts)
 
-        pcs = self.another_changeable.producing_commitments()
+        pcs = self.get_commitment_fault(self.another_changeable, self.another_changeable.producing_commitments())
         count = pcs.count()
         self.assertEqual(count, 2)
         first_pc = pcs[0]
