@@ -3056,10 +3056,14 @@ def create_order(request):
     item_forms = []
     data = request.POST or None
     order_form = OrderForm(data=data)
+    # This is my new target for all the RT-ID nonsense
+    #import pdb; pdb.set_trace()
     for rt in rts:
         prefix1 = "-".join(['RT', str(rt.id)])
         init = {'resource_type_id': rt.id,}
         form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
+        ## DEBUG
+        print("view got RT %s : %d; made fields %s" % (rt, rt.id, form.fields))
         form.features = []
         for ft in rt.features.all():
             prefix2 = "-".join(['FT', str(ft.id)])
@@ -3071,6 +3075,7 @@ def create_order(request):
             order = order_form.save(commit=False)
             order.created_by=request.user
             order.order_type = "customer"
+            order.receiver = order.receiver or request.user
             order.save()
             uc = UseCase.objects.get(identifier="demand_xfer")
             ext_id = request.POST["exchange_type"]
