@@ -105,7 +105,7 @@ class OrderTest(WebTest):
             resource_effect="=",
         )
         event_type_sale.save()"""
-        event_type_sale = EventType.objects.get(slug="sale")
+        event_type_sale = EventType.objects.get(name='Sale')
 
         pfv = PatternFacetValue(
             pattern=order_pattern,
