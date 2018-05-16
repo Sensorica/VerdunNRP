@@ -3048,6 +3048,9 @@ def create_order(request):
     #    raise NotImplementedError(msg='This version does not support order ceate')
     #import pdb; pdb.set_trace()
     patterns = PatternUseCase.objects.filter(use_case__identifier='cust_orders')
+    ## DEBUG
+    if len(patterns) > 1:
+        raise Exception("%d pattern use cases with UCID cust_orders; NOOOOOOOOOOOO!" % (len(patterns),))
     if patterns:
         pattern = patterns[0].pattern
     else:
@@ -3062,8 +3065,7 @@ def create_order(request):
         prefix1 = "-".join(['RT', str(rt.id)])
         init = {'resource_type_id': rt.id,}
         form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
-        ## DEBUG
-        print("view got RT %s : %d; made fields %s" % (rt, rt.id, form.fields))
+
         form.features = []
         for ft in rt.features.all():
             prefix2 = "-".join(['FT', str(ft.id)])
