@@ -52,10 +52,6 @@ class OrderTest(WebTest):
         self.parent = recipe.parent
         self.child = recipe.child
         self.grandchild = recipe.grandchild
-        ## DEBUG
-        print("order_test.setUp sees parent RT %s : %d" % (self.parent, self.parent.id))
-        print("order_test.setUp sees child RT %s : %d" % (self.child, self.child.id))
-        print("order_test.setUp sees grandchild RT %s : %d" % (self.grandchild, self.grandchild.id))
 
         self.wf_recipe = WorkFlowRecipe()
         self.changeable = self.wf_recipe.changeable
@@ -132,6 +128,9 @@ class OrderTest(WebTest):
             facet_value=sellable_sellable,
         )
         rtfv.save()
+
+        ##DEBUG
+        print("PatternUseCase puc is %s : %d" % (puc, puc.id))
 
     def rt_form_name(self, rt, field):
         """Hack to repair test code that hard-coded field names
