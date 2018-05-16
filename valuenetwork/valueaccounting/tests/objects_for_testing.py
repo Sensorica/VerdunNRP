@@ -34,11 +34,6 @@ class Recipe(object):
             )
             self.grandchild.save()
 
-        ## DEBUG
-        print("recipe created parent RT %s : %d" % (self.parent, self.parent.id))
-        print("recipe created child RT %s : %d" % (self.child, self.child.id))
-        print("recipe created grandchild RT %s : %d" % (self.grandchild, self.grandchild.id))
-
         if not unit:
             self.unit = Unit(
                 unit_type="quantity",
