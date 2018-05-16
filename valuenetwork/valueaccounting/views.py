@@ -3048,9 +3048,7 @@ def create_order(request):
     #    raise NotImplementedError(msg='This version does not support order ceate')
     #import pdb; pdb.set_trace()
     patterns = PatternUseCase.objects.filter(use_case__identifier='cust_orders')
-    ## DEBUG
-    if len(patterns) > 1:
-        raise Exception("%d pattern use cases with UCID cust_orders; NOOOOOOOOOOOO!" % (len(patterns),))
+    
     if patterns:
         pattern = patterns[0].pattern
     else:
