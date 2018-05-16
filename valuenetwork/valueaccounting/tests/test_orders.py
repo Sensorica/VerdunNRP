@@ -174,7 +174,6 @@ class OrderTest(WebTest):
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         # the form SHOULD do this itself, but let's do it anyway
         form["exchange_type"] = self.extype
-        form["receiver"] = self.user.pk
 
         form["due_date"] = due_date
         form[self.rt_form_name(self.rt_by_id(6), 'quantity')] = 3
@@ -202,7 +201,6 @@ class OrderTest(WebTest):
             #import pdb; pdb.set_trace()
             # the form SHOULD do this itself, but let's do it anyway
             form["exchange_type"] = self.extype
-            form["receiver"] = self.user.pk
 
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
@@ -235,7 +233,6 @@ class OrderTest(WebTest):
         form["due_date"] = due_date
         # the form SHOULD do this itself, but let's do it anyway
         form["exchange_type"] = self.extype
-        form["receiver"] = self.user.pk
 
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-9-quantity"] = 2000
