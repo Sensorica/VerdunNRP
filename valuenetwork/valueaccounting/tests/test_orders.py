@@ -177,7 +177,7 @@ class OrderTest(WebTest):
 
         form["due_date"] = due_date
         form[self.rt_form_name(self.rt_by_id(6), 'quantity')] = 3
-        response = form.submit("submit1").follow()
+        response = form.submit("submit1")#.follow()
         process = self.parent.producing_commitments()[0].process
         incoming = process.incoming_commitments()
         child_input = incoming.filter(resource_type=self.child)[0]
@@ -208,7 +208,7 @@ class OrderTest(WebTest):
                 if fieldName.endswith('quantity'):
                     form[fieldName] = 0
 
-            response = form.submit("submit1").follow()
+            response = form.submit("submit1")#.follow()
         except ValidationError:
             pass
         except Exception as ex:
@@ -236,7 +236,7 @@ class OrderTest(WebTest):
 
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-9-quantity"] = 2000
-        response = form.submit("submit1").follow()
+        response = form.submit("submit1")#.follow()
         #import pdb; pdb.set_trace()
         pcs = self.changeable.producing_commitments()
         count = pcs.count()
@@ -275,7 +275,7 @@ class OrderTest(WebTest):
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-10-quantity"] = 4000
         form[self.rt_form_name(self.rt_by_id(10), 'quantity')] = 4000
-        response = form.submit("submit1").follow()
+        response = form.submit("submit1")#.follow()
         #import pdb; pdb.set_trace()
 
         pcs = self.changeable.producing_commitments()
