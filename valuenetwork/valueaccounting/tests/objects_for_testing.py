@@ -4,9 +4,9 @@ from decimal import *
 from valuenetwork.valueaccounting.models import *
 
 class Recipe(object):
-    def __init__(self, 
-        parent=None, 
-        child=None, 
+    def __init__(self,
+        parent=None,
+        child=None,
         grandchild=None,
         unit=None,
         production_event_type=None,
@@ -33,6 +33,11 @@ class Recipe(object):
             name="grandchild",
             )
             self.grandchild.save()
+
+        ## DEBUG
+        print("recipe created parent RT %s : %d" % (self.parent, self.parent.id))
+        print("recipe created child RT %s : %d" % (self.child, self.child.id))
+        print("recipe created grandchild RT %s : %d" % (self.grandchild, self.grandchild.id))
 
         if not unit:
             self.unit = Unit(
@@ -79,7 +84,7 @@ class Recipe(object):
             estimated_duration=14400,
         )
         child_pt.save()
-     
+
         parent_output = ProcessTypeResourceType(
             process_type=parent_pt,
             resource_type=self.parent,
@@ -145,10 +150,10 @@ class Recipe(object):
         )
         source.save()
 
-        
+
 class WorkFlowRecipe(object):
-    def __init__(self, 
-        changeable=None, 
+    def __init__(self,
+        changeable=None,
         unit=None,
         create_event_type=None,
         to_be_event_type=None,
@@ -166,7 +171,7 @@ class WorkFlowRecipe(object):
                 substitutable=False,
             )
             self.changeable.save()
-            
+
         self.another_changeable = EconomicResourceType(
             name="another changeable",
             substitutable=False,
@@ -193,7 +198,7 @@ class WorkFlowRecipe(object):
                     resource_effect="+~",
                 )
                 self.create_event_type.save()
-                
+
         if not to_be_event_type:
             try:
                 et = EventType.objects.get(name="To Be Changed")
@@ -232,7 +237,7 @@ class WorkFlowRecipe(object):
             estimated_duration=14400,
         )
         create_pt.save()
-     
+
         change_output = ProcessTypeResourceType(
             process_type=change_pt,
             stage=change_pt,
@@ -262,7 +267,7 @@ class WorkFlowRecipe(object):
             unit_of_quantity=self.unit,
         )
         create_output.save()
-        
+
         change_pt = ProcessType(
             name="change",
             estimated_duration=7200,
@@ -274,7 +279,7 @@ class WorkFlowRecipe(object):
             estimated_duration=14400,
         )
         create_pt.save()
-     
+
         change_output = ProcessTypeResourceType(
             process_type=change_pt,
             stage=change_pt,
@@ -307,9 +312,9 @@ class WorkFlowRecipe(object):
 
 
 class Facets(object):
-    def __init__(self, 
-        domain=None, 
-        source=None, 
+    def __init__(self,
+        domain=None,
+        source=None,
         optical_pattern=None,
         electronic_pattern=None,
         electroptical_pattern=None,
@@ -341,7 +346,7 @@ class Facets(object):
         self.event_type_use=event_type_use
         self.event_type_consume=event_type_consume
         self.event_type_work=event_type_work
-        
+
         if not domain:
             self.domain = Facet(
                 name="Domain",
@@ -509,8 +514,8 @@ class Facets(object):
                     relationship="work",
                     resource_effect="=",
                 )
-                self.event_type_work.save()             
-           
+                self.event_type_work.save()
+
         pfv = PatternFacetValue(
             pattern=self.optical_pattern,
             facet_value=optical_domain,
@@ -614,7 +619,7 @@ class Facets(object):
             facet_value=work_domain,
             event_type=self.event_type_work,
         )
-        pfv.save()      
+        pfv.save()
 
         if not optical_product:
             self.optical_product = EconomicResourceType(
@@ -674,4 +679,3 @@ class Facets(object):
             facet_value=source_us,
         )
         rtfv.save()
-     

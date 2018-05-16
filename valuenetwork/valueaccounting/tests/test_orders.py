@@ -52,6 +52,10 @@ class OrderTest(WebTest):
         self.parent = recipe.parent
         self.child = recipe.child
         self.grandchild = recipe.grandchild
+        ## DEBUG
+        print("order_test.setUp sees parent RT %s : %d" % (self.parent, self.parent.id))
+        print("order_test.setUp sees child RT %s : %d" % (self.child, self.child.id))
+        print("order_test.setUp sees grandchild RT %s : %d" % (self.grandchild, self.grandchild.id))
 
         self.wf_recipe = WorkFlowRecipe()
         self.changeable = self.wf_recipe.changeable
