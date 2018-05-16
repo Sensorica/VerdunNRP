@@ -98,7 +98,8 @@ class OrderTest(WebTest):
         event_type_sale = EventType(
             name="Sale",
             label="sells",
-            relationship="output",
+            #relationship="output",
+            relationship="out",
             related_to="agent",
             resource_effect="=",
         )
