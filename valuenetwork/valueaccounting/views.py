@@ -3094,7 +3094,8 @@ def create_order(request):
             order = order_form.save(commit=False)
             order.created_by=request.user
             order.order_type = "customer"
-            order.receiver = order.receiver or request.user
+            user = AgentUser.objects.filter(user=request.user)
+            order.receiver = order.receiver or (len(user) == 1 and user.get().agent) or request.user # probably still a type mismatch...
             order.save()
             uc = UseCase.objects.get(identifier="demand_xfer")
             ext_id = request.POST["exchange_type"]

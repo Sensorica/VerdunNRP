@@ -1537,7 +1537,7 @@ class EconomicResourceType(models.Model):
     unit = models.ForeignKey(Unit, default=Unit.default_unit_id,
         verbose_name=_('unit'), related_name="resource_units",
         help_text=_('if this resource has different units of use and inventory, this is the unit of inventory'))
-    unit_of_use = models.ForeignKey(Unit, blank=True, null=True,
+    unit_of_use = models.ForeignKey(Unit, blank=True, null=True, default=Unit.default_unit_id,
         verbose_name=_('unit of use'), related_name="units_of_use",
         help_text=_('if this resource has different units of use and inventory, this is the unit of use'))
     unit_of_value = models.ForeignKey(Unit, blank=True, null=True,
@@ -3302,6 +3302,7 @@ class Order(models.Model):
         #import pdb; pdb.set_trace()
         if not due:
             due=self.due_date
+        # is Give right?  We also have Sale, Shipment
         event_type = EventType.objects.get(name="Give")  #(relationship="shipment")
         ct = Commitment(
             order=self,
