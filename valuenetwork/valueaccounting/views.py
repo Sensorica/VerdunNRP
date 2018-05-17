@@ -3072,8 +3072,11 @@ def create_order(request):
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         if not order_form.is_valid():
-            raise ValidationError("Invalid order form")
+
+            raise ValidationError("Invalid order form: %s" % (order_form.errors,))
+
         elif (iform for iform in item_forms if iform.is_valid()):
+
             order = order_form.save(commit=False)
             order.created_by=request.user
             order.order_type = "customer"
@@ -3185,6 +3188,10 @@ def create_order(request):
 
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/order-schedule', order.id))
+
+        else:
+
+            raise ValidationError("no non-zero quantity order items")
 
     return render_to_response("valueaccounting/create_order.html", {
         "order_form": order_form,
