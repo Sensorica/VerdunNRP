@@ -3071,7 +3071,7 @@ def create_order(request):
 
     order_form = OrderForm(data=data)
 
-    #import pdb; pdb.set_trace()
+    import pdb; pdb.set_trace()
     for rt in rts:
         prefix1 = "-".join(['RT', str(rt.id)])
         init = {'resource_type_id': rt.id,}
