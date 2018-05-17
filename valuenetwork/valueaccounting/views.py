@@ -3063,8 +3063,8 @@ def create_order(request):
     # user, and a runtime error always indicates a lack of data.
     try:
         data = request.POST or {
-            "receiver": (request.user or EconomicAgent.objects.all()[0]).id,
-            "exchange_type": ExchangeType.objects.demand_exchange_types()[0].id,
+            "receiver": request.user or EconomicAgent.objects.all()[0],
+            "exchange_type": ExchangeType.objects.demand_exchange_types()[0],
         }
     except IndexError:
         raise RuntimeError("Must have at least one agent and one demand exchange type to create order")
