@@ -3053,11 +3053,24 @@ def create_order(request):
         pattern = patterns[0].pattern
     else:
         raise ValidationError("no Customer Order ProcessPattern")
+
     rts = pattern.all_resource_types()
     item_forms = []
-    data = request.POST or None
+
+    # part of fix for: Create Order dies #10
+    # both of these fields are (now) required (formally rather than throwing cryptically)
+    # so give them defaults. Now a form validation error always implicates the
+    # user, and a runtime error always indicates a lack of data.
+    try:
+        data = request.POST or {
+            "receiver": EconomicAgent.objects.all()[0],
+            "exchange_type": ExchangeType.objects.demand_exchange_types()[0],
+        }
+    except IndexError:
+        raise RuntimeError("Must have at least one agent and one demand exchange type to create order")
+
     order_form = OrderForm(data=data)
-    # This is my new target for all the RT-ID nonsense
+
     #import pdb; pdb.set_trace()
     for rt in rts:
         prefix1 = "-".join(['RT', str(rt.id)])

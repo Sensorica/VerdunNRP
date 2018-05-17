@@ -400,7 +400,7 @@ class OrderForm(forms.ModelForm):
         required=True,
         queryset=EconomicAgent.objects.all())
     exchange_type = forms.ModelChoiceField(
-        required=False,
+        required=True,
         empty_label=None,
         queryset=ExchangeType.objects.demand_exchange_types())
 
