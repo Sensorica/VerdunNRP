@@ -201,8 +201,8 @@ class OrderTest(WebTest):
         return resp
 
     def diag_form_fields(self, form):
-        print("seeing form receiver: %s" % (form.fields['receiver'],))
-        print("seeing form exchange_type: %s" % (form.fields['exchange_type'],))
+        print("seeing form receiver: %s" % (form.fields['receiver'].render(),))
+        print("seeing form exchange_type: %s" % (form.fields['exchange_type'].render(),))
 
     def test_create_order(self):
         """Test create_order view
