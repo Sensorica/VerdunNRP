@@ -3061,9 +3061,10 @@ def create_order(request):
     # both of these fields are (now) required (formally rather than throwing cryptically)
     # so give them defaults. Now a form validation error always implicates the
     # user, and a runtime error always indicates a lack of data.
+    user = AgentUser.objects.filter(user=request.user)
     try:
         data = request.POST or {
-            "receiver": request.user or EconomicAgent.objects.all()[0],
+            "receiver": (user and user.get().agent) or EconomicAgent.objects.all()[0],
             "exchange_type": ExchangeType.objects.demand_exchange_types()[0],
         }
     except IndexError:
