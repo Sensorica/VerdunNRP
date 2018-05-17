@@ -281,7 +281,7 @@ class OrderTest(WebTest):
         # probably don't need this, but it can't hurt
         commitments = Commitment.objects
         commitments.all().delete()
-        self.assertIsFalse(bool(commitments.all()), 'Commitments escaped deletion: %s' % (commitments.all(),))
+        self.assertFalse(bool(commitments.all()), 'Commitments escaped deletion: %s' % (commitments.all(),))
         e = None
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
