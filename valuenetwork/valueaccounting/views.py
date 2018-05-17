@@ -3063,15 +3063,15 @@ def create_order(request):
     # user, and a runtime error always indicates a lack of data.
     try:
         data = request.POST or {
-            "receiver": request.user or EconomicAgent.objects.all()[0],
-            "exchange_type": ExchangeType.objects.demand_exchange_types()[0],
+            "receiver": (request.user or EconomicAgent.objects.all()[0]).id,
+            "exchange_type": ExchangeType.objects.demand_exchange_types()[0].id,
         }
     except IndexError:
         raise RuntimeError("Must have at least one agent and one demand exchange type to create order")
 
     order_form = OrderForm(data=data)
 
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
     for rt in rts:
         prefix1 = "-".join(['RT', str(rt.id)])
         init = {'resource_type_id': rt.id,}
