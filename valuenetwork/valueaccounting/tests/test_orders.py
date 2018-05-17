@@ -200,6 +200,9 @@ class OrderTest(WebTest):
 
         return resp
 
+    def diag_form_fields(self, form):
+        print("seeing form.receiver: %s" % (form.receiver,))
+        print("seeing form.exchange_type: %s" % (form.exchange_type,))
 
     def test_create_order(self):
         """Test create_order view
@@ -210,6 +213,7 @@ class OrderTest(WebTest):
 
         response = self.app.get('/accounting/create-order/' , user='alice')
         form = response.form
+        self.diag_form_fields(form)
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         # the form SHOULD do this itself, but let's do it anyway
@@ -250,6 +254,7 @@ class OrderTest(WebTest):
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
             form = response.form
+            self.diag_form_fields(form)
             #import pdb; pdb.set_trace()
             # the form SHOULD do this itself, but let's do it anyway
             form["exchange_type"] = self.extype
@@ -280,6 +285,7 @@ class OrderTest(WebTest):
 
         response = self.app.get('/accounting/create-order/' , user='alice')
         form = response.form
+        self.diag_form_fields(form)
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
