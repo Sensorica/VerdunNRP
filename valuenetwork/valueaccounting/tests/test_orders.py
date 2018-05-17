@@ -147,7 +147,7 @@ class OrderTest(WebTest):
         # Diagnostics need to be certain that only orders and commitments generated
         # by the operation itself are in the DB
         Commitment.objects.all().delete()
-        Order.object.all().delete()
+        Order.objects.all().delete()
 
     def tearDown(self):
         # Diagnostics need to be certain that only orders and commitments generated
