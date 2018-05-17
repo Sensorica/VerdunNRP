@@ -28,7 +28,7 @@ class OrderTest(WebTest):
     def setUp(self):
 
         # Need to set up an ExchangeType too.
-        self.extype = ExchangeType.objects.filter(slug='sale').get().pk
+        self.extype = ExchangeType.objects.filter(slug='sale').get()
 
         self.user = User.objects.create_user('alice', 'alice@whatever.com', 'password')
 
@@ -144,11 +144,17 @@ class OrderTest(WebTest):
         )
         rtfv.save()
 
-        # To make the fault-finder work, clean out all of the DB's commitments
+        # Diagnostics need to be certain that only orders and commitments generated
+        # by the operation itself are in the DB
         Commitment.objects.all().delete()
+        Order.object.all().delete()
 
     def tearDown(self):
-        Commitment.objects.all().delete()
+        # Diagnostics need to be certain that only orders and commitments generated
+        # by the operation itself are in the DB
+        #Commitment.objects.all().delete()
+        #Order.object.all().delete()
+        pass
 
     def rt_form_name(self, rt, field):
         """Hack to repair test code that hard-coded field names
@@ -187,7 +193,30 @@ class OrderTest(WebTest):
         self.assertIsNotNone(check, msg='Operation produced no commitments related to %s' % (rt,))
 
         # If we get here, there is an association flaw.
-        raise AssertionError(msg='association flaw')
+        # Are there any event types with commitments?
+        et_w_com = (et for et in EventType.objects.all() if et.commitments)
+        self.assertTrue(et_w_com, msg='No event types with commitments')
+
+        # Does the RT connect to processes?
+        check = rt.producing_process_type_relationships()
+        self.assertTrue(check, msg='RT has no producing process types; does have process types: %s' % (rt.process_types,))
+
+        # I can do this because we kill all commitments beforehand
+        with_order = (com for com in rt.commitments if com.order)
+        # Are the RT's commitments associated with any order?
+        self.assertTrue(with_order, msg='No commitment associated with both RT and order; did produce: %s' % (rt.commitments,))
+
+        # Is our exchange type being used?
+        check = self.extype.exchanges
+        self.assertTrue(check, msg='Operation produced no Sale exchange')
+
+        # Are there commitments that use our exchange type?
+        check = Commitment.objects.filter(exchange__exchange_type=self.extype)
+        self.assertTrue(check, msg='Operation produced no commitments to Sale exchange type; did produce: %s' % (Commitment.objects.all(),))
+
+        self.assertTrue(False, msg='It was something else; commitments produced: %s' % (Commitment.objects.all(),))
+
+
 
     def follow(self, resp):
         """ Is there really a good reason to throw when you don't memorize your
@@ -218,7 +247,7 @@ class OrderTest(WebTest):
         #import pdb; pdb.set_trace()
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         # the form SHOULD do this itself, but let's do it anyway
-        form["exchange_type"] = self.extype
+        #form["exchange_type"] = self.extype
 
         form["due_date"] = due_date
         form[self.rt_form_name(self.rt_by_id(6), 'quantity')] = 3
@@ -250,7 +279,9 @@ class OrderTest(WebTest):
         """Test fix for #510 Create order blows up: at least one item must have quantity > 0
         """
         # probably don't need this, but it can't hurt
-        Commitment.objects.all().delete()
+        commitments = Commitment.objects
+        commitments.all().delete()
+        self.assertIsFalse(bool(commitments.all()), 'Commitments escaped deletion: %s' % (commitments.all(),))
         e = None
         try:
             response = self.app.get('/accounting/create-order/' , user='alice')
@@ -258,7 +289,7 @@ class OrderTest(WebTest):
             self.diag_form_fields(form)
             #import pdb; pdb.set_trace()
             # the form SHOULD do this itself, but let's do it anyway
-            form["exchange_type"] = self.extype
+            #form["exchange_type"] = self.extype
 
             due_date = datetime.date.today().strftime('%Y-%m-%d')
             form["due_date"] = due_date
@@ -274,7 +305,7 @@ class OrderTest(WebTest):
 
         self.assertIsNone(e, msg="setting form fields or submit threw %s" % (str(e),))
 
-        coms = Commitment.objects.all()
+        coms = bool(Commitment.objects.all())
         self.assertFalse(coms, msg="order with zero quantities produced commitments: %s" % (str(coms),))
 
     def test_create_workflow_order(self):
@@ -291,7 +322,7 @@ class OrderTest(WebTest):
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
         # the form SHOULD do this itself, but let's do it anyway
-        form["exchange_type"] = self.extype
+        #form["exchange_type"] = self.extype
 
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-9-quantity"] = 2000
@@ -330,7 +361,7 @@ class OrderTest(WebTest):
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
         # the form SHOULD do this itself, but let's do it anyway
-        form["exchange_type"] = self.extype
+        #form["exchange_type"] = self.extype
         #form["RT-9-quantity"] = 2000
         form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
         #form["RT-10-quantity"] = 4000
