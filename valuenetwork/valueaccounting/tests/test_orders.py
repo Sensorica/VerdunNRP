@@ -194,17 +194,17 @@ class OrderTest(WebTest):
 
         # If we get here, there is an association flaw.
         # Are there any event types with commitments?
-        et_w_com = (et for et in EventType.objects.all() if et.commitments)
+        et_w_com = (et for et in EventType.objects.all() if et.commitments.all())
         self.assertTrue(et_w_com, msg='No event types with commitments')
 
         # Does the RT connect to processes?
         check = rt.producing_process_type_relationships()
-        self.assertTrue(check, msg='RT has no producing process types; does have process types: %s' % (rt.process_types,))
+        self.assertTrue(check, msg='RT has no producing process types; does have process types: %s' % (rt.process_types.all(),))
 
         # I can do this because we kill all commitments beforehand
-        with_order = (com for com in rt.commitments if com.order)
+        with_order = (com for com in rt.commitments.all() if com.order)
         # Are the RT's commitments associated with any order?
-        self.assertTrue(with_order, msg='No commitment associated with both RT and order; did produce: %s' % (rt.commitments,))
+        self.assertTrue(with_order, msg='No commitment associated with both RT and order; did produce: %s' % (rt.commitments.all(),))
 
         # Is our exchange type being used?
         check = self.extype.exchanges
