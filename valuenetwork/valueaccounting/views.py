@@ -3052,7 +3052,7 @@ def create_order(request):
     if patterns:
         pattern = patterns[0].pattern
     else:
-        raise ValidationError("no Customer Order ProcessPattern")
+        raise RuntimeError("no Customer Order ProcessPattern")
 
     rts = pattern.all_resource_types()
     item_forms = []
@@ -3063,7 +3063,7 @@ def create_order(request):
     # user, and a runtime error always indicates a lack of data.
     try:
         data = request.POST or {
-            "receiver": EconomicAgent.objects.all()[0],
+            "receiver": request.user or EconomicAgent.objects.all()[0],
             "exchange_type": ExchangeType.objects.demand_exchange_types()[0],
         }
     except IndexError:
@@ -3149,7 +3149,7 @@ def create_order(request):
                                     created_by=request.user,
                                 )
                                 commitment.save()
-                                commitment.order_item = commitment
+                                commitment.order_item = commitment # what?
                                 commitment.save()
                                 commitment.generate_producing_process(request.user, [], explode=True)
 
@@ -3158,6 +3158,7 @@ def create_order(request):
             tt = None
             if tts:
                 tt = tts[0]
+                # why just the one?  ExchangeTypes can have a lot of them...
             for commit in oi_commitments:
                 xfer = Transfer(
                     exchange=exchange,
@@ -3177,12 +3178,13 @@ def create_order(request):
             rec_tt = None
             if rec_tts:
                 rec_tt = rec_tts[0]
+            # wait, why is the above iterating commitments and this isn't?
             cr_xfer = Transfer(
                 exchange=exchange,
                 name=rec_tt.name + " from " + order.receiver.nick,
                 transfer_type=rec_tt,
                 context_agent=exchange.context_agent,
-                transfer_date=commit.commitment_date,
+                transfer_date=datetime.date.today(), # was commit.commitment_date
                 created_by=request.user,
             )
             cr_xfer.save()
