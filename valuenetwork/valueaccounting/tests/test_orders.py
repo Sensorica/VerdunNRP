@@ -207,7 +207,7 @@ class OrderTest(WebTest):
         self.assertTrue(with_order, msg='No commitment associated with both RT and order; did produce: %s' % (rt.commitments.all(),))
 
         # Is our exchange type being used?
-        check = self.extype.exchanges
+        check = self.extype.exchanges.all()
         self.assertTrue(check, msg='Operation produced no Sale exchange')
 
         # Are there commitments that use our exchange type?
@@ -215,8 +215,6 @@ class OrderTest(WebTest):
         self.assertTrue(check, msg='Operation produced no commitments to Sale exchange type; did produce: %s' % (Commitment.objects.all(),))
 
         self.assertTrue(False, msg='It was something else; commitments produced: %s' % (Commitment.objects.all(),))
-
-
 
     def follow(self, resp):
         """ Is there really a good reason to throw when you don't memorize your
@@ -305,7 +303,7 @@ class OrderTest(WebTest):
 
         self.assertIsNone(e, msg="setting form fields or submit threw %s" % (str(e),))
 
-        coms = bool(Commitment.objects.all())
+        coms = Commitment.objects.all()
         self.assertFalse(coms, msg="order with zero quantities produced commitments: %s" % (str(coms),))
 
     def test_create_workflow_order(self):
