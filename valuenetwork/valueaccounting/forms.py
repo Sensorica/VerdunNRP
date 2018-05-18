@@ -2726,12 +2726,12 @@ class ResourceTypeFacetValueForm(forms.Form):
     facet_id = forms.CharField(widget=forms.HiddenInput)
     value = forms.ChoiceField()
 
-
+# oh man, I should have caught this way sooner.
 class OrderItemForm(forms.ModelForm):
     resource_type_id = forms.CharField(widget=forms.HiddenInput)
     quantity = forms.DecimalField(
         widget=forms.TextInput(attrs={'class': 'input-small',}),
-        validators=[MinValueValidator(0.00001)]
+        validators=[MinValueValidator(0.01)]
         )
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))

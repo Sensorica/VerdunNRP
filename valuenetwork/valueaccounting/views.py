@@ -3061,10 +3061,11 @@ def create_order(request):
     # both of these fields are (now) required (formally rather than throwing cryptically)
     # so give them defaults. Now a form validation error always implicates the
     # user, and a runtime error always indicates a lack of data.
-    user = AgentUser.objects.filter(user=request.user)
+
     try:
+        user = AgentUser.objects.filter(user=request.user)
         data = request.POST or {
-            "receiver": (user and user.get().agent) or EconomicAgent.objects.all()[0],
+            "receiver": (user and len(user) == 1 and user.get().agent) or EconomicAgent.objects.all()[0],
             "exchange_type": ExchangeType.objects.demand_exchange_types()[0],
         }
     except IndexError:
@@ -3073,6 +3074,8 @@ def create_order(request):
     order_form = OrderForm(data=data)
 
     #import pdb; pdb.set_trace()
+    # once I confirm this as the problem, the fix should involve this code.
+    # (probably)
     for rt in rts:
         prefix1 = "-".join(['RT', str(rt.id)])
         init = {'resource_type_id': rt.id,}
@@ -3083,6 +3086,7 @@ def create_order(request):
             prefix2 = "-".join(['FT', str(ft.id)])
             form.features.append(OrderItemOptionsForm(data=data, prefix=prefix2, feature=ft))
         item_forms.append(form)
+
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         if not order_form.is_valid():
@@ -3112,6 +3116,8 @@ def create_order(request):
             exchange.save()
             #import pdb; pdb.set_trace()
             for form in item_forms:
+                ## DEBUG smoking gun.  If this looks bogus, the form has to be redone
+                print(form.cleaned_data)
                 if form.is_valid():
                     data = form.cleaned_data
                     qty = data["quantity"]
