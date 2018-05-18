@@ -3074,8 +3074,7 @@ def create_order(request):
     order_form = OrderForm(data=data)
 
     #import pdb; pdb.set_trace()
-    # once I confirm this as the problem, the fix should involve this code.
-    # (probably)
+
     for rt in rts:
         prefix1 = "-".join(['RT', str(rt.id)])
         init = {'resource_type_id': rt.id,}
@@ -3093,7 +3092,7 @@ def create_order(request):
 
             raise ValidationError("Invalid order form: %s" % (order_form.errors,))
 
-        elif (iform for iform in item_forms if iform.is_valid()):
+        elif [iform for iform in item_forms if iform.is_valid()]:
 
             order = order_form.save(commit=False)
             order.created_by=request.user
@@ -3117,8 +3116,6 @@ def create_order(request):
             #import pdb; pdb.set_trace()
             for form in item_forms:
                 if form.is_valid():
-                    ## DEBUG smoking gun.  If this looks bogus, the form has to be redone
-                    print(form.cleaned_data)
 
                     data = form.cleaned_data
                     qty = data["quantity"]
