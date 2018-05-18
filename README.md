@@ -1,6 +1,6 @@
 valuenetwork
 =====================
-This project is hard-forked from valnet/valueaccounting.  The original authors are Bob Haugen and Foster Lynn.
+This project is hard-forked from valnet/valueaccounting.  The original authors are Bob Haugen and Lynn Foster.
 
 This is final Sensorica version of the NRP that will feature improved stability and UI for use in the Verdun Project.  Renovations to this version are by David Hand (sqykly) with *a lot* of input from Bob and Lynn.
 
