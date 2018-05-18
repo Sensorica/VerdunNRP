@@ -3116,9 +3116,10 @@ def create_order(request):
             exchange.save()
             #import pdb; pdb.set_trace()
             for form in item_forms:
-                ## DEBUG smoking gun.  If this looks bogus, the form has to be redone
-                print(form.cleaned_data)
                 if form.is_valid():
+                    ## DEBUG smoking gun.  If this looks bogus, the form has to be redone
+                    print(form.cleaned_data)
+
                     data = form.cleaned_data
                     qty = data["quantity"]
                     if qty:
