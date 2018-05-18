@@ -228,9 +228,10 @@ class OrderTest(WebTest):
         return resp
 
     def diag_form_fields(self, form):
-        #print("seeing form receiver: %s" % (form.fields['receiver'][0].value,))
-        #print("seeing form exchange_type: %s" % (form.fields['exchange_type'][0].value,))
-        pass
+        for field_name, field in form.fields.items():
+            if field_name.endswith('id'):
+                self.assertTrue(form[field_name], 'This ID field is unfilled: %s' % (field_name,))
+        return form
 
     def test_create_order(self):
         """Test create_order view
