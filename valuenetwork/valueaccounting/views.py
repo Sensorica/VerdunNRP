@@ -3071,13 +3071,13 @@ def create_order(request):
         raise RuntimeError("Must have at least one agent and one demand exchange type to create order")
 
     order_form = OrderForm(data=data)
-    item_inits = []
+    item_inits = [{'resource_type_id': rt.id} for rt in rts]
 
     #import pdb; pdb.set_trace()
 
-    for rt in rts:
+    #for rt in rts:
         #prefix1 = "-".join(['RT', str(rt.id)])
-        item_inits.append({'resource_type_id': rt.id,})
+        #item_inits.append({'resource_type_id': rt.id,})
         #form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
         # Not anymore
         """

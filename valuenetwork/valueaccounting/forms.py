@@ -2727,7 +2727,7 @@ class ResourceTypeFacetValueForm(forms.Form):
     value = forms.ChoiceField()
 
 # oh man, I should have caught this way sooner.
-class OrderItemForm(forms.ModelForm):
+class OrderItemForm(forms.Form):
     resource_type_id = forms.CharField(widget=forms.HiddenInput, required=True)
     quantity = forms.DecimalField(
         widget=forms.TextInput(attrs={'class': 'input-small',}),
@@ -2745,11 +2745,12 @@ class OrderItemForm(forms.ModelForm):
         super(OrderItemForm, self).__init__(*args, initial = initial or None, data = data, **kwargs)
         self.resource_type = resource_type
 
-
+    """# Just for kicks.
     class Meta:
         model = Commitment # needs to be bound to be valid
         fields = ('quantity', 'description')
         #pass
+    """
 
 class OrderItemFormSet(forms.formsets.BaseFormSet):
     form = OrderItemForm
