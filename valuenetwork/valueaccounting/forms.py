@@ -2737,12 +2737,19 @@ class OrderItemForm(forms.Form):
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
 
-    def __init__(self, resource_type=None, initial={}, data={}, *args, **kwargs):
-        resource_type = resource_type or ('resource_type_id' in data and EconomicResourceType.objects.get(id=initial['resource_type_id']))
+    def __init__(self, resource_type=None, initial=None, data=None, *args, **kwargs):
+        resource_type = resource_type or (data and 'resource_type_id' in data and EconomicResourceType.objects.get(id=initial['resource_type_id']))
         #fine.
-        resource_type = resource_type or ('resource_type_id' in initial and EconomicResourceType.objects.get(id=initial['resource_type_id']))
-        # MUST include data to cause the form to be bound.
-        super(OrderItemForm, self).__init__(*args, initial = initial or None, data = data, **kwargs)
+        resource_type = resource_type or (initial and 'resource_type_id' in initial and EconomicResourceType.objects.get(id=initial['resource_type_id']))
+
+        if data and initial and 'quantity' in initial and 'quantity' in data:
+            initial.pop('quantity')
+        elif initial and 'quantity' not in initial:
+            initial['quantity'] = Decimal(0)
+        elif not initial:
+            initial = {'quantity': Decimal(0)}
+
+        super(OrderItemForm, self).__init__(*args, initial = initial, data = data, **kwargs)
         self.resource_type = resource_type
 
     class Meta:
