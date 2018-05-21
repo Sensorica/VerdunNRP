@@ -3,7 +3,7 @@
 {% load i18n %}
 {% load bootstrap_tags %}
 {% load types %}
-
+{% load chair_tag %}
 
 
 {% block head_title %}{% trans "Create Order" %}{% endblock %}
@@ -14,7 +14,7 @@
 
 <style>
 
-	tr.even td
+	.even
 	{
 		color:#000000;
 		background-color:#EAF2D3;
@@ -53,7 +53,12 @@
 	<div>
 
 		<legend>{% trans "Create Order" %}</legend>
-
+		{% if order_form.errors %}
+			{{ order_form.errors }}
+		{% endif %}
+		{% if item_forms.errors %}
+			{{ item_forms.errors }}
+		{% endif %}
 		<form method="POST" action="" id="orderForm" >
 			{% csrf_token %}
 			<div class="row-fluid">
@@ -70,20 +75,33 @@
 					{{ order_form.due_date }}
 				</div>
                 <div class="span3 control-group">
-                    <div class="heading" >{% trans t_exchange_type|title %}:</div>
+                    <div class="heading" >{{ t_exchange_type|title|tr }}:</div>
                     {{ order_form.exchange_type }}
                 </div>
 			</div>
+			{# TODO this would be a good spot to add rt list filter, facet filter(?) #}
+			{# could have filter by provider, that would make sense, but I think sales #}
+			{# through this interface will be limited for Verdun to non-physical products? #}
 			<div class="row-fluid">
 				<div class="span8 control-group">
 						<b>{% trans "Notes" %}:</b>
 						{{ order_form.description }}
 				</div>
-				<div class="form-actions span2">
+				<div class="form-actions span2">{# er, why are there two? #}
 		        	<button class="btn btn-primary" type="submit" name="submit1" >{% trans "Submit Order" %}</button>
 		    	</div>
 			</div>
 
+			<div class="order-items">
+				{{ item_forms.management_form }}
+				{% for form in item_forms %}
+				<div class="{% cycle 'even' 'odd' %}">
+					{% include "valueaccounting/_order_item_rt.html" with form=form %}
+				</div>
+			</div>
+
+			{# No. #}
+			{% comment %}
 			<table style="width: 100%;" class="table table-bordered table-hover table-condensed" >
 				<thead>
 					<th>{% trans "Resource" %}</th>
@@ -109,6 +127,8 @@
 					{% endfor %}
 				<tbody>
 			</table>
+			{% endcomment %}
+			{# TODO This is a great place to calculate the cost if we want that #}
 			<div class="form-actions">
 		       	<button class="btn btn-primary" type="submit"  name="submit2" >{% trans "Submit Order" %}</button>
 		   	</div>

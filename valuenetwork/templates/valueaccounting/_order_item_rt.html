@@ -1,0 +1,41 @@
+{# form : forms.OrderItemForm #}
+{# form.resource_type : EconomicResourceType #}
+{# form.id : forms.Field(widget=forms.HiddenInput) #}
+{# form.quantity : forms.DecimalField #}
+
+{% load i18n %}
+{% load bootstrap_tags %}
+{% load thumbnail %}
+{% load types %}
+{% load chair_tag %}
+
+{% with resource_type=form.resource_type %}
+  <div class="clearfix" id="rt-{{ resource_type.id }}">
+    {% if resource_type.photo %}
+      <img class="hang-left" src="{% thumbnail resource_type.photo photo_size %}" />
+    {% elif resource_type.photo_url %}
+      <img class="hang-left" src="{{ resource_type.photo_url }}" width="128" height="96" />
+    {% endif %}
+    <div class="right-of-img">
+      <div class="rt-name">
+        <a href="{% url resource_type resource_type_id=resource_type.id %}">
+          {{ resource_type.name|tr }}
+        </a>
+        {% if resource_type.url %}<a href="{{ resource_type.url }}" class="btn btn-small external-link rt-link-out">=&gt;</a>{% endif %}
+      </div>
+
+      <div class="order-rt-controls">
+        {{ form.resource_type_id }}
+        {{ form.quantity }} {# TODO add unit here #}
+        {# TODO if we want prices to be calculated, probably want a price control here #}
+        {# Sure, someone could just set the price to 0, but only if they're morons #}
+      </div>
+      <div class="row-fluid">
+        <p>
+          {{ resource_type.description|urlize|linebreaks }}
+        </p>
+      </div>
+    </div>
+
+  </div>
+{% endwith %}
