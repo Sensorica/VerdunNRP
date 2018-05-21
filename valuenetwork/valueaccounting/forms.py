@@ -2745,12 +2745,10 @@ class OrderItemForm(forms.Form):
         super(OrderItemForm, self).__init__(*args, initial = initial or None, data = data, **kwargs)
         self.resource_type = resource_type
 
-    """# Just for kicks.
     class Meta:
-        model = Commitment # needs to be bound to be valid
-        fields = ('quantity', 'description')
+        #model = Commitment # needs to be bound to be valid, #or does it?
+        fields = ('quantity', 'description', 'resource_type_id', 'url', 'description')
         #pass
-    """
 
 class OrderItemFormSet(forms.formsets.BaseFormSet):
     form = OrderItemForm
