@@ -95,9 +95,10 @@
 			<div class="order-items">
 				{{ item_forms.management_form }}
 				{% for form in item_forms %}
-				<div class="{% cycle 'even' 'odd' %}">
-					{% include "valueaccounting/_order_item_rt.html" with form=form %}
-				</div>
+					<div class="{% cycle 'even' 'odd' %}">
+						{% include "valueaccounting/_order_item_rt.html" with form=form %}
+					</div>
+				{% endfor %}
 			</div>
 
 			{# No. #}
