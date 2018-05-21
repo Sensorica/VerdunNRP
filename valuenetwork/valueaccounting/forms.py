@@ -2751,7 +2751,7 @@ class OrderItemForm(forms.ModelForm):
         fields = ('quantity', 'description')
         #pass
 
-class OrderItemFormSet(forms.formsets.FormSet):
+class OrderItemFormSet(forms.formsets.BaseFormSet):
     form = OrderItemForm
 
     def order_item_forms(self):
