@@ -3074,19 +3074,19 @@ def create_order(request):
     item_inits = [{'resource_type_id': rt.id} for rt in rts]
 
     #import pdb; pdb.set_trace()
-
-    #for rt in rts:
-        #prefix1 = "-".join(['RT', str(rt.id)])
-        #item_inits.append({'resource_type_id': rt.id,})
-        #form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
+    """
+    for rt in rts:
+        prefix1 = "-".join(['RT', str(rt.id)])
+        item_inits.append({'resource_type_id': rt.id,})
+        form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
         # Not anymore
-        """
+
         form.features = []
         for ft in rt.features.all():
             prefix2 = "-".join(['FT', str(ft.id)])
             form.features.append(OrderItemOptionsForm(data=data, prefix=prefix2, feature=ft))
         item_forms.append(form)
-        """
+    """
 
     # make the formset with item_inits
     item_forms = OrderItemFormSet(initial=item_inits, data=request.POST or None, prefix='item')
