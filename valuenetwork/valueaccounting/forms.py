@@ -2751,7 +2751,7 @@ class OrderItemForm(forms.ModelForm):
         fields = ('quantity', 'description')
         #pass
 
-class OrderItemFormSet(forms.BaseFormSet):
+class OrderItemFormSet(django.forms.BaseFormSet):
     form = OrderItemForm
 
     def order_item_forms(self):
