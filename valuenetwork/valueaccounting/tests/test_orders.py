@@ -231,13 +231,16 @@ class OrderTest(WebTest):
     def set_item_quantity(self, form, rt, qty):
         pk = rt.id
         field_name_for_rt = ''
+        did_find = []
         for field_name, field in form.fields.items():
             if field_name.endswith('resource_type_id'):
                 if int(form[field_name].value or '0') == pk:
                     field_name_for_rt = field_name
                     break
+                else:
+                    did_find.append(form[field_name].value)
 
-        self.assertTrue(field_name_for_rt, 'Form fields for RT with ID %s not found in form fields: %s' % (pk, form.fields))
+        self.assertTrue(field_name_for_rt, 'Form fields for RT with ID %s not found in form fields: %s' % (pk, did_find))
 
         prefix = field_name_for_rt[:-len('resource_type_id')]
         form[prefix + 'quantity'] = Decimal(qty)
