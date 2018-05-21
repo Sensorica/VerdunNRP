@@ -3222,10 +3222,6 @@ def create_order(request):
             return HttpResponseRedirect('/%s/%s/'
                 % ('accounting/order-schedule', order.id))
 
-        else:
-
-            raise ValidationError("no non-zero quantity order items")
-
     return render_to_response("valueaccounting/create_order.html", {
         "order_form": order_form,
         "item_forms": item_forms,
