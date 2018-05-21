@@ -2728,21 +2728,42 @@ class ResourceTypeFacetValueForm(forms.Form):
 
 # oh man, I should have caught this way sooner.
 class OrderItemForm(forms.ModelForm):
-    resource_type_id = forms.CharField(widget=forms.HiddenInput)
+    resource_type_id = forms.CharField(widget=forms.HiddenInput, required=True)
     quantity = forms.DecimalField(
         widget=forms.TextInput(attrs={'class': 'input-small',}),
-        validators=[MinValueValidator(0.01)]
+        #validators=[MinValueValidator(0.01)], # can't do that; the formset now does this validation itself
+        default=Decimal(0)
         )
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
 
-    def __init__(self, resource_type, *args, **kwargs):
-        super(OrderItemForm, self).__init__(*args, **kwargs)
+    def __init__(self, resource_type=None, initial={}, data={}, *args, **kwargs):
+        resource_type = resource_type or
+            ('resource_type_id' in data and EconomicResourceType.objects.get(initial['resource_type_id'])) or
+            ('resource_type_id' in initial and EconomicResourceType.objects.get(initial['resource_type_id']))
+        # MUST include data to cause the form to be bound.
+        super(OrderItemForm, self).__init__(*args, initial = initial or None, data = data, **kwargs)
         self.resource_type = resource_type
 
+
     class Meta:
-        model = Commitment
-        fields = ('quantity', 'description')
+        model = Commitment # needs to be bound to be valid
+        fields = ('quantity',)# 'description')
+        #pass
+
+class OrderItemFormSet(forms.BaseFormSet):
+    form = OrderItemForm
+
+    def order_item_forms(self):
+        return [form for form in self.forms if form.is_valid() and form.cleaned_data['quantity']]
+
+    def clean(self):
+        """ See if this SET of forms is valid by having one or more non-zero
+            quantity items.
+        """
+        if not self.order_item_forms():
+            raise ValidationError("Must order at least one item in non-zero quantity")
+
 
 
 class OrderItemOptionsForm(forms.Form):

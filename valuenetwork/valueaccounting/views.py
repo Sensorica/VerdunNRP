@@ -3055,7 +3055,6 @@ def create_order(request):
         raise RuntimeError("no Customer Order ProcessPattern")
 
     rts = pattern.all_resource_types()
-    item_forms = []
 
     # part of fix for: Create Order dies #10
     # both of these fields are (now) required (formally rather than throwing cryptically)
@@ -3072,27 +3071,37 @@ def create_order(request):
         raise RuntimeError("Must have at least one agent and one demand exchange type to create order")
 
     order_form = OrderForm(data=data)
+    item_inits = []
 
     #import pdb; pdb.set_trace()
 
     for rt in rts:
-        prefix1 = "-".join(['RT', str(rt.id)])
-        init = {'resource_type_id': rt.id,}
-        form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
-
+        #prefix1 = "-".join(['RT', str(rt.id)])
+        item_inits.append({'resource_type_id': rt.id,})
+        #form = OrderItemForm(data=data, prefix=prefix1, resource_type=rt, initial=init)
+        # Not anymore
+        """
         form.features = []
         for ft in rt.features.all():
             prefix2 = "-".join(['FT', str(ft.id)])
             form.features.append(OrderItemOptionsForm(data=data, prefix=prefix2, feature=ft))
         item_forms.append(form)
+        """
+
+    # make the formset with item_inits
+    item_forms = OrderItemFormSet(initial=item_inits, data=request.POST or None, extra=0, can_delete=False, prefix='item')
 
     if request.method == "POST":
         #import pdb; pdb.set_trace()
-        if not order_form.is_valid():
-
-            raise ValidationError("Invalid order form: %s" % (order_form.errors,))
-
-        elif [iform for iform in item_forms if iform.is_valid()]:
+        # Now that I'm rendering the errors, once debugging is done, just gtfo
+        if settings.DEBUG:
+            if not order_form.is_valid():
+                raise ValidationError("Order form wasn't valid!  Errors: %s" % (order_form.errors,))
+            if not item_forms.is_valid():
+                raise ValidationError("Item forms wasn't valid!  Errors: %s" % (item_forms.errors,))
+        
+        if order_form.is_valid() and item_forms.is_valid():
+            item_forms = item_forms.order_item_forms()
 
             order = order_form.save(commit=False)
             order.created_by=request.user
@@ -3131,6 +3140,8 @@ def create_order(request):
                             description=description,
                             user=request.user)
 
+                        # We just call them bugs now
+                        """
                         for ftr in form.features:
                             #todo: shd be refactored as above
                             if ftr.is_valid():
@@ -3158,6 +3169,7 @@ def create_order(request):
                                 commitment.order_item = commitment # what?
                                 commitment.save()
                                 commitment.generate_producing_process(request.user, [], explode=True)
+                        """
 
             oi_commitments = Commitment.objects.filter(order=order)
             tts = exchange.exchange_type.transfer_types_non_reciprocal()
