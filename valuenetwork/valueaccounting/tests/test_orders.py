@@ -233,7 +233,7 @@ class OrderTest(WebTest):
         field_name_for_rt = ''
         for field_name, field in form.fields.items():
             if field_name.endswith('resource_type_id'):
-                if int(form[field_name] or '0') == pk:
+                if int(form[field_name].value or '0') == pk:
                     field_name_for_rt = field_name
                     break
 
