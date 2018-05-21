@@ -19,6 +19,15 @@
       form li {
         line-height: 28px;
       }
+      .hang-left {
+      	vertical-align: top;
+      	float: left;
+      }
+      .row-of-rt::after, .clearfix::after {
+      	display: block;
+      	content: "";
+      	clear: both;
+      }
     </style>
     {% endblock %}
 {% endblock %}
