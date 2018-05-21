@@ -411,7 +411,7 @@ class OrderTest(WebTest):
 
         last_pc = pcs[count - 1]
         #import pdb; pdb.set_trace()
-        self.assertEqual(first_pc.order_item, last_pc.order_item, 'Last producing process for another changeable should have same order item as first (%s), but found: %s', (first_pc.order_item, last_pc.order_item))
+        self.assertEqual(first_pc.order_item, last_pc.order_item, 'Last producing process for another changeable should have same order item as first (%s), but found: %s' % (first_pc.order_item, last_pc.order_item))
 
         first_process = first_pc.process
         last_process = last_pc.process
