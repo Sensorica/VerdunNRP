@@ -2732,7 +2732,7 @@ class OrderItemForm(forms.ModelForm):
     quantity = forms.DecimalField(
         widget=forms.TextInput(attrs={'class': 'input-small',}),
         #validators=[MinValueValidator(0.01)], # can't do that; the formset now does this validation itself
-        default=Decimal(0)
+        #default=Decimal(0)
         )
     url = forms.URLField(required=False, widget=forms.TextInput(attrs={'class': 'url',}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
