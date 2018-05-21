@@ -95,17 +95,22 @@
 			<div class="order-items">
 				{{ item_forms.management_form }}
 				{% for form in item_forms %}
-				{% with prefix='item-'|add:forloop.counter0 %}
+
 					<div class="{% cycle 'even' 'odd' %}">
 						{# I don't like this, but it's not worth fighting Django about it any more #}
 						{# Dear future maintainer: any alteration to views.create_order, forms.OrderForm, #}
 						{# forms.OrderItemForm, or forms.OrderItemFormSet will almost definitely break this! #}
 						{# sorry!! #}
-						<input type="hidden" id="{{ prefix }}-resource_type_id" name="{{ prefix }}-resource_type_id" value="{{ form.resource_type.id }}"/>
+						<input
+							type="hidden"
+							id="item-{{ forloop.counter0|ts }}-resource_type_id"
+							name="item-{{ forloop.counter0|ts }}-resource_type_id"
+							value="{{ form.resource_type.id|ts }}"
+						/>
 						{# ugh, I feel all gross. #}
 						{% include "valueaccounting/_order_item_rt.html" with form=form %}
 					</div>
-				{% endwith %}
+				
 				{% endfor %}
 			</div>
 
