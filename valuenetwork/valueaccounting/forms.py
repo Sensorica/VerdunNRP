@@ -2738,9 +2738,9 @@ class OrderItemForm(forms.ModelForm):
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'item-description',}))
 
     def __init__(self, resource_type=None, initial={}, data={}, *args, **kwargs):
-        resource_type = resource_type
-            or ('resource_type_id' in data and EconomicResourceType.objects.get(initial['resource_type_id']))
-            or ('resource_type_id' in initial and EconomicResourceType.objects.get(initial['resource_type_id']))
+        resource_type = resource_type or ('resource_type_id' in data and EconomicResourceType.objects.get(initial['resource_type_id']))
+        #fine.
+        resource_type = resource_type or ('resource_type_id' in initial and EconomicResourceType.objects.get(initial['resource_type_id']))
         # MUST include data to cause the form to be bound.
         super(OrderItemForm, self).__init__(*args, initial = initial or None, data = data, **kwargs)
         self.resource_type = resource_type
@@ -2748,7 +2748,7 @@ class OrderItemForm(forms.ModelForm):
 
     class Meta:
         model = Commitment # needs to be bound to be valid
-        fields = ('quantity',)# 'description')
+        fields = ('quantity', 'description')
         #pass
 
 class OrderItemFormSet(forms.BaseFormSet):
