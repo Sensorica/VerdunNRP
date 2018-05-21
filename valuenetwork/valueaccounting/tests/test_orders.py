@@ -242,7 +242,7 @@ class OrderTest(WebTest):
 
         self.assertTrue(field_name_for_rt, 'Form fields for RT with ID %s not found in form fields: %s' % (pk, did_find))
 
-        prefix = field_name_for_rt[:-len('resource_type_id')]
+        prefix = field_name_for_rt[0:-len('resource_type_id')]
         form[prefix + 'quantity'] = Decimal(qty)
 
     def test_create_order(self):
