@@ -3094,13 +3094,13 @@ def create_order(request):
     if request.method == "POST":
         #import pdb; pdb.set_trace()
         # Now that I'm rendering the errors, once debugging is done, just gtfo
-        if settings.DEBUG:
+        if True: #settings.DEBUG: # wait what?  Neither of these raises happen....
             if not order_form.is_valid():
                 raise ValidationError("Order form wasn't valid!  Errors: %s" % (order_form.errors,))
             if not item_forms.is_valid():
                 raise ValidationError("Item forms wasn't valid!  Errors: %s" % (item_forms.errors,))
 
-        if order_form.is_valid() and item_forms.is_valid():
+        if order_form.is_valid() and item_forms.is_valid(): # .... but neither does this?
             item_forms = item_forms.order_item_forms()
 
             order = order_form.save(commit=False)
