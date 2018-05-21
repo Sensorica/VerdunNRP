@@ -2754,9 +2754,13 @@ class OrderItemForm(forms.ModelForm):
 class OrderItemFormSet(forms.formsets.BaseFormSet):
     form = OrderItemForm
     can_delete = False
+    can_order = True
+    absolute_max = EconomicResourceType.objects.all().count
     extra = 0
     min_num = 1
     max_num = EconomicResourceType.objects.all().count
+    validate_min = 1
+    validate_max = EconomicResourceType.objects.all().count
 
     def order_item_forms(self):
         return [form for form in self.forms if form.is_valid() and form.cleaned_data['quantity']]
