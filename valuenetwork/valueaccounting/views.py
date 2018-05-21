@@ -3071,7 +3071,7 @@ def create_order(request):
         raise RuntimeError("Must have at least one agent and one demand exchange type to create order")
 
     order_form = OrderForm(data=data)
-    item_inits = [{'resource_type_id': rt.id} for rt in rts]
+    item_inits = [{'resource_type_id': rt.id, 'quantity': Decimal(0)} for rt in rts]
 
     #import pdb; pdb.set_trace()
     """
