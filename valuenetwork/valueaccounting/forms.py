@@ -2753,6 +2753,8 @@ class OrderItemForm(forms.ModelForm):
 
 class OrderItemFormSet(forms.formsets.BaseFormSet):
     form = OrderItemForm
+    can_delete = False
+    extra = 0
 
     def order_item_forms(self):
         return [form for form in self.forms if form.is_valid() and form.cleaned_data['quantity']]

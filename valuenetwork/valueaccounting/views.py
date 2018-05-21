@@ -3089,7 +3089,7 @@ def create_order(request):
         """
 
     # make the formset with item_inits
-    item_forms = OrderItemFormSet(initial=item_inits, data=request.POST or None, extra=0, can_delete=False, prefix='item')
+    item_forms = OrderItemFormSet(initial=item_inits, data=request.POST or None, prefix='item')
 
     if request.method == "POST":
         #import pdb; pdb.set_trace()
@@ -3099,7 +3099,7 @@ def create_order(request):
                 raise ValidationError("Order form wasn't valid!  Errors: %s" % (order_form.errors,))
             if not item_forms.is_valid():
                 raise ValidationError("Item forms wasn't valid!  Errors: %s" % (item_forms.errors,))
-        
+
         if order_form.is_valid() and item_forms.is_valid():
             item_forms = item_forms.order_item_forms()
 
