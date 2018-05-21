@@ -2,7 +2,6 @@ import sys
 import datetime
 from decimal import *
 from django import forms
-from django.forms import BaseFormSet
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils import simplejson
@@ -2752,7 +2751,7 @@ class OrderItemForm(forms.ModelForm):
         fields = ('quantity', 'description')
         #pass
 
-class OrderItemFormSet(FormSet):
+class OrderItemFormSet(forms.formsets.FormSet):
     form = OrderItemForm
 
     def order_item_forms(self):
