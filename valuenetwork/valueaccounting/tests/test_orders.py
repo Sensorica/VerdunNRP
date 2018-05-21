@@ -197,7 +197,7 @@ class OrderTest(WebTest):
         self.assertTrue(check, msg='RT has no producing process types; does have process types: %s' % (rt.process_types.all(),))
 
         # I can do this because we kill all commitments beforehand
-        with_order = (com for com in rt.commitments.all() if com.order)
+        with_order = [com for com in rt.commitments.all() if com.order]
         # Are the RT's commitments associated with any order?
         self.assertTrue(with_order, msg='No commitment associated with both RT and order; did produce: %s' % (rt.commitments.all(),))
 
@@ -314,6 +314,9 @@ class OrderTest(WebTest):
         coms = Commitment.objects.all()
         self.assertFalse(coms, msg="order with zero quantities produced commitments: %s" % (str(coms),))
 
+    # Let's assume that the workflow order really means it is testing the
+    # WorkFlowRecipe system that uses changeable and another_changeable, not
+    # the Recipe system that uses parent, child, and grandchild.
     def test_create_workflow_order(self):
         """Test create_order for a workflow item
 
@@ -328,7 +331,9 @@ class OrderTest(WebTest):
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
 
-        self.set_item_quantity(form, self.child, 2000)
+        # Seems like we should be ordering a changeable to find commitments for
+        # changeable, not child
+        self.set_item_quantity(form, self.changeable, 2000)#self.child, 2000)
         #form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
 
         response = self.follow(form.submit("submit1"))
@@ -344,9 +349,11 @@ class OrderTest(WebTest):
         last_pc = pcs[count - 1]
         #import pdb; pdb.set_trace()
         self.assertTrue(last_pc.order_item.exchange, 'Last producing commitment should have had an exchange, but was %s' % (last_pc,))
+
         order = last_pc.order_item.order
         processes = order.all_processes()
         self.assertEqual(len(processes), 2, 'Order should have produced 2 processes, but found: %s' % (processes,))
+
         first_process = processes[0]
         last_process = processes[count - 1]
         nexts = first_process.next_processes()
@@ -354,7 +361,8 @@ class OrderTest(WebTest):
         self.assertTrue(first_process in prevs, 'First process (%s) should have been in last process previous processes, but found: %s' % (first_process, prevs))
         self.assertTrue(last_process in nexts, 'Last process (%s) should have been in first process next processes, but found: %s' % (last_process, nexts))
 
-
+    # See above for rationale about changing child->changeable, grandchild->another_changeable
+    # Technically I don't think there will be an explosion at all in that system though.
     def test_two_workflow_item_order(self):
         """Test create_order for two workflow items
 
@@ -369,11 +377,9 @@ class OrderTest(WebTest):
         due_date = datetime.date.today().strftime('%Y-%m-%d')
         form["due_date"] = due_date
 
-        self.set_item_quantity(form, self.child, 2000)
-        #form[self.rt_form_name(self.rt_by_id(9), 'quantity')] = 2000
+        self.set_item_quantity(form, self.changeable, 2000)#self.child, 2000)
 
-        self.set_item_quantity(form, self.grandchild, 4000)
-        #form[self.rt_form_name(self.rt_by_id(10), 'quantity')] = 4000
+        self.set_item_quantity(form, self.another_changeable, 4000)#self.grandchild, 4000)
         response = self.follow(form.submit("submit1"))
         #import pdb; pdb.set_trace()
 
