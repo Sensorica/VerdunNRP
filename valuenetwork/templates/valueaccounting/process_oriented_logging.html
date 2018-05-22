@@ -150,7 +150,7 @@ hr {
 }
 */
 </style>
-
+{{ block.super }}
 {% endblock %}
 
 {% block body_class %}work{% endblock %}
@@ -160,6 +160,7 @@ hr {
 {% type_process as t_proc %}
 {% type_facet as t_facet %}
 {% type_facet_value as t_facet_value %}
+{% type_resource_type as t_res_type %}
     <div class="container">
         {% include "_messages.html" %}
 	<div>
