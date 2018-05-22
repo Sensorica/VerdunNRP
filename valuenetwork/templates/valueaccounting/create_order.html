@@ -41,7 +41,7 @@
 }
 
 </style>
-
+{{ block.super }}
 {% endblock %}
 
 {% block body_class %}projects{% endblock %}
@@ -110,7 +110,7 @@
 						{# ugh, I feel all gross. #}
 						{% include "valueaccounting/_order_item_rt.html" with form=form %}
 					</div>
-				
+
 				{% endfor %}
 			</div>
 
