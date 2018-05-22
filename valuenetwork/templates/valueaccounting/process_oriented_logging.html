@@ -1436,21 +1436,21 @@ hr {
         <div class="modal-body">
             <form class="output-form validateMe" name="addout" enctype="multipart/form-data" id="addOutputForm" action="{% url add_process_output process_id=process.id %}" method="POST" >
 	            {% csrf_token %}
-
-                    <p class="modal-line">{{ t_res_type|title|tr }} </p>
-                    {% field_as_p add_output_form.resource_type "" %}
+                    {# Field as p should do this fine. #}
+                    {#<p class="modal-line">{{ t_res_type|title|tr }} </p>#}
+                    {% field_as_p add_output_form.resource_type t_res_type|title|tr %}
                     {% comment %}
                     <a href="#createResourceModal" role="button" class="add-another" data-toggle="modal">
                         <img src="{% static 'admin/img/icon_addlink.gif' %}" title="add new"></img>
                     </a>
                     {% endcomment %}
 
-                    <p class="modal-line">{% trans "Quantity" %} </p>
-                    {% field_as_p add_output_form.quantity "" %}
-                    <p class="modal-line">{% trans "Unit of Quantity" %} </p>
-                    {% field_as_p add_output_form.unit_of_quantity "" %}
-                    <p class="modal-line">{% trans "Description" %} </p>
-                    {% field_as_p add_output_form.description "" %}
+                    {#<p class="modal-line">{% trans "Quantity" %} </p>#}
+                    {% field_as_p add_output_form.quantity "Quantity"|tr %}
+                    {#<p class="modal-line">{% trans "Unit of Quantity" %} </p>#}
+                    {% field_as_p add_output_form.unit_of_quantity "Unit of Quantity"|tr %}
+                    {#<p class="modal-line">{% trans "Description" %} </p>#}
+                    {% field_as_p add_output_form.description "Description"|tr %}
 
               <div class="modal-footer">
 	            <button class="btn" data-dismiss="modal" aria-hidden="true">{% trans "Cancel" %}</button>
