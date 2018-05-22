@@ -17,18 +17,18 @@ def chair(desc, field, no_trans=False):
     return {'desc': desc, 'field': field, 'linebreaks': linebreaks, 'wrap': False}
 
 @register.inclusion_tag('valueaccounting/chair.html')
-def field_as_p(ff, label=''):
-    return {'desc': label or ff.label_tag(), 'wrap': 'p', 'field': ff.as_widget(), 'linebreaks': True}
+def field_as_p(ff, label=None):
+    return {'desc': label if label is not None else ff.label_tag(), 'wrap': 'p', 'field': ff.as_widget(), 'linebreaks': True}
 
 @register.inclusion_tag('valueaccounting/chair.html')
-def field_as_div(ff, label=''):
+def field_as_div(ff, label=None):
     linebreaks = False
     field = ff.as_widget()
     try:
         linebreaks = '\n' in field or '<br' in field or '<textarea' in field
     except:
         pass
-    return {'desc': label or ff.label_tag(), 'field': ff, 'linebreaks': linebreaks, 'wrap': False}
+    return {'desc': label if label is not None else ff.label_tag(), 'field': ff, 'linebreaks': linebreaks, 'wrap': False}
 
 @register.inclusion_tag('valueaccounting/chair.html')
 def field_as_li(ff, label=''):
@@ -38,7 +38,7 @@ def field_as_li(ff, label=''):
         linebreaks = '\n' in field or '<br' in field or '<textarea' in field
     except:
         pass
-    return {'field': field, 'desc': label or ff.label_tag(), 'wrap': 'li', 'linebreaks': linebreaks}
+    return {'field': field, 'desc': label if label is not None else ff.label_tag(), 'wrap': 'li', 'linebreaks': linebreaks}
 
 @register.filter
 def tr(txt):
