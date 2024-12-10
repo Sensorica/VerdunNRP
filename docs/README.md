@@ -1,43 +1,47 @@
 # VerdunNRP Documentation
 
-This directory contains the comprehensive documentation for the VerdunNRP project, a fork of the valueaccounting system specifically customized for the Verdun Project.
+## Table of Contents
 
-## Documentation Structure
+### Getting Started
+- [Installation](getting_started/installation.md)
+- [Quick Start Guide](getting_started/quick_start.md)
 
-- `getting_started/`: Quick start guides and basic setup
-  - Installation Guide
-  - Basic Usage
-  - Configuration
-  
-- `user_guide/`: Detailed user documentation
-  - Features Overview
-  - User Interface Guide
-  - Common Tasks
-  
-- `technical/`: Technical documentation
-  - Architecture Overview
-  - API Documentation
-  - Database Schema
-  
-- `development/`: Developer documentation
-  - Contributing Guidelines
-  - Development Setup
-  - Testing Guide
-  
-- `configuration/`: Configuration files and guides
-  - Environment Variables
-  - Docker Configuration
-  - Apache Configuration
+### Technical Documentation
+- [Architecture](technical/architecture.md)
+- [API Reference](technical/api.md)
+- [Models](technical/models.md)
+- [Core Concepts](technical/core_concepts.md)
+- [Database Schema](technical/database.md)
+- [Event Processing](technical/events.md)
+- [Value Network](technical/value_network.md)
+- [Process Patterns](technical/process_patterns.md)
 
-## Quick Links
+### Development
+- [Contributing Guidelines](development/contributing.md)
+- [Development Setup](development/setup.md)
+- [Coding Standards](development/coding_standards.md)
 
-- [Installation Guide](getting_started/installation.md)
-- [User Guide](user_guide/README.md)
-- [API Documentation](technical/api.md)
-- [Contributing Guide](development/contributing.md)
+### User Guide
+- [Overview](user_guide/README.md)
+- [User Workflows](user_guide/workflows.md)
+- [Best Practices](user_guide/best_practices.md)
 
-## About VerdunNRP
+### Additional Resources
+- [Documentation Status](technical/documentation_status.md)
+- [Changelog](../CHANGELOG.md)
 
-VerdunNRP is a Network Resource Planning system designed for value networks. It's built on the Django framework and provides comprehensive tools for value network accounting and resource management.
+## Documentation Principles
 
-For more information about the project, visit the main [README.md](../README.md) in the project root.
+Our documentation aims to be:
+- 📘 Comprehensive
+- 🔍 Easily Navigable
+- 💡 Informative
+- 🤝 Beginner-Friendly
+
+## Contributing to Documentation
+
+We welcome improvements to our documentation! Please see our [contributing guidelines](development/contributing.md) for more information on how you can help.
+
+## Documentation Status
+
+For the current status of documentation completeness, refer to the [documentation status](technical/documentation_status.md) page.

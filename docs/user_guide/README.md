@@ -1,108 +1,113 @@
 # VerdunNRP User Guide
 
-Welcome to the VerdunNRP User Guide. This guide will help you understand and use the various features of our Network Resource Planning system.
+Welcome to the VerdunNRP User Guide. This comprehensive guide will help you understand and effectively use our Network Resource Planning system.
 
-## Table of Contents
-
-1. [Getting Started](#getting-started)
-2. [Basic Concepts](#basic-concepts)
-3. [Features Overview](#features-overview)
-4. [Common Tasks](#common-tasks)
-5. [Troubleshooting](#troubleshooting)
-
-## Getting Started
+## 🚀 Getting Started
 
 ### First-time Setup
-
 1. Log in to your account
 2. Complete your profile setup
 3. Join or create a network
 4. Configure your preferences
 
 ### Basic Navigation
-
 - Dashboard overview
 - Main menu structure
 - Quick access features
-- Search functionality
+- Advanced search functionality
 
-## Basic Concepts
+## 🌐 Basic Concepts
 
 ### Value Networks
+A value network represents the complex flows of value between participants. Key components include:
 
-A value network represents the flows of value between participants. Key components include:
+- **Economic Resources**: Tangible and intangible assets
+- **Economic Events**: Actions that transform or transfer resources
+- **Economic Agents**: Individuals or organizations participating in the network
+- **Value Flows**: Interactions and exchanges between agents
 
-- Economic Resources
-- Economic Events
-- Economic Agents
-- Value Flows
+### Resource Management Principles
+- Transparent tracking of resources
+- Collaborative value creation
+- Comprehensive event logging
+- Dynamic reporting
 
-### Resource Management
-
-Learn how to:
-- Create and track resources
-- Log economic events
-- Monitor value flows
-- Generate reports
-
-## Features Overview
+## 📊 Features Overview
 
 ### 1. Resource Tracking
 - Adding new resources
-- Updating resource status
-- Resource categorization
-- Resource history
+- Categorizing resources
+- Tracking resource lifecycles
+- Resource allocation and sharing
 
-### 2. Event Logging
-- Creating economic events
-- Event types and categories
-- Event validation
-- Event history
+### 2. Event Management
+- Logging economic events
+- Tracking value transformations
+- Event history and audit trails
+- Performance analytics
 
-### 3. Network Management
-- Network visualization
-- Relationship mapping
-- Agent connections
-- Flow analysis
+### 3. Agent Collaboration
+- Network membership management
+- Role-based access control
+- Collaborative workflows
+- Communication tools
 
-### 4. Reporting
-- Standard reports
+### 4. Reporting and Analytics
 - Custom report generation
-- Data export options
-- Analytics dashboard
+- Value flow visualization
+- Performance metrics
+- Predictive insights
 
-## Common Tasks
+## 🛠 Common Tasks
 
-### Managing Resources
-1. How to add a new resource
-2. Updating resource information
-3. Resource transfers
-4. Resource deletion
+### Resource Management
+- Create a new resource
+- Transfer resources between agents
+- Archive or retire resources
+- Generate resource reports
 
-### Working with Events
-1. Creating new events
-2. Event validation
-3. Event modification
-4. Event cancellation
+### Event Tracking
+- Log an economic event
+- Review event history
+- Analyze event impacts
+- Export event data
 
-### Network Operations
-1. Adding network participants
-2. Establishing connections
-3. Managing relationships
-4. Network analysis
+### Network Interactions
+- Invite new network members
+- Define collaboration rules
+- Manage network permissions
+- Resolve conflicts
 
-## Troubleshooting
+## 🆘 Troubleshooting
 
 ### Common Issues
-- Login problems
+- Authentication problems
 - Data synchronization
-- Report generation
-- Network connectivity
+- Performance bottlenecks
+- Permissions and access
 
-### Support Resources
-- FAQ
-- Technical support
+### Getting Help
 - Community forums
-- Documentation updates
+- Documentation search
+- Support ticket system
+- Video tutorials
 
-For technical details, please refer to our [Technical Documentation](../technical/architecture.md).
+## 📚 Additional Resources
+
+- [Technical Documentation](/technical/README.md)
+- [API Reference](/technical/api.md)
+- [Contributing Guidelines](/development/contributing.md)
+
+## 🤝 Best Practices
+
+1. Maintain accurate and timely resource information
+2. Use clear and descriptive event descriptions
+3. Collaborate transparently
+4. Regularly review and update network configurations
+
+## 📝 Feedback
+
+We continuously improve VerdunNRP. Your feedback is crucial!
+- Report bugs
+- Suggest features
+- Contribute to documentation
