@@ -57,164 +57,118 @@ VerdunNRP provides a comprehensive RESTful API for interacting with the value ne
    POST /api/keys/rotate/
    ```
 
-## Request and Response Formats
+## Request/Response Formats
 
-### Content Types
-- `application/json`: Primary content type
-- `application/xml`: Optional XML support
-- `multipart/form-data`: File uploads
+### Request Format
+All requests should use JSON format for the request body:
+```http
+Content-Type: application/json
+Accept: application/json
+```
 
-### Standard Response Structure
+### Response Format
+All responses follow a standard format:
 ```json
 {
-  "status": "success|error",
-  "data": {},
-  "error": {
-    "code": "error_code",
-    "message": "Detailed error description"
-  },
-  "metadata": {
-    "timestamp": "ISO8601 timestamp",
-    "request_id": "unique_request_identifier"
-  }
+    "status": "success|error",
+    "data": {
+        // Response data here
+    },
+    "message": "Optional message",
+    "metadata": {
+        "version": "1.0",
+        "timestamp": "ISO-8601 timestamp"
+    }
 }
 ```
 
 ## Error Handling
 
-### HTTP Status Codes
-- `200 OK`: Successful request
-- `201 Created`: Resource successfully created
-- `400 Bad Request`: Invalid request parameters
-- `401 Unauthorized`: Authentication required
-- `403 Forbidden`: Insufficient permissions
-- `404 Not Found`: Resource not found
-- `422 Unprocessable Entity`: Validation errors
-- `500 Internal Server Error`: Server-side errors
-
-### Error Codes
+### Error Response Format
 ```json
 {
-  "INVALID_PARAMETERS": "Request parameters are invalid",
-  "AUTHENTICATION_REQUIRED": "Authentication token missing",
-  "INSUFFICIENT_PERMISSIONS": "User lacks required permissions",
-  "RESOURCE_NOT_FOUND": "Requested resource does not exist",
-  "VALIDATION_ERROR": "Data validation failed"
+    "status": "error",
+    "error": {
+        "code": "ERROR_CODE",
+        "message": "Human readable message",
+        "details": {
+            // Additional error details
+        }
+    }
 }
 ```
 
-## Rate Limiting
+### Common Error Codes
+- `AUTH_001`: Authentication failed
+- `AUTH_002`: Token expired
+- `PERM_001`: Insufficient permissions
+- `VAL_001`: Validation error
+- `RATE_001`: Rate limit exceeded
+- `SYS_001`: System error
 
-### Request Limits
-- `DEFAULT`: 100 requests/minute
-- `AUTHENTICATED`: 500 requests/minute
-- `ADMIN`: Unlimited requests
+## Rate Limiting
 
 ### Rate Limit Headers
 ```http
-X-RateLimit-Limit: 100
-X-RateLimit-Remaining: 75
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
 X-RateLimit-Reset: 1609459200
+```
+
+### Limits by Endpoint Type
+- GET requests: 1000 requests per hour
+- POST/PUT/DELETE requests: 100 requests per hour
+- Bulk operations: 10 requests per hour
+
+### Rate Limit Response (429 Too Many Requests)
+```json
+{
+    "status": "error",
+    "error": {
+        "code": "RATE_001",
+        "message": "Rate limit exceeded",
+        "details": {
+            "reset_at": "2025-01-05T01:00:00Z",
+            "retry_after": 3600
+        }
+    }
+}
 ```
 
 ## API Versioning
 
-### Versioning Strategy
-- URL-based versioning
-- Current version: `v1`
-- Backward compatibility maintained
-
-### Version Endpoints
+### Version Header
+Include the API version in the request header:
 ```http
-/api/v1/agents/
-/api/v1/events/
-/api/v1/resources/
+Accept: application/json; version=1.0
 ```
 
-## Security Best Practices
-
-1. **HTTPS Only**
-   - All API endpoints require HTTPS
-   - TLS 1.2+ encryption
-   - HSTS (HTTP Strict Transport Security)
-
-2. **Input Validation**
-   - Server-side validation for all inputs
-   - Sanitize and validate all parameters
-   - Prevent SQL injection and XSS attacks
-
-3. **Logging and Monitoring**
-   - Log all API access attempts
-   - Monitor for suspicious activities
-   - Implement IP-based blocking
-
-## Integration Guidelines
-
-### Third-Party Integrations
-- Provide comprehensive webhook support
-- Support for event-driven architectures
-- Flexible data transformation
-
-### Webhook Endpoints
+### Version Path Prefix
+Alternatively, use version in the URL path:
 ```http
-POST /api/webhooks/events/
-POST /api/webhooks/resources/
+https://api.verdunnrp.org/v1/resources
 ```
 
-## Performance Considerations
+### Version Support
+- v1.0: Current stable version (Fully supported)
+- v0.9: Legacy version (Deprecated, sunset date: 2025-06-01)
+- v1.1-beta: Beta version (Preview features)
 
-1. **Caching**
-   - Implement Redis-based caching
-   - Cache-Control headers
-   - Conditional GET requests
+### Version Lifecycle
+1. Beta Release
+   - Preview of new features
+   - Subject to change
+   - No SLA guarantees
 
-2. **Pagination**
-   - Default page size: 50 items
-   - Maximum page size: 500 items
-   ```http
-   GET /api/agents/?page=2&page_size=100
-   ```
+2. Stable Release
+   - Full production support
+   - Backwards compatible changes only
+   - Security updates
 
-3. **Compression**
-   - Support gzip compression
-   - Reduce payload size
-   ```http
-   Accept-Encoding: gzip
-   ```
-
-## Documentation and Support
-
-1. **Swagger/OpenAPI**
-   - Interactive API documentation
-   - `/api/docs/` endpoint
-
-2. **Client Libraries**
-   - Python SDK
-   - JavaScript/TypeScript client
-   - Postman collection
-
-3. **Support Channels**
-   - API documentation
-   - Community forums
-   - Support email
-   - GitHub issues
-
-## Changelog
-
-### v1.0.0
-- Initial API release
-- Core endpoints for agents, events, resources
-
-### v1.1.0
-- Added webhook support
-- Improved authentication
-- Enhanced error handling
-
-## Deprecation Policy
-
-- 6-month notice for major API changes
-- Maintain backward compatibility
-- Provide migration guides
+3. Deprecation
+   - 6 months notice before EOL
+   - Security fixes only
+   - Migration guides provided
 
 ## API Endpoints
 
@@ -457,3 +411,88 @@ Returns agents in JSON-LD format with vocabularies based on:
 - FOAF
 - Schema.org
 - Value Flows vocabulary
+
+## Changelog
+
+### v1.0.0
+- Initial API release
+- Core endpoints for agents, events, resources
+
+### v1.1.0
+- Added webhook support
+- Improved authentication
+- Enhanced error handling
+
+## Deprecation Policy
+
+- 6-month notice for major API changes
+- Maintain backward compatibility
+- Provide migration guides
+
+## Documentation and Support
+
+1. **Swagger/OpenAPI**
+   - Interactive API documentation
+   - `/api/docs/` endpoint
+
+2. **Client Libraries**
+   - Python SDK
+   - JavaScript/TypeScript client
+   - Postman collection
+
+3. **Support Channels**
+   - API documentation
+   - Community forums
+   - Support email
+   - GitHub issues
+
+## Security Best Practices
+
+1. **HTTPS Only**
+   - All API endpoints require HTTPS
+   - TLS 1.2+ encryption
+   - HSTS (HTTP Strict Transport Security)
+
+2. **Input Validation**
+   - Server-side validation for all inputs
+   - Sanitize and validate all parameters
+   - Prevent SQL injection and XSS attacks
+
+3. **Logging and Monitoring**
+   - Log all API access attempts
+   - Monitor for suspicious activities
+   - Implement IP-based blocking
+
+## Integration Guidelines
+
+### Third-Party Integrations
+- Provide comprehensive webhook support
+- Support for event-driven architectures
+- Flexible data transformation
+
+### Webhook Endpoints
+```http
+POST /api/webhooks/events/
+POST /api/webhooks/resources/
+```
+
+## Performance Considerations
+
+1. **Caching**
+   - Implement Redis-based caching
+   - Cache-Control headers
+   - Conditional GET requests
+
+2. **Pagination**
+   - Default page size: 50 items
+   - Maximum page size: 500 items
+   ```http
+   GET /api/agents/?page=2&page_size=100
+   ```
+
+3. **Compression**
+   - Support gzip compression
+   - Reduce payload size
+   ```http
+   Accept-Encoding: gzip
+   ```
