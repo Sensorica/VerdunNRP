@@ -1,356 +1,202 @@
 # Database Schema
 
-VerdunNRP uses a relational database based on the REA (Resource-Event-Agent) accounting model. This document describes the core database tables and their relationships.
+[← Back to Main Documentation](../README.md)
+
+## Table of Contents
+1. [Core Tables](#core-tables)
+   - [Equipment Management](#1-equipment-management)
+   - [Resource Management](#2-resource-management)
+   - [Board Management](#3-board-management)
+2. [Key Relationships](#key-relationships)
+   - [Equipment Flow](#equipment-flow)
+   - [Resource Flow](#resource-flow)
+   - [Workflow Flow](#workflow-flow)
+3. [Common Queries](#common-queries)
+   - [Equipment Queries](#equipment-queries)
+   - [Resource Queries](#resource-queries)
+   - [Workflow Queries](#workflow-queries)
+
+VerdunNRP uses PostgreSQL with a REA (Resource-Event-Agent) model for managing economic interactions.
 
 ## Core Tables
 
-### EconomicAgent
-Represents participants in the value network.
+[↑ Back to Top](#table-of-contents)
+
+### 1. Equipment Management
 
 ```sql
-CREATE TABLE EconomicAgent (
+-- Equipment
+CREATE TABLE Equipment (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    nick VARCHAR(32) UNIQUE NOT NULL,
-    agent_type_id INTEGER REFERENCES AgentType(id),
-    description TEXT,
-    url VARCHAR(255),
-    address VARCHAR(255),
-    email VARCHAR(96),
-    phone_primary VARCHAR(32),
-    phone_secondary VARCHAR(32),
-    latitude FLOAT,
-    longitude FLOAT,
-    reputation DECIMAL(8,2),
-    is_context BOOLEAN DEFAULT FALSE,
-    created_date DATE,
-    changed_date DATE
+    status VARCHAR(50),
+    maintenance_status VARCHAR(50),
+    location_id INTEGER REFERENCES Location(id),
+    created_date TIMESTAMP,
+    updated_date TIMESTAMP
 );
-```
 
-### AgentType
-Defines types of economic agents.
-
-```sql
-CREATE TABLE AgentType (
+-- Equipment Usage
+CREATE TABLE EquipmentUsage (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL,
-    party_type VARCHAR(12),
-    description TEXT,
-    is_context BOOLEAN DEFAULT FALSE
+    equipment_id INTEGER REFERENCES Equipment(id),
+    user_id INTEGER REFERENCES EconomicAgent(id),
+    technician_id INTEGER REFERENCES EconomicAgent(id),
+    hours DECIMAL(8,2),
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    notes TEXT
 );
-```
 
-### EventType
-Defines types of economic events.
-
-```sql
-CREATE TABLE EventType (
+-- Equipment Payment
+CREATE TABLE EquipmentPayment (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128) NOT NULL,
-    label VARCHAR(32),
-    inverse_label VARCHAR(40),
-    relationship VARCHAR(12),
-    related_to VARCHAR(12),
-    resource_effect VARCHAR(12),
-    unit_type VARCHAR(12)
+    usage_id INTEGER REFERENCES EquipmentUsage(id),
+    amount DECIMAL(10,2),
+    payment_method VARCHAR(50),
+    payment_date TIMESTAMP,
+    status VARCHAR(50)
 );
 ```
 
-### EconomicEvent
-Records economic activities between agents.
+[↑ Back to Top](#table-of-contents)
+
+### 2. Resource Management
 
 ```sql
-CREATE TABLE EconomicEvent (
-    id SERIAL PRIMARY KEY,
-    event_type_id INTEGER REFERENCES EventType(id),
-    provider_id INTEGER REFERENCES EconomicAgent(id),
-    receiver_id INTEGER REFERENCES EconomicAgent(id),
-    resource_type_id INTEGER REFERENCES EconomicResourceType(id),
-    resource_id INTEGER REFERENCES EconomicResource(id),
-    quantity DECIMAL(8,2),
-    unit_of_quantity_id INTEGER REFERENCES Unit(id),
-    value DECIMAL(8,2),
-    unit_of_value_id INTEGER REFERENCES Unit(id),
-    event_date TIMESTAMP,
-    description TEXT
-);
-```
-
-### EconomicResource
-Represents resources in the system.
-
-```sql
+-- Resources
 CREATE TABLE EconomicResource (
     id SERIAL PRIMARY KEY,
-    identifier VARCHAR(128),
-    resource_type_id INTEGER REFERENCES EconomicResourceType(id),
+    type_id INTEGER REFERENCES ResourceType(id),
     quantity DECIMAL(8,2),
-    unit_of_quantity_id INTEGER REFERENCES Unit(id),
-    quality VARCHAR(32),
-    notes TEXT,
-    current_location_id INTEGER REFERENCES Location(id),
-    created_date DATE,
-    state_id INTEGER REFERENCES ResourceState(id)
+    unit_id INTEGER REFERENCES Unit(id),
+    location_id INTEGER REFERENCES Location(id),
+    status VARCHAR(50),
+    created_date TIMESTAMP
 );
-```
 
-## Supporting Tables
-
-### Location
-```sql
-CREATE TABLE Location (
+-- Resource Types
+CREATE TABLE ResourceType (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE NOT NULL,
-    description TEXT,
-    address VARCHAR(255),
-    latitude FLOAT,
-    longitude FLOAT
-);
-```
-
-### Unit
-```sql
-CREATE TABLE Unit (
-    id SERIAL PRIMARY KEY,
-    unit_type VARCHAR(12),
-    name VARCHAR(64),
-    symbol VARCHAR(1),
-    abbrev VARCHAR(8)
-);
-```
-
-### AgentAssociation
-```sql
-CREATE TABLE AgentAssociation (
-    id SERIAL PRIMARY KEY,
-    is_associate_id INTEGER REFERENCES EconomicAgent(id),
-    has_associate_id INTEGER REFERENCES EconomicAgent(id),
-    association_type_id INTEGER REFERENCES AgentAssociationType(id),
-    description TEXT,
-    state VARCHAR(12)
-);
-```
-
-### ResourceState
-```sql
-CREATE TABLE ResourceState (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    unit_id INTEGER REFERENCES Unit(id),
+    category VARCHAR(50),
     description TEXT
 );
-```
 
-### ResourceClass
-```sql
-CREATE TABLE ResourceClass (
+-- Resource Transfers
+CREATE TABLE ResourceTransfer (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(128) UNIQUE NOT NULL,
-    description TEXT
+    resource_id INTEGER REFERENCES EconomicResource(id),
+    from_location_id INTEGER REFERENCES Location(id),
+    to_location_id INTEGER REFERENCES Location(id),
+    quantity DECIMAL(8,2),
+    transfer_date TIMESTAMP,
+    notes TEXT
 );
 ```
 
-## Model Relationships
+[↑ Back to Top](#table-of-contents)
 
-### Agent Relationships
+### 3. Board Management
 
-1. **Agent Hierarchy**
-   - Agents can have parent-child relationships through `AgentType`
-   - Context agents are marked with `is_context=True`
-   - Agents can be associated through `AgentAssociation`
-
-2. **Agent Associations**
-   - Types defined in `AgentAssociationType`
-   - States: active, inactive, potential
-   - Behaviors: supplier, customer, member, peer
-
-### Resource Management
-
-1. **Resource States**
-   - Defined in `ResourceState`
-
-2. **Resource Classes**
-   - Defined in `ResourceClass`
-
-3. **Resource Type Relationships**
-   - Parent-child relationships
-   - Substitution relationships
-   - Recipe inheritance
-
-### Event Processing
-
-1. **Event Type Relationships**
-   - Direction: input/output
-   - Related to: process/exchange
-   - Resource effects: increment/decrement/none
-
-2. **Event Processing Rules**
-   - Validation requirements
-   - Resource state changes
-   - Value calculations
-
-## Data Integrity
-
-### Constraints
-
-1. **Unique Constraints**
-   - Agent nick names
-   - Resource type names
-   - Location names
-   - Unit abbreviations
-
-2. **Foreign Key Relationships**
-   - Agent types to agents
-   - Resource types to resources
-   - Units to measurements
-   - Locations to resources
-
-### Indexes
-
-1. **Primary Indexes**
-   - All primary keys use SERIAL
-   - Automatically indexed
-
-2. **Secondary Indexes**
-   - Agent nick names
-   - Resource identifiers
-   - Event dates
-   - Location coordinates
-
-## Data Access Patterns
-
-### Common Queries
-
-1. **Agent Queries**
 ```sql
--- Get all active agents of a specific type
-SELECT * FROM EconomicAgent 
-WHERE agent_type_id = ? AND state = 'active';
+-- Workflows
+CREATE TABLE Workflow (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    status VARCHAR(50),
+    created_date TIMESTAMP
+);
 
--- Get all members of a context agent
-SELECT a.* FROM EconomicAgent a
-JOIN AgentAssociation aa ON a.id = aa.is_associate_id
-WHERE aa.has_associate_id = ? 
-AND aa.association_type = 'member';
-```
+-- Workflow Stages
+CREATE TABLE WorkflowStage (
+    id SERIAL PRIMARY KEY,
+    workflow_id INTEGER REFERENCES Workflow(id),
+    name VARCHAR(255) NOT NULL,
+    order_index INTEGER,
+    status VARCHAR(50)
+);
 
-2. **Resource Queries**
-```sql
--- Get available resources of a type
-SELECT * FROM EconomicResource
-WHERE resource_type_id = ? 
-AND quantity > 0;
-
--- Get resources at a location
-SELECT * FROM EconomicResource
-WHERE current_location_id = ?;
-```
-
-3. **Event Queries**
-```sql
--- Get events for a process
-SELECT * FROM EconomicEvent
-WHERE process_id = ?
-ORDER BY event_date;
-
--- Get resource creation events
-SELECT * FROM EconomicEvent
-WHERE event_type_id IN (
-    SELECT id FROM EventType 
-    WHERE resource_effect = 'increment'
+-- Stage Resources
+CREATE TABLE StageResource (
+    id SERIAL PRIMARY KEY,
+    stage_id INTEGER REFERENCES WorkflowStage(id),
+    resource_id INTEGER REFERENCES EconomicResource(id),
+    status VARCHAR(50),
+    entry_date TIMESTAMP
 );
 ```
 
-### Performance Considerations
+[↑ Back to Top](#table-of-contents)
 
-1. **Query Optimization**
-   - Use appropriate indexes
-   - Join order optimization
-   - Subquery optimization
+## Key Relationships
 
-2. **Data Volume Management**
-   - Archive old events
-   - Summarize historical data
-   - Partition large tables
+[↑ Back to Top](#table-of-contents)
 
-## Data Migration
-
-### Version Control
-
-1. **Schema Migrations**
-   - Use South for Django migrations
-   - Version control all changes
-   - Document migration steps
-
-2. **Data Migrations**
-   - Handle data transformations
-   - Preserve data integrity
-   - Validate results
-
-### Backup Strategy
-
-1. **Regular Backups**
-   - Daily full backups
-   - Hourly incremental backups
-   - Transaction log backups
-
-2. **Recovery Procedures**
-   - Point-in-time recovery
-   - Transaction rollback
-   - Data verification
-
-## Best Practices
-
-### Data Entry
-
-1. **Validation Rules**
-   - Required fields
-   - Data type constraints
-   - Business logic validation
-
-2. **Default Values**
-   - Sensible defaults
-   - Automatic timestamps
-   - System-generated IDs
-
-### Data Maintenance
-
-1. **Data Cleanup**
-   - Regular consistency checks
-   - Orphan record cleanup
-   - Duplicate detection
-
-2. **Performance Monitoring**
-   - Query performance
-   - Index usage
-   - Storage utilization
-
-## Indexes
-
-Important indexes for performance:
-
-```sql
-CREATE INDEX idx_agent_nick ON EconomicAgent(nick);
-CREATE INDEX idx_agent_type ON EconomicAgent(agent_type_id);
-CREATE INDEX idx_event_date ON EconomicEvent(event_date);
-CREATE INDEX idx_event_provider ON EconomicEvent(provider_id);
-CREATE INDEX idx_event_receiver ON EconomicEvent(receiver_id);
-CREATE INDEX idx_resource_identifier ON EconomicResource(identifier);
+### Equipment Flow
+```mermaid
+erDiagram
+    Equipment ||--o{ EquipmentUsage : "used in"
+    EquipmentUsage ||--o{ EquipmentPayment : "paid for"
+    EconomicAgent ||--o{ EquipmentUsage : "uses"
 ```
 
-## Constraints
+### Resource Flow
+```mermaid
+erDiagram
+    ResourceType ||--o{ EconomicResource : "defines"
+    EconomicResource ||--o{ ResourceTransfer : "transferred in"
+    Location ||--o{ ResourceTransfer : "from/to"
+```
 
-Key constraints for data integrity:
+### Workflow Flow
+```mermaid
+erDiagram
+    Workflow ||--o{ WorkflowStage : "contains"
+    WorkflowStage ||--o{ StageResource : "processes"
+    EconomicResource ||--o{ StageResource : "processed in"
+```
 
+[↑ Back to Top](#table-of-contents)
+
+## Common Queries
+
+[↑ Back to Top](#table-of-contents)
+
+### Equipment Queries
 ```sql
--- Ensure positive quantities
-ALTER TABLE EconomicEvent
-ADD CONSTRAINT positive_quantity CHECK (quantity >= 0);
+-- Get equipment usage history
+SELECT e.name, u.hours, u.start_time, p.amount
+FROM Equipment e
+JOIN EquipmentUsage u ON e.id = u.equipment_id
+LEFT JOIN EquipmentPayment p ON u.id = p.usage_id
+WHERE e.id = ?;
+```
 
--- Ensure valid dates
-ALTER TABLE EconomicEvent
-ADD CONSTRAINT valid_event_date CHECK (event_date <= CURRENT_TIMESTAMP);
+### Resource Queries
+```sql
+-- Track resource movement
+SELECT r.id, t.quantity, t.transfer_date,
+       fl.name as from_location, tl.name as to_location
+FROM EconomicResource r
+JOIN ResourceTransfer t ON r.id = t.resource_id
+JOIN Location fl ON t.from_location_id = fl.id
+JOIN Location tl ON t.to_location_id = tl.id
+WHERE r.id = ?;
+```
 
--- Ensure unique agent associations
-ALTER TABLE AgentAssociation
-ADD CONSTRAINT unique_association UNIQUE (is_associate_id, has_associate_id, association_type_id);
+### Workflow Queries
+```sql
+-- Get workflow progress
+SELECT w.name, s.name as stage, r.id as resource_id,
+       sr.status, sr.entry_date
+FROM Workflow w
+JOIN WorkflowStage s ON w.id = s.workflow_id
+JOIN StageResource sr ON s.id = sr.stage_id
+JOIN EconomicResource r ON sr.resource_id = r.id
+WHERE w.id = ?;
+```
+
+[↑ Back to Top](#table-of-contents)

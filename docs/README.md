@@ -1,47 +1,99 @@
 # VerdunNRP Documentation
 
+> ⚠️ **Archived Project Notice**: This is an archived project that will not receive further updates. This documentation serves as a reference for understanding the project's architecture and implementation.
+
 ## Table of Contents
+1. [Project Overview](#project-overview)
+2. [Architecture](#architecture)
+   - [Core Components](#core-components)
+   - [Technology Stack](#technology-stack)
+   - [Security](#security)
+3. [Technical Documentation](#technical-documentation)
+   - [API Reference](technical/api.md)
+   - [Database Schema](technical/database.md)
+4. [System Requirements](#system-requirements)
+5. [Quick Start](#quick-start)
 
-### Getting Started
-- [Installation](getting_started/installation.md)
-- [Quick Start Guide](getting_started/quick_start.md)
+## Project Overview
 
-### Technical Documentation
-- [Architecture](technical/architecture.md)
-- [API Reference](technical/api.md)
-- [Models](technical/models.md)
-- [Core Concepts](technical/core_concepts.md)
-- [Database Schema](technical/database.md)
-- [Event Processing](technical/events.md)
-- [Value Network](technical/value_network.md)
-- [Process Patterns](technical/process_patterns.md)
+VerdunNRP is a Django-based Network Resource Planning system designed to manage complex economic interactions. The system handles equipment management, resource tracking, and value network operations.
 
-### Development
-- [Contributing Guidelines](development/contributing.md)
-- [Development Setup](development/setup.md)
-- [Coding Standards](development/coding_standards.md)
+[↑ Back to Top](#table-of-contents)
 
-### User Guide
-- [Overview](user_guide/README.md)
-- [User Workflows](user_guide/workflows.md)
-- [Best Practices](user_guide/best_practices.md)
+## Architecture
 
-### Additional Resources
-- [Documentation Status](technical/documentation_status.md)
-- [Changelog](../CHANGELOG.md)
+### Core Components
 
-## Documentation Principles
+1. **Equipment Module**
+   - Manages equipment inventory and usage
+   - Handles usage logging and payment processing
+   - Tracks maintenance and repairs
 
-Our documentation aims to be:
-- 📘 Comprehensive
-- 🔍 Easily Navigable
-- 💡 Informative
-- 🤝 Beginner-Friendly
+2. **Resource Module**
+   - Manages resource types and inventory
+   - Tracks resource movements and transfers
+   - Calculates resource values
 
-## Contributing to Documentation
+3. **Board Module**
+   - Manages workflows and processes
+   - Tracks resource allocation
+   - Handles stage progression
 
-We welcome improvements to our documentation! Please see our [contributing guidelines](development/contributing.md) for more information on how you can help.
+[↑ Back to Top](#table-of-contents)
 
-## Documentation Status
+### Technology Stack
 
-For the current status of documentation completeness, refer to the [documentation status](technical/documentation_status.md) page.
+- **Backend**: Django 3.2+
+- **Database**: PostgreSQL
+- **Cache**: Redis
+- **API**: RESTful with token authentication
+
+[↑ Back to Top](#table-of-contents)
+
+### Security
+
+- Token-based authentication
+- Role-based access control
+- CSRF protection
+- Session management
+
+[↑ Back to Top](#table-of-contents)
+
+## Technical Documentation
+
+Detailed technical documentation is split into two main sections:
+
+- [API Reference](technical/api.md) - Complete API documentation
+  - Authentication
+  - Endpoints
+  - Request/Response formats
+  - Error handling
+
+- [Database Schema](technical/database.md) - Database documentation
+  - Table structures
+  - Relationships
+  - Common queries
+
+[↑ Back to Top](#table-of-contents)
+
+## System Requirements
+
+- Python 3.9+
+- PostgreSQL 12+
+- Redis 6+
+
+[↑ Back to Top](#table-of-contents)
+
+## Quick Start
+
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Configure database settings
+4. Run migrations: `python manage.py migrate`
+5. Start server: `python manage.py runserver`
+
+[↑ Back to Top](#table-of-contents)
+
+## License
+
+[Insert License Information]
